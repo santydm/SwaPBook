@@ -20,79 +20,83 @@ const Registro = () => {
           }}
         >
           {/* Capa semitransparente para mejor legibilidad */}
-          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+<div className="hidden md:block absolute left-[35%] top-0 w-[65%] h-full bg-black bg-opacity-80"></div>
         </div>
       </div>
 
       {/* Contenido principal (sobrepuesto al fondo) */}
       <div className="relative z-10 min-h-screen flex flex-col">
-        <div className="flex-grow flex items-center justify-center p-4">
-          <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Formulario de registro (centrado) */}
-            <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8 border border-gray-200">
-              <h1 className="text-3xl font-bold text-center mb-8">Registro</h1>
-              
-              <form className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ingresa tu nombre completo"
-                  />
-                </div>
+        <div className="flex-grow flex items-center p-4">
+          <div className="w-full flex flex-col md:flex-row">
+            {/* Formulario de registro (en el 35% izquierdo) */}
+            <div className="w-full md:w-[35%] flex justify-center p-8">
+              <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8 border border-gray-200">
+                <h1 className="text-3xl font-bold text-center mb-8">Registro</h1>
+                
+                <form className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ingresa tu nombre completo"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Correo institucional</label>
-                  <input
-                    type="email"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="correo@institucion.edu"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Correo institucional</label>
+                    <input
+                      type="email"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="correo@institucion.edu"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                  <input
-                    type="password"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="••••••••"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input
+                      type="password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="••••••••"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
-                  <input
-                    type="password"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="••••••••"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
+                    <input
+                      type="password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="••••••••"
+                    />
+                  </div>
 
-                <div className="text-center text-sm">
-                  <span className="text-gray-600">¿Ya tienes cuenta? </span>
-                  <Link to="/iniciar-sesion" className="text-blue-600 hover:text-blue-500 font-medium">
-                    Click aquí
-                  </Link>
-                </div>
+                  <div className="text-center text-sm">
+                    <span className="text-gray-600">¿Ya tienes cuenta? </span>
+                    <Link to="/iniciar-sesion" className="text-blue-600 hover:text-blue-500 font-medium">
+                      Click aquí
+                    </Link>
+                  </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Registrarse
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    className="w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    Registrarse
+                  </button>
+                </form>
+              </div>
             </div>
 
-            {/* Marca y eslogan al lado derecho */}
-            <div className="hidden md:block max-w-xs">
-              <h2 className="text-6xl font-bold text-white">SwaPBook</h2>
-              <div className="grid grid-cols-1 gap-1 mt-2 font-semibold text-white text-3xl">
-                <div>Reutiliza</div>
-                <div>Intercambia</div>
-                <div>Conoce</div>
-                <div>Libros</div>
+            {/* Marca y eslogan al lado derecho (en el 65% restante) */}
+            <div className="hidden md:flex w-[65%] items-center justify-center">
+              <div className="max-w-xs ml-16">
+                <h2 className="text-7xl font-extrabold text-white">SwaPBook</h2>
+                <div className="grid grid-cols-1 gap-1 mt-2 font-bold text-white text-3xl">
+                  <div>Reutiliza</div>
+                  <div>Intercambia</div>
+                  <div>Conoce</div>
+                  <div>Libros</div>
+                </div>
               </div>
             </div>
           </div>
