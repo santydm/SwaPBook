@@ -3,7 +3,7 @@ from datetime import datetime
 
 class EstudianteCreate(BaseModel):
     nombre: str
-    correInstitucional: EmailStr
+    correoInstitucional: EmailStr
     contrasenia: str
 
 class EstudianteResponse(BaseModel):
@@ -12,6 +12,6 @@ class EstudianteResponse(BaseModel):
     correoInstitucional: str
     fechaRegistro: datetime
 
-    class config:
+    class Config:
         orm_mode = True
     
