@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,11 +7,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'blue': {
-          600: '#2563eb', // Puedes ajustar este color
-        },
-      },
+        'Swap-vinotinto': '#722F37',
+        'Swap-beige': '#C9B084'
+      }
     },
   },
   plugins: [],
 }
+
