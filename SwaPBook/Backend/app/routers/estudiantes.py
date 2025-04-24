@@ -6,9 +6,10 @@ from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse
 
 router = APIRouter(prefix="/estudiantes", tags=["Estudiantes"])
 
-@router.post("/", response_model=EstudianteResponse, status_code=201)
-def crear_estudiante(estudiante: EstudianteCreate, db: Session = Depends(get_db)):
+@router.post("/registro", response_model=EstudianteResponse, status_code=201)
+def registrar_estudiante(estudiante: EstudianteCreate, db: Session = Depends(get_db)):
     db_estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == estudiante.correoInstitucional).first()
+    print("Datos recibidos del frontend", estudiante.dict())
     if db_estudiante:
         raise HTTPException(status_code=400, detail="Correo institucional ya registrado")
     nuevo_estudiante = Estudiante(**estudiante.dict())

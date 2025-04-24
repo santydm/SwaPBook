@@ -10,6 +10,7 @@ class EstudianteResponse(BaseModel):
     idEstudiante: int
     nombre: str
     correoInstitucional: str
+    contrasenia: str
     fechaRegistro: datetime
 
     class Config:
