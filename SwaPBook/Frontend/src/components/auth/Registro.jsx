@@ -269,14 +269,14 @@ const Registro = () => {
         </div>
 
         {/* Footer */}
-<footer className="w-full bg-[#722F37] py-8">
-  <div className="max-w-6xl mx-auto px-6">
+<footer className="w-full bg-[#722F37] py-2">
+  <div className="max-w-6xl mx-auto px-2">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
       
       {/* Columna Nosotros */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <h3 className="text-lg font-bold border-b border-white/20 pb-2">Nosotros</h3>
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           <li>
             <a href="#" className="hover:text-gray-300 transition-colors">Formulario de contacto</a>
           </li>
@@ -290,9 +290,9 @@ const Registro = () => {
       </div>
 
       {/* Columna Páginas Legales */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <h3 className="text-lg font-bold border-b border-white/20 pb-2">Páginas legales</h3>
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           <li>
             <a href="#" className="hover:text-gray-300 transition-colors">Términos y condiciones</a>
           </li>
@@ -303,7 +303,7 @@ const Registro = () => {
       </div>
 
       {/* Columna Información del Matorral */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <h3 className="text-lg font-bold border-b border-white/20 pb-2">Información del Matorral</h3>
         <ul className="space-y-2">
           <li>
@@ -325,8 +325,8 @@ const Registro = () => {
     </div>
 
     {/* Derechos de autor */}
-    <div className="mt-8 pt-6 border-t border-white/20 text-center text-white/70 text-sm">
-      © {new Date().getFullYear()} SwaPBook. Todos los derechos reservados.
+    <div className="mt-8 pt-2 border-t border-white/20 text-center text-white/70 text-sm">
+      © {new Date().getFullYear()} SwaPBook.
     </div>
   </div>
 </footer>
