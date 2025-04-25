@@ -5,7 +5,6 @@ from app.routers import estudiantes
 
 app = FastAPI()
 
-# 🚨 Middleware CORS ANTES de cualquier router
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],  # El frontend
