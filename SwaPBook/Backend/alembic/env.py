@@ -1,13 +1,15 @@
 import os
 import sys
+import sqlalchemy
 from logging.config import fileConfig
+
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from db.database import Base
-from models.estudiantes import Estudiante 
+from app.db.database import Base
+from app.models.estudiantes import Estudiante 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
