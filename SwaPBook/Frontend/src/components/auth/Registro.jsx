@@ -1,4 +1,4 @@
-// src/componentes/autenticacion/Registro.jsx
+// src/components/auth/Registro.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import fondoSwap from '../../img/fondoSwap.webp';
@@ -241,7 +241,7 @@ const Registro = () => {
 
                   <div className="text-center text-sm">
                     <span className="text-gray-600">¿Ya tienes cuenta? </span>
-                    <Link to="/iniciar-sesion" className="text-blue-600 hover:text-blue-500 font-medium">
+                    <Link to="/Login" className="text-blue-600 hover:text-blue-500 font-medium">
                       Click aquí
                     </Link>
                   </div>
