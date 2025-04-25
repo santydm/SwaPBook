@@ -11,6 +11,7 @@
         "tailwind": "tailwindcss init -p"
     },
     "dependencies": {
+        "@windmill/react-ui": "^0.6.0",
         "axios": "^1.9.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
