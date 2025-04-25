@@ -13,5 +13,3 @@ class Estudiante(Base):
     correoInstitucional = Column(String(50), unique=True, index=True, nullable=False)
     contrasenia = Column(String(20), nullable=False)
 
-    
-
