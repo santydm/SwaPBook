@@ -20,7 +20,7 @@ const LayoutAutenticacion = () => {
         <div className="enlaces-pie">
           <a href="#">Privacidad</a>
           <a href="#">Términos y condiciones</a>
-          <a href="#">Libertas</a>
+          <a href="#">Librerias</a>
         </div>
       </footer>
     </div>

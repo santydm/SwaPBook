@@ -8,7 +8,11 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
+<<<<<<< HEAD
 set "VIRTUAL_ENV=C:\Users\sebit\SwaPBook\SwaPBook\backend\venv"
+=======
+set "VIRTUAL_ENV=C:\Users\santi\OneDrive\Escritorio\SistemaFacilitadorDeIntercambio\SwaPBook\Backend\venv"
+>>>>>>> origin/main
 
 if not defined PROMPT set PROMPT=$P$G
 

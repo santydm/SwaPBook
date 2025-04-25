@@ -12,6 +12,7 @@ class EstudianteResponse(BaseModel):
     correoInstitucional: str
     contrasenia: str
     fechaRegistro: datetime
+    activo: bool
 
     class Config:
         orm_mode = True
