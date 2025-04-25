@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, CHAR
+from sqlalchemy import Column, Integer, String, DateTime, CHAR, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.database import Base
@@ -12,4 +12,6 @@ class Estudiante(Base):
     fechaRegistro = Column(DateTime, default=datetime.utcnow)
     correoInstitucional = Column(String(50), unique=True, index=True, nullable=False)
     contrasenia = Column(String(20), nullable=False)
+    activo = Column(Boolean, default=False) #campo para activar la cuenta
+
 
