@@ -7,6 +7,7 @@ from app.utils.email_utils import enviar_correo_bienvenida
 from itsdangerous import URLSafeTimedSerializer
 from dotenv import load_dotenv
 import os
+from app.utils.auth import crear_token
 
 load_dotenv()
 
@@ -61,7 +62,11 @@ def verificar_correo(token: str, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(db_estudiante)
 
-        return {"message": "Correo verificado y cuenta activada con éxito."}
+        jwt_token = crear_token({"sub": db_estudiante.correoInstitucional})
+
+        frontend_url = f"http://localhost:5173/verificado?token={jwt_token}"
+        return RedirectResponse(frontend_url)
+        
     except Exception as e:
         # Agregar detalles del error para facilitar el diagnóstico
         print(f"Error al verificar el correo: {e}")
