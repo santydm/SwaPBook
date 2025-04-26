@@ -1,36 +1,79 @@
 // src/components/auth/Confirmacion.jsx
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import fondoSwap from '../../img/fondoSwap.webp';
-import { useEffect } from 'react';
-import axios from 'axios';
-
 
 const Confirmacion = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
-    
-    // Si no hay token, redirige a la página principal
-    if (!token) {
-      navigate('/');
+    const status = urlParams.get('status');
+  
+    // Validación adicional para evitar el error de React
+    if (!token || !status) {
+      setError('Token o estado de verificación no encontrados');
+      setLoading(false);
       return;
     }
-
-    // Lógica de confirmación con el token...
-    const confirmarCuenta = async () => {
-      try {
-        await axios.get(`http://127.0.0.1:8000/estudiantes/cuenta-activada?token=${token}`);
-      } catch (error) {
-        console.error('Error al confirmar cuenta:', error);
-        navigate('/');
-      }
-    };
-
-    confirmarCuenta();
+  
+    if (status === 'success' && token) {
+      localStorage.setItem('token', token);
+      setSuccess(true);
+      // Elimina el setTimeout para que no redirija automáticamente
+    } else {
+      setError(urlParams.get('error') || 'Error en la verificación');
+    }
+    setLoading(false);
   }, [navigate]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="spinner-border text-Swap-beige" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+          <p className="mt-3">Verificando tu cuenta...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-4 text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-16 w-16 text-red-500 mx-auto mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+          <h1 className="text-2xl font-bold text-center mb-4">Error de Verificación</h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Link
+            to="/registro"
+            className="inline-block py-2 px-6 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto"
+          >
+            Volver al Registro
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex items-center justify-center">
@@ -67,14 +110,14 @@ const Confirmacion = () => {
           </svg>
           <h1 className="text-3xl font-bold text-center mb-4">¡Confirmación Exitosa!</h1>
           <p className="text-gray-600 mb-6">
-            Tu cuenta ha sido verificada correctamente. Ahora puedes ir a tu perfil.
+            {success ? 'Tu cuenta ha sido verificada correctamente. Redirigiendo...' : 'Verificación completada.'}
           </p>
           <Link
-            to="/login"
-            className="inline-block py-2 px-6 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Ir al Perfil.
-          </Link>
+              to="/iniciar-sesion"
+              className="inline-block py-2 px-6 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto"
+              onClick={() => localStorage.removeItem('token')}>
+              Ir al Inicio de Sesión
+            </Link>
         </div>
       </div>
     </div>

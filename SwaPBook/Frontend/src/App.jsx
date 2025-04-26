@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Registro from './components/auth/Registro';
 import Login from './components/auth/Login';
 import Clave from './components/auth/Claveolvidada';
-import Confirmacion from './components/auth/Confirmacion.jsx';
+import Confirmacion from './components/auth/Confirmacion';
 
 function App() {
   return (
