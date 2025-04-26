@@ -12,7 +12,7 @@ function App() {
         <Route path="/registro" element={<Registro />} />
         <Route path="/login" element={<Login />} />
         <Route path="/recuperacion-clave" element={<Clave />} />
-        <Route path="/cuenta-activada?" element={<Confirmacion />} />
+        <Route path="/cuenta-activada" element={<Confirmacion />} />
       </Routes>
     </Router>
   );

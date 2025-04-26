@@ -21,7 +21,7 @@ const Login = () => {
     if (!correoInstitucional) {
       nuevosErrores.correoInstitucional = 'El correo es requerido';
     } else if (!esCorreoInstitucionalValido(correoInstitucional)) {
-      nuevosErrores.correoInstitucional = 'Correo institucional inválido (debe terminar en .edu)';
+      nuevosErrores.correoInstitucional = 'Correo institucional inválido (debe tener dominio .edu)';
     }
     if (!contrasenia) {
       nuevosErrores.contrasenia = 'La contraseña es requerida';

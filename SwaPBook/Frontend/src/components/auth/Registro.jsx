@@ -32,7 +32,7 @@ const Registro = () => {
     if (!correoInstitucional) {
       nuevosErrores.correoInstitucional = 'El correo es requerido';
     } else if (!esCorreoInstitucionalValido(correoInstitucional)) {
-      nuevosErrores.correoInstitucional = 'Correo institucional inválido (debe terminar en .edu)';
+      nuevosErrores.correoInstitucional = 'Correo institucional inválido (debe tener dominio .edu)';
     }
     if (!contrasenia) {
       nuevosErrores.contrasenia = 'La contraseña es requerida';
@@ -251,7 +251,7 @@ const Registro = () => {
 
                       <div className="text-center text-sm">
                         <span className="text-gray-600">¿Ya tienes cuenta? </span>
-                        <Link to="/iniciar-sesion" className="text-blue-600 hover:text-blue-500 font-medium">
+                        <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
                           Click aquí
                         </Link>
                       </div>

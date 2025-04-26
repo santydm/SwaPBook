@@ -4,7 +4,7 @@ from app.db.database import get_db
 from app.models.estudiantes import Estudiante
 from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse
 from app.utils.email_utils import enviar_correo_bienvenida
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from dotenv import load_dotenv
 import os
 from app.utils.auth import crear_token
@@ -40,7 +40,7 @@ def registrar_estudiante(estudiante: EstudianteCreate, db: Session = Depends(get
     db.refresh(nuevo_estudiante)
     
         # Crear token de verificación
-    token = s.dumps(estudiante.correoInstitucional, salt="email-confirm")
+    token = s.dumps({'email': estudiante.correoInstitucional}, salt="email-confirm")
     verificacion_link = f"http://localhost:8000/estudiantes/verificar/{token}"
     
         # Enviar correo
@@ -51,27 +51,36 @@ def registrar_estudiante(estudiante: EstudianteCreate, db: Session = Depends(get
 @router.get("/verificar/{token}")
 def verificar_correo(token: str, db: Session = Depends(get_db)):
     try:
-        #Cargar correo desde el token
-        correo = s.loads(token, salt="email-confirm", max_age=3600)  # 1 hora de validez
-        #Verificar si el correo ya existe en la base de datos
+        print(f"Token recibido: {token}")  # Depuración
+        
+        # Decodificar el token (cambia esta línea)
+        data = s.loads(token, salt="email-confirm", max_age=3600)
+        correo = data['email'] if isinstance(data, dict) else data  # Compatibilidad con tokens antiguos
+        print(f"Correo decodificado: {correo}")
+        
         db_estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == correo).first()
         if not db_estudiante:
-            raise HTTPException(status_code=400, detail="El correo no está registrado")
-
-        #Si todo es correcto, se puede proceder a activar la cuenta del estudiante
-        db_estudiante.activo = True
-        db.commit()
-        db.refresh(db_estudiante)
-
+            raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+        
+        if not db_estudiante.activo:
+            db_estudiante.activo = True
+            db.commit()
+            print("Cuenta activada en BD")  # Depuración
+        
         jwt_token = crear_token({"sub": db_estudiante.correoInstitucional})
-
-        frontend_url = f"http://localhost:5173/verificado?token={jwt_token}" 
+        
+        # Cambia el return por esto:
+        frontend_url = f"http://localhost:5173/cuenta-activada?token={jwt_token}&status=success"
+        print(f"Redirigiendo a: {frontend_url}")  # Depuración
         return RedirectResponse(frontend_url)
 
+    except SignatureExpired:
+        raise HTTPException(status_code=400, detail="Enlace expirado")
+    except BadSignature:
+        raise HTTPException(status_code=400, detail="Token inválido")
     except Exception as e:
-        # Agregar detalles del error para facilitar el diagnóstico
-        print(f"Error al verificar el correo: {e}")
-        raise HTTPException(status_code=500, detail="Error interno del servidor. Intenta nuevamente más tarde.")
+        print(f"Error inesperado: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error interno")
 
 @router.get("/", response_model=list[EstudianteResponse])
 def obtener_estudiantes(db: Session = Depends(get_db)):
