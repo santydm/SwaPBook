@@ -4,28 +4,33 @@ import fondoSwap from '../../img/fondoSwap.webp';
 import { useEffect } from 'react';
 import axios from 'axios';
 
+
 const Confirmacion = () => {
-  // Aquí podrías extraer un token de la URL si es necesario
-  // const { token } = useParams(); // Si usas parámetros en la ruta
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Llamar al endpoint de confirmación cuando el componente se monta
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    // Si no hay token, redirige a la página principal
+    if (!token) {
+      navigate('/');
+      return;
+    }
+
+    // Lógica de confirmación con el token...
     const confirmarCuenta = async () => {
       try {
-        // Ejemplo con token en URL (ajusta según tu implementación backend)
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        
-        if (token) {
-          await axios.get(`http://127.0.0.1:8000/estudiantes/cuenta-activada?token=${token}`);
-        }
+        await axios.get(`http://127.0.0.1:8000/estudiantes/cuenta-activada?token=${token}`);
       } catch (error) {
         console.error('Error al confirmar cuenta:', error);
+        navigate('/');
       }
     };
 
     confirmarCuenta();
-  }, []);
+  }, [navigate]);
+
 
   return (
     <div className="min-h-screen relative flex items-center justify-center">
@@ -62,13 +67,13 @@ const Confirmacion = () => {
           </svg>
           <h1 className="text-3xl font-bold text-center mb-4">¡Confirmación Exitosa!</h1>
           <p className="text-gray-600 mb-6">
-            Tu cuenta ha sido verificada correctamente. Ahora puedes iniciar sesión.
+            Tu cuenta ha sido verificada correctamente. Ahora puedes ir a tu perfil.
           </p>
           <Link
-            to="/iniciar-sesion"
+            to="/login"
             className="inline-block py-2 px-6 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Ir al Inicio de Sesión
+            Ir al Perfil.
           </Link>
         </div>
       </div>
