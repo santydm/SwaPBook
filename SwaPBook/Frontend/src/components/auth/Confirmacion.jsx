@@ -113,10 +113,10 @@ const Confirmacion = () => {
             {success ? 'Tu cuenta ha sido verificada correctamente. Redirigiendo...' : 'Verificación completada.'}
           </p>
           <Link
-              to="/iniciar-sesion"
+              to="/Perfil"
               className="inline-block py-2 px-6 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto"
               onClick={() => localStorage.removeItem('token')}>
-              Ir al Inicio de Sesión
+              Ir al Perfil
             </Link>
         </div>
       </div>

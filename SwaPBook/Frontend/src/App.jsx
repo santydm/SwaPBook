@@ -4,6 +4,8 @@ import Registro from './components/auth/Registro';
 import Login from './components/auth/Login';
 import Clave from './components/auth/Claveolvidada';
 import Confirmacion from './components/auth/Confirmacion';
+import Perfil from './components/shared/Perfil';
+
 
 function App() {
   return (
@@ -13,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/recuperacion-clave" element={<Clave />} />
         <Route path="/cuenta-activada" element={<Confirmacion />} />
+        <Route path="/Perfil" element={<Perfil />} />
       </Routes>
     </Router>
   );

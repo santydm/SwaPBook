@@ -1,10 +1,11 @@
 // src/componentes/autenticacion/Login.jsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import fondoSwap from '../../img/fondoSwap.webp';
 import axios from 'axios';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [correoInstitucional, setCorreoInstitucional] = useState('');
   const [contrasenia, setContrasenia] = useState('');
   const [mostrarContrasenia, setMostrarContrasenia] = useState(false);
@@ -14,10 +15,10 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
 
+    // Validaciones
     const nuevosErrores = {};
-
-    // Validaciones (simplificadas para login)
     if (!correoInstitucional) {
       nuevosErrores.correoInstitucional = 'El correo es requerido';
     } else if (!esCorreoInstitucionalValido(correoInstitucional)) {
@@ -27,32 +28,51 @@ const Login = () => {
       nuevosErrores.contrasenia = 'La contraseña es requerida';
     }
 
-    setErrors(nuevosErrores);
-
     if (Object.keys(nuevosErrores).length > 0) {
+      setErrors(nuevosErrores);
       setIsLoading(false);
       return;
     }
 
     try {
-      const credenciales = {
+      const response = await axios.post('http://127.0.0.1:8000/auth/login', {
         correoInstitucional,
         contrasenia
-      };
-    
-      const response = await axios.post('http://127.0.0.1:8000/auth/login', credenciales);
+      });
+      
       console.log('Inicio de sesión exitoso:', response.data);
       
-      // Guardar el token en el localStorage
-      localStorage.setItem('token', response.data.token);
-
-      // Redirigir al usuario (por ejemplo, al dashboard o inicio)
-      navigate('/dashboard');  // Asegúrate de que esta ruta exista en tu aplicación
+      if (!response.data.access_token) {
+        throw new Error('El servidor no devolvió un token válido');
+      }
+      
+      // Guardar token en localStorage
+      localStorage.setItem('token', response.data.access_token);
+      
+      // Redirigir al perfil
+      navigate('/Perfil');
+      
     } catch (error) {
-      console.error('Error al iniciar sesión:', error.response?.data || error.message);
-      setErrors({
-        submit: error.response?.data?.message || 'Error al iniciar sesión. Verifica tus credenciales.'
-      });
+      console.error('Error al iniciar sesión:', error);
+      
+      let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+      
+      if (error.response) {
+        // Manejo de errores específicos del backend
+        if (error.response.status === 401) {
+          errorMessage = 'Credenciales incorrectas';
+        } else if (error.response.data?.detail) {
+          errorMessage = error.response.data.detail;
+        } else if (error.response.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+      } else if (error.request) {
+        errorMessage = 'No se recibió respuesta del servidor';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setErrors({ submit: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +85,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Fondo dividido (igual que en registro) */}
+      {/* Fondo dividido */}
       <div className="absolute inset-0 flex z-0">
         <div className="hidden md:block w-[35%] bg-white"></div>
         <div 
@@ -160,16 +180,30 @@ const Login = () => {
 
                   <button
                     type="submit"
-                    className={`w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                    className={`w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                    }`}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                    {isLoading ? (
+                      <>
+                        <span className="inline-block mr-2">
+                          <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </span>
+                        Iniciando sesión...
+                      </>
+                    ) : (
+                      'Iniciar Sesión'
+                    )}
                   </button>
                 </form>
               </div>
             </div>
 
-            {/* Marca y eslogan (igual que en registro) */}
+            {/* Marca y eslogan */}
             <div className="hidden md:flex w-[65%] items-center justify-center">
               <div className="max-w-xs ml-16">
                 <h2 className="text-7xl font-extrabold text-white transition-all duration-300 hover:text-8xl hover:translate-x-[-150px]">SwaPBook</h2>
@@ -184,11 +218,10 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Footer (igual que en registro) */}
+        {/* Footer */}
         <footer className="w-full bg-[#722F37] py-2">
           <div className="max-w-6xl mx-auto px-2">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
-              
               {/* Columna Nosotros */}
               <div className="space-y-1">
                 <h3 className="text-lg font-bold border-b border-white/20 pb-2">Nosotros</h3>
@@ -237,7 +270,6 @@ const Login = () => {
                   </li>
                 </ul>
               </div>
-
             </div>
 
             {/* Derechos de autor */}
