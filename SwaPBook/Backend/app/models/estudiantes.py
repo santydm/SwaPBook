@@ -11,7 +11,7 @@ class Estudiante(Base):
     rol = Column(CHAR(10), nullable=False, default="Estudiante")
     fechaRegistro = Column(DateTime, default=datetime.utcnow)
     correoInstitucional = Column(String(50), unique=True, index=True, nullable=False)
-    contrasenia = Column(String(20), nullable=False)
+    contrasenia = Column(String(60), nullable=False)
 
     
         # Relación uno a muchos con libros

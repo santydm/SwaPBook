@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
+from passlib.context import CryptContext
 from app.models.estudiantes import Estudiante
-from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse
+from app.utils.auth import crear_token, autenticar_usuario
+from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin
 from app.utils.email_utils import enviar_correo_bienvenida
+from app.core.security import verify_password
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from dotenv import load_dotenv
 import os
@@ -11,6 +14,8 @@ from app.utils.auth import crear_token
 from fastapi.responses import RedirectResponse
 
 load_dotenv()
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 #Obtener la clave secreta del archivo .env
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -27,12 +32,14 @@ def registrar_estudiante(estudiante: EstudianteCreate, db: Session = Depends(get
     print("Datos recibidos del frontend", estudiante.dict())
     if db_estudiante:
         raise HTTPException(status_code=400, detail="Correo institucional ya registrado")
+    
+    hashed_password = pwd_context.hash(estudiante.contrasenia)
 
     # Crear nuevo estudiante (inicialmente inactivo)
     nuevo_estudiante = Estudiante(
         nombre=estudiante.nombre,
         correoInstitucional=estudiante.correoInstitucional,
-        contrasenia=estudiante.contrasenia,
+        contrasenia=hashed_password,
         activo=False  # Hasta que verifique el correo
     )
     db.add(nuevo_estudiante)
@@ -81,6 +88,37 @@ def verificar_correo(token: str, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error inesperado: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno")
+    
+@router.post("/login", response_model=EstudianteResponse)
+async def login(estudiante_login: EstudianteLogin, db: Session = Depends(get_db)):
+    # Busca al estudiante en la base de datos con el correo proporcionado
+    estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == estudiante_login.correo).first()
+    
+    # Si no se encuentra al estudiante
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Verifica la contraseña
+    if not autenticar_usuario(estudiante_login.contrasenia, estudiante.contrasenia):
+        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
+    
+    # Si la cuenta está inactiva
+    if not estudiante.activo:
+        raise HTTPException(status_code=400, detail="Cuenta no activada")
+    
+    # Si las credenciales son correctas, crea el token
+    token = crear_token({"sub": estudiante.correoInstitucional})
+    
+    # Devolver los datos del estudiante (sin la contraseña) y el token
+    return {
+        "idEstudiante": estudiante.idEstudiante,
+        "nombre": estudiante.nombre,
+        "correoInstitucional": estudiante.correoInstitucional,
+        "fechaRegistro": estudiante.fechaRegistro,
+        "activo": estudiante.activo,
+        "access_token": token,
+        "token_type": "bearer"
+    }
 
 @router.get("/", response_model=list[EstudianteResponse])
 def obtener_estudiantes(db: Session = Depends(get_db)):

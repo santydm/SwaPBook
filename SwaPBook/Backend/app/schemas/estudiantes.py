@@ -5,6 +5,10 @@ class EstudianteCreate(BaseModel):
     nombre: str
     correoInstitucional: EmailStr
     contrasenia: str
+    
+class EstudianteLogin(BaseModel):
+    correo: EmailStr
+    contrasenia: str
 
 class EstudianteResponse(BaseModel):
     idEstudiante: int

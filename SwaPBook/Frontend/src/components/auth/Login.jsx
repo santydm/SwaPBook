@@ -40,9 +40,14 @@ const Login = () => {
         contrasenia
       };
     
-      const response = await axios.post('http://127.0.0.1:8000/estudiantes/login', credenciales);
+      const response = await axios.post('http://127.0.0.1:8000/auth/login', credenciales);
       console.log('Inicio de sesión exitoso:', response.data);
-      // Aquí podrías redirigir al usuario o guardar el token de autenticación
+      
+      // Guardar el token en el localStorage
+      localStorage.setItem('token', response.data.token);
+
+      // Redirigir al usuario (por ejemplo, al dashboard o inicio)
+      navigate('/dashboard');  // Asegúrate de que esta ruta exista en tu aplicación
     } catch (error) {
       console.error('Error al iniciar sesión:', error.response?.data || error.message);
       setErrors({
