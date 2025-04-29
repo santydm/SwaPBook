@@ -1,43 +1,106 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const PublicarLibro = ({ isOpen, onClose }) => {
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [categoria, setCategoria] = useState('');
+  const [categoriasDisponibles, setCategoriasDisponibles] = useState([]);
   const [imagen, setImagen] = useState(null);
   const [imagenPreview, setImagenPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [mensajeExito, setMensajeExito] = useState('');
+
+  const idEstudiante = localStorage.getItem('idEstudiante');
+
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/categorias/');
+        const data = await res.json();
+        setCategoriasDisponibles(data);
+      } catch (error) {
+        console.error('Error al cargar categorías:', error);
+      }
+    };
+    fetchCategorias();
+  }, []);
 
   if (!isOpen) return null;
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+        setErrors(prev => ({ ...prev, imagen: 'Solo se permiten imágenes JPG o PNG' }));
+        return;
+      }
       setImagen(file);
       setImagenPreview(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = (e) => {
+  const limpiarFormulario = () => {
+    setTitulo('');
+    setAutor('');
+    setDescripcion('');
+    setCategoria('');
+    setImagen(null);
+    setImagenPreview(null);
+    setErrors({});
+  };
+
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("✅ Intentando enviar formulario desde PublicarLibro.jsx");
     const nuevosErrores = {};
     if (!titulo) nuevosErrores.titulo = 'El título es requerido';
     if (!autor) nuevosErrores.autor = 'El autor es requerido';
     if (!descripcion) nuevosErrores.descripcion = 'La descripción es requerida';
     if (!categoria) nuevosErrores.categoria = 'La categoría es requerida';
     if (!imagen) nuevosErrores.imagen = 'La portada es requerida';
+    if (!idEstudiante) nuevosErrores.estudiante = 'ID del estudiante no encontrado';
 
     setErrors(nuevosErrores);
     if (Object.keys(nuevosErrores).length > 0) return;
 
+    const formData = new FormData();
+    formData.append('titulo', titulo);
+    formData.append('autor', autor);
+    formData.append('descripcion', descripcion);
+    formData.append('estado', 'Disponible');
+    formData.append('idCategoria', categoria);
+    formData.append('foto', imagen);
+
     setIsLoading(true);
-    // Aquí iría la lógica para enviar el libro al backend
-    setTimeout(() => {
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('http://localhost:8000/libros/', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.detail}`);
+      } else {
+        setMensajeExito('¡Libro publicado exitosamente!');
+        limpiarFormulario();
+        setTimeout(() => setMensajeExito(''), 3000);
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error al publicar el libro:", error);
+    } finally {
       setIsLoading(false);
-      onClose();
-    }, 1000);
+    }
   };
 
   return (
@@ -52,8 +115,14 @@ const PublicarLibro = ({ isOpen, onClose }) => {
           </svg>
         </button>
         <h2 className="text-2xl font-bold text-center mb-6">Publicar libro</h2>
+
+        {mensajeExito && (
+          <div className="mb-4 text-green-700 bg-green-100 border border-green-300 rounded-md px-4 py-2 text-sm text-center">
+            {mensajeExito}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Título */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
             <input
@@ -65,7 +134,6 @@ const PublicarLibro = ({ isOpen, onClose }) => {
             />
             {errors.titulo && <p className="mt-1 text-sm text-red-600">{errors.titulo}</p>}
           </div>
-          {/* Autor */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Autor</label>
             <input
@@ -77,7 +145,6 @@ const PublicarLibro = ({ isOpen, onClose }) => {
             />
             {errors.autor && <p className="mt-1 text-sm text-red-600">{errors.autor}</p>}
           </div>
-          {/* Descripción */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
             <textarea
@@ -89,25 +156,28 @@ const PublicarLibro = ({ isOpen, onClose }) => {
             />
             {errors.descripcion && <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>}
           </div>
-          {/* Categoría/Género */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Categoría/Género</label>
-            <input
-              type="text"
-              className={`w-full px-3 py-2 border ${errors.categoria ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              placeholder="Ej: Ficción, Ciencia, Académico..."
+            <select
               value={categoria}
               onChange={(e) => setCategoria(e.target.value)}
-            />
+              className={`w-full px-3 py-2 border ${errors.categoria ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            >
+              <option value="">Selecciona una categoría</option>
+              {categoriasDisponibles.map(cat => (
+                <option key={cat.idCategoria} value={cat.idCategoria}>
+                  {cat.nombre}
+                </option>
+              ))}
+            </select>
             {errors.categoria && <p className="mt-1 text-sm text-red-600">{errors.categoria}</p>}
           </div>
-          {/* Foto de portada */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Foto de portada</label>
             <input
               type="file"
-              accept="image/*"
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-Swap-beige file:text-white hover:file:bg-[#a67c52]"
+              accept="image/jpeg, image/png"
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#c1a57b] file:text-white hover:file:bg-[#a67c52]"
               onChange={handleImageChange}
             />
             {imagenPreview && (
@@ -119,10 +189,9 @@ const PublicarLibro = ({ isOpen, onClose }) => {
             )}
             {errors.imagen && <p className="mt-1 text-sm text-red-600">{errors.imagen}</p>}
           </div>
-          {/* Botón */}
           <button
             type="submit"
-            className={`w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-[#a67c52] focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+            className={`w-full py-2 px-4 bg-[#c1a57b] text-white font-medium rounded-md hover:bg-[#a67c52] focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
             disabled={isLoading}
           >
             {isLoading ? 'Publicando...' : 'Publicar libro'}

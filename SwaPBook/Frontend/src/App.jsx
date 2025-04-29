@@ -6,6 +6,7 @@ import Clave from './components/auth/Claveolvidada';
 import Confirmacion from './components/auth/Confirmacion';
 import Perfil from './components/estudiante/Perfil';
 import Catalogo from './components/catalog/Catalogo';
+import PublicarLibro from './components/catalog/PublicarLibro';
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/cuenta-activada" element={<Confirmacion />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/catalogo" element={<Catalogo />} />
+        <Route path="/libros" element={<PublicarLibro />} />
       </Routes>
     </Router>
   );
