@@ -1,19 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from passlib.context import CryptContext
 from app.models.estudiantes import Estudiante
 from app.utils.auth import crear_token, autenticar_usuario
-from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin, EstudiantePerfilSchema
+from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin, EstudiantePerfilSchema, EstudianteDeleteRequest
 from app.utils.email_utils import enviar_correo_bienvenida
 from app.core.security import verify_password
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from dotenv import load_dotenv
 import os
-from app.utils.auth import crear_token
+from app.utils.auth import crear_token, get_current_user
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+
 
 load_dotenv()
 
@@ -149,6 +150,23 @@ def obtener_estudiante_actual(token: str = Depends(oauth2_scheme), db: Session =
 def obtener_estudiantes(db: Session = Depends(get_db)):
     estudiantes = db.query(Estudiante).all()
     return estudiantes
+
+#eliminar estudiante
+@router.delete("/eliminar", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_mi_cuenta(
+    datos: EstudianteDeleteRequest,
+    db: Session = Depends(get_db),
+    estudiante_actual: Estudiante = Depends(get_current_user)
+):
+    if not verify_password(datos.contrasenia, estudiante_actual.contrasenia):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Contraseña incorrecta. No se pudo eliminar la cuenta."
+        )
+    
+    db.delete(estudiante_actual)
+    db.commit()
+    return
 
 
 

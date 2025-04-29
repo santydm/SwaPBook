@@ -15,17 +15,20 @@ class EstudianteResponse(BaseModel):
     nombre: str
     correoInstitucional: str
     contrasenia: str
-    fechaRegistro: str  # Aquí aceptamos que venga ya como string formateado
+    fechaRegistro: datetime  # Aquí aceptamos que venga ya como string formateado
     activo: bool
 
     class Config:
         from_attributes = True
+        
+class EstudianteDeleteRequest(BaseModel):
+    contrasenia: str
 
 class EstudiantePerfilSchema(BaseModel):
     idEstudiante: int
     nombre: str
     correoInstitucional: str
-    fechaRegistro: str  # Cambiar datetime -> str para poder formatear
+    fechaRegistro: datetime  # Cambiar datetime -> str para poder formatear
     activo: bool
 
     class Config:
