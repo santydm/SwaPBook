@@ -15,7 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/recuperacion-clave" element={<Clave />} />
         <Route path="/cuenta-activada" element={<Confirmacion />} />
-        <Route path="/Perfil" element={<Perfil />} />
+        <Route path="/perfil" element={<Perfil />} />
       </Routes>
     </Router>
   );

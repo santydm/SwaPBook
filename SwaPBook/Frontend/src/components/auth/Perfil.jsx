@@ -15,11 +15,11 @@ const Perfil = () => {
         const token = localStorage.getItem('token');
         
         if (!token) {
-          navigate('/login');
+          navigate('/perfil');
           return;
         }
 
-        const response = await axios.get('http://127.0.0.1:8000/estudiante/perfil', {
+        const response = await axios.get('http://127.0.0.1:8000/estudiantes/perfil', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -164,7 +164,7 @@ const Perfil = () => {
             {/* Información del usuario */}
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-[#722F37]">{estudiante?.nombre || "Nombre no disponible"}</h1>
-              <p className="text-gray-600 mt-1">{estudiante?.email || "Email no disponible"}</p>
+              <p className="text-gray-600 mt-1">{estudiante?.correoInstitucional || "Email no disponible"}</p>
               <p className="text-gray-500 text-sm mt-2">
                 Fecha de registro: {estudiante?.fechaRegistro || "Fecha no disponible"}
               </p>

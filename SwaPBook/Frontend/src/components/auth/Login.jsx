@@ -40,7 +40,6 @@ const Login = () => {
         contrasenia
       });
       
-      console.log('Inicio de sesión exitoso:', response.data);
       
       if (!response.data.access_token) {
         throw new Error('El servidor no devolvió un token válido');
