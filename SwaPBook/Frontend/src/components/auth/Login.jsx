@@ -49,7 +49,7 @@ const Login = () => {
       localStorage.setItem('token', response.data.access_token);
       
       // Redirigir al perfil
-      navigate('/Catalogo');
+      navigate('/catalogo');
       
     } catch (error) {
       console.error('Error al iniciar sesión:', error);

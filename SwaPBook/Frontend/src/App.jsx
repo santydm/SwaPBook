@@ -4,7 +4,8 @@ import Registro from './components/auth/Registro';
 import Login from './components/auth/Login';
 import Clave from './components/auth/Claveolvidada';
 import Confirmacion from './components/auth/Confirmacion';
-import Perfil from './components/auth/Perfil';
+import Perfil from './components/estudiante/Perfil';
+import Catalogo from './components/catalog/Catalogo';
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/recuperacion-clave" element={<Clave />} />
         <Route path="/cuenta-activada" element={<Confirmacion />} />
         <Route path="/perfil" element={<Perfil />} />
+        <Route path="/catalogo" element={<Catalogo />} />
       </Routes>
     </Router>
   );
