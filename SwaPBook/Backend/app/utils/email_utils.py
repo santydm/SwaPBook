@@ -33,3 +33,36 @@ def enviar_correo_bienvenida(destinatario: str, verificacion_link: str):
         print(f"Correo de verificación enviado a {destinatario}")
     except Exception as e:
         print(f"Error al enviar el correo de verificación: {e}")
+        
+
+def enviar_correo_recuperacion(destinatario: str, token: str):
+    mensaje = EmailMessage()
+    mensaje["Subject"] = "Recuperación de contraseña - SwaPBook"
+    mensaje["From"] = f"SwaPBook <{EMAIL_ORIGEN}>"
+    mensaje["To"] = destinatario
+
+    body = f"""
+    Hola,
+
+    Hemos recibido una solicitud para restablecer tu contraseña en SwaPBook.
+
+    Usa el siguiente token para restablecer tu contraseña:
+
+    Token: {token}
+
+    Este token expirará en 1 hora por motivos de seguridad.
+
+    Si no solicitaste este cambio, puedes ignorar este mensaje.
+    """
+
+    mensaje.set_content(body)
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(EMAIL_ORIGEN, EMAIL_PASSWORD)
+            server.send_message(mensaje)
+        print(f"Correo de recuperación enviado a {destinatario}")
+    except Exception as e:
+        print(f"Error al enviar el correo de recuperación: {e}")
+        raise

@@ -179,4 +179,6 @@ def perfil_estudiante(estudiante: Estudiante = Depends(obtener_estudiante_actual
         "fechaRegistro": estudiante.fechaRegistro.strftime("%Y-%m-%d"),
         "activo": estudiante.activo
     }
+    
+
 

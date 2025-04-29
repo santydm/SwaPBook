@@ -35,7 +35,7 @@ def autenticar_usuario(plain_password: str, hashed_password: str) -> bool:
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Estudiante:
     credentials_exception = HTTPException(
@@ -45,13 +45,43 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        correo_institucional: str = payload.get("sub")
-        if correo_institucional is None:
+        correoInstitucional: str = payload.get("sub")
+        if correoInstitucional is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == correo_institucional).first()
+    estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == correoInstitucional).first()
     if estudiante is None:
         raise credentials_exception
     return estudiante
+
+#token de recuperacion de contraseña
+
+RESET_PASSWORD_EXPIRE_MINUTES = 60  # 1 hora
+
+def crear_token_recuperacion(correo_institucional: str):
+    """Genera un token JWT válido por 1 hora para recuperación de contraseña."""
+    expira = datetime.utcnow() + timedelta(minutes=RESET_PASSWORD_EXPIRE_MINUTES)
+    payload = {
+        "sub": correo_institucional,
+        "exp": expira,
+        "tipo": "recuperacion"
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def verificar_token_recuperacion(token: str) -> str:
+    """Valida el token JWT y devuelve el correo si es válido y es de tipo 'recuperacion'."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("tipo") != "recuperacion":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Token inválido para recuperación."
+            )
+        return payload.get("sub")
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token inválido o expirado."
+        )
