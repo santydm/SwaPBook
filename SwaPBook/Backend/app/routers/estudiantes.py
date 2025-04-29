@@ -4,7 +4,7 @@ from app.db.database import get_db
 from passlib.context import CryptContext
 from app.models.estudiantes import Estudiante
 from app.utils.auth import crear_token, autenticar_usuario
-from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin
+from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin, EstudiantePerfilSchema
 from app.utils.email_utils import enviar_correo_bienvenida
 from app.core.security import verify_password
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
@@ -12,13 +12,19 @@ from dotenv import load_dotenv
 import os
 from app.utils.auth import crear_token
 from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
 
 load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 #Obtener la clave secreta del archivo .env
 SECRET_KEY = os.getenv("SECRET_KEY")
+
+ALGORITHM = os.getenv("ALGORITHM")
 
 router = APIRouter(prefix="/estudiantes", tags=["Estudiantes"])
 
@@ -109,27 +115,50 @@ async def login(estudiante_login: EstudianteLogin, db: Session = Depends(get_db)
     # Si las credenciales son correctas, crea el token
     token = crear_token({"sub": estudiante.correoInstitucional})
     
+    fecha_registro = estudiante.fechaRegistro.strftime("%Y-%m-%d")
+
     # Devolver los datos del estudiante (sin la contraseña) y el token
     return {
         "idEstudiante": estudiante.idEstudiante,
         "nombre": estudiante.nombre,
         "correoInstitucional": estudiante.correoInstitucional,
-        "fechaRegistro": estudiante.fechaRegistro,
+        "fechaRegistro": fecha_registro,
         "activo": estudiante.activo,
         "access_token": token,
         "token_type": "bearer"
     }
+
+def obtener_estudiante_actual(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = payload.get("sub")
+        if user_email is None:
+            raise HTTPException(status_code=401, detail="Token inválido")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    
+    estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == user_email).first()
+    if estudiante is None:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
+
+    return estudiante
+
+
 
 @router.get("/", response_model=list[EstudianteResponse])
 def obtener_estudiantes(db: Session = Depends(get_db)):
     estudiantes = db.query(Estudiante).all()
     return estudiantes
 
-@router.get("/{id_estudiante}", response_model=EstudianteResponse)
-def obtener_estudiante_por_id(id_estudiante: int, db: Session = Depends(get_db)):
-    estudiante = db.query(Estudiante).filter(Estudiante.idEstudiante == id_estudiante).first()
-    if not estudiante:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
-    return estudiante
 
+
+@router.get("/perfil", response_model=EstudiantePerfilSchema)
+def perfil_estudiante(estudiante: Estudiante = Depends(obtener_estudiante_actual)):
+    return {
+        "idEstudiante": estudiante.idEstudiante,
+        "nombre": estudiante.nombre,
+        "correoInstitucional": estudiante.correoInstitucional,
+        "fechaRegistro": estudiante.fechaRegistro.strftime("%Y-%m-%d"),
+        "activo": estudiante.activo
+    }
 

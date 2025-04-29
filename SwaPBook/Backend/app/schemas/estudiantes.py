@@ -15,9 +15,25 @@ class EstudianteResponse(BaseModel):
     nombre: str
     correoInstitucional: str
     contrasenia: str
-    fechaRegistro: datetime
+    fechaRegistro: str  # Aquí aceptamos que venga ya como string formateado
     activo: bool
 
     class Config:
-        orm_mode = True
-    
+        from_attributes = True
+
+class EstudiantePerfilSchema(BaseModel):
+    idEstudiante: int
+    nombre: str
+    correoInstitucional: str
+    fechaRegistro: str  # Cambiar datetime -> str para poder formatear
+    activo: bool
+
+    class Config:
+        from_attributes = True
+
+    @classmethod
+    def from_orm(cls, obj):
+        obj_dict = obj.__dict__.copy()
+        if obj.fechaRegistro:
+            obj_dict['fechaRegistro'] = obj.fechaRegistro.strftime("%Y-%m-%d")
+        return super().from_orm(obj)
