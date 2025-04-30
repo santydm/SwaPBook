@@ -3,7 +3,7 @@ import NavbarCatalogo from "./NavbarCatalogo";
 import SidebarCatalogo from "./SidebarCatalogo";
 import PublicarLibro from "./PublicarLibro";
 import Footer from "../ui/Footer";
-import FloatingButton from "../ui/FloatingButton";
+
 
 // Usuario de ejemplo (puedes reemplazar por datos reales)
 const usuarioDemo = {
@@ -47,6 +47,7 @@ const Catalogo = () => {
       {showSidebar && (
         <SidebarCatalogo
           usuario={usuarioDemo}
+          onCrearLibro={() => setShowModal(true)}
           onClose={() => setShowSidebar(false)}
           // Ya NO pases onCrearLibro aquí
         />
@@ -81,12 +82,7 @@ const Catalogo = () => {
         </div>
       </main>
 
-      {/* Botón flotante "+Crear libro" */}
-      <FloatingButton 
-        onClick={() => setShowModal(true)} 
-        isVisible={!showModal} 
-        label="Crear libro" 
-      />
+
 
       <Footer />
     </div>

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import PanelPerfil from "./PanelPerfil";
-import EditarPerfilModal from "./EditarPerfilModal";
+import PanelPerfil from "../../components/estudiante/PanelPerfil";
 
 const Perfil = () => {
   const navigate = useNavigate();
@@ -64,8 +63,8 @@ const Perfil = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-4 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
           <h1 className="text-2xl font-bold text-center mb-4">Error</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
@@ -147,13 +146,6 @@ const Perfil = () => {
         </div>
       </div>
 
-      {/* Modal de edición */}
-      <EditarPerfilModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        estudiante={estudiante}
-        onPerfilActualizado={handlePerfilActualizado}
-      />
     </div>
   );
 };

@@ -12,8 +12,8 @@ export default {
           '100%': { transform: 'translateX(0)' },
         },
         'bounce-subtle': {
-          '0%, 100%': { transform: 'translateY(0) translateX(-50%)' },
-          '50%': { transform: 'translateY(-5px) translateX(-50%)' }
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' }
         },
       },
       animation: {

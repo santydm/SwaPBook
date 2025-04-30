@@ -19,7 +19,7 @@ const SidebarCatalogo = ({ estudiante, onClose, onCrearLibro }) => (
       {/* Aquí pasas compact={true} */}
       <PanelPerfil estudiante={estudiante} handleLogout={() => {}} compact={true} />  
       <button
-        className="mt-8 w-full py-2 px-4 bg-Swap-beige text-white rounded-md hover:bg-[#a67c52] font-semibold"
+        className="mt-8 w-full py-2 px-4 bg-Swap-green text-white rounded-md hover:bg-Swap-green-dark font-semibold transition-all duration-200 animate-bounce-subtle"
         onClick={onCrearLibro}
       >
         + Crear libro
