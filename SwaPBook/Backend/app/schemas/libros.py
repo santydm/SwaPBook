@@ -1,23 +1,20 @@
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 class EstadoLibroEnum(str, Enum):
     disponible = "Disponible"
     intercambio = "Intercambio"
 
-class LibroCreate(BaseModel):
-    titulo: str
-    descripcion: str
-    estado: EstadoLibroEnum = EstadoLibroEnum.disponible
-    idEstudiante: int  # Campo requerido (FK)
-    idCategoria: int   # <-- Agrega esto
-
 
 class LibroResponse(BaseModel):
     idLibro: int
     titulo: str
+    autor: str
     descripcion: str
+    idCategoria: int
+    foto: Optional[str]
     estado: EstadoLibroEnum
 
     class Config:

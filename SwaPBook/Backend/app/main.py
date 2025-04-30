@@ -6,6 +6,8 @@ from app.routers import libros
 from app.routers import categorias
 from app.routers import auth
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi import Request
 
 app = FastAPI()
 
@@ -16,12 +18,21 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"]
 )
+
+class PrintRequestMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path.startswith("/libros") and request.method == "POST":
+            body = await request.body()
+            print("📦 Raw body recibido:", body[:500])  # Limita la impresión a los primeros 500 bytes
+        response = await call_next(request)
+        return response
+
+app.add_middleware(PrintRequestMiddleware)
 
 # Routers
 app.include_router(estudiantes.router)

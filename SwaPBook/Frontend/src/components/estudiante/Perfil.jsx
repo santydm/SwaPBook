@@ -1,36 +1,31 @@
-// src/components/estudiante/Perfil.jsx
-import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import PanelPerfil from "./PanelPerfil";
+import EditarPerfilModal from "./EditarPerfilModal";
 
 const Perfil = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [estudiante, setEstudiante] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchPerfil = async () => {
       try {
         const token = localStorage.getItem('token');
-        
         if (!token) {
-          navigate('/perfil');
+          navigate('/login');
           return;
         }
-
         const response = await axios.get('http://127.0.0.1:8000/estudiantes/perfil', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
-
         setEstudiante(response.data);
       } catch (error) {
-        console.error('Error al obtener perfil:', error);
         setError('Error al cargar el perfil. Por favor intenta nuevamente.');
-        
-        // Si el token es inválido o ha expirado, redirigir al login
         if (error.response?.status === 401) {
           localStorage.removeItem('token');
           navigate('/login');
@@ -39,7 +34,6 @@ const Perfil = () => {
         setLoading(false);
       }
     };
-
     fetchPerfil();
   }, [navigate]);
 
@@ -48,13 +42,20 @@ const Perfil = () => {
     navigate('/login');
   };
 
+  const handlePerfilActualizado = () => {
+    setLoading(true);
+    axios.get('http://127.0.0.1:8000/estudiantes/perfil', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    }).then(res => setEstudiante(res.data))
+      .catch(() => setError('Error al recargar el perfil.'))
+      .finally(() => setLoading(false));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="spinner-border text-Swap-beige" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
+          <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full mx-auto"></div>
           <p className="mt-3">Cargando perfil...</p>
         </div>
       </div>
@@ -65,20 +66,6 @@ const Perfil = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-4 text-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-16 w-16 text-red-500 mx-auto mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
           <h1 className="text-2xl font-bold text-center mb-4">Error</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
@@ -112,59 +99,19 @@ const Perfil = () => {
       {/* Contenido principal */}
       <div className="container mx-auto p-4 md:p-6">
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Sidebar */}
-          <div className="w-full md:w-1/4 bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <div className="flex flex-col items-center mb-6">
-              <div className="w-32 h-32 rounded-full bg-gray-200 mb-4 overflow-hidden border-4 border-[#722F37]">
-                <img 
-                  src={estudiante?.fotoPerfil || "https://via.placeholder.com/150"} 
-                  alt="Foto de perfil" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <h2 className="text-lg font-bold text-[#722F37]">Mi perfil</h2>
-            </div>
-
-            <nav className="flex-grow">
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/perfil" className="block py-2 px-3 hover:bg-gray-100 rounded text-gray-700">
-                    Mi perfil
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/mis-libros" className="block py-2 px-3 hover:bg-gray-100 rounded text-gray-700">
-                    Mis libros
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/mis-solicitudes" className="block py-2 px-3 hover:bg-gray-100 rounded text-gray-700">
-                    Mis solicitudes
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/mis-intercambios" className="block py-2 px-3 hover:bg-gray-100 rounded text-gray-700">
-                    Mis intercambios
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-
-            {/* Botón de cerrar sesión en el sidebar */}
-            <button 
-              className="mt-8 py-2 px-4 bg-Swap-beige text-white rounded-md hover:bg-Swap-vinotinto transition-colors"
-              onClick={handleLogout}
-            >
-              Cerrar sesión
-            </button>
-          </div>
+          {/* Panel lateral de perfil */}
+          <PanelPerfil
+            estudiante={estudiante}
+            handleLogout={handleLogout}
+            onModificarPerfil={() => setShowModal(true)}
+          />
 
           {/* Contenido del perfil */}
           <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md">
             {/* Información del usuario */}
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-[#722F37]">{estudiante?.nombre || "Nombre no disponible"}</h1>
-              <p className="text-gray-600 mt-1">{estudiante?.correoInstitucional || "Email no disponible"}</p>
+              <p className="text-gray-600 mt-1">{estudiante?.correoInstitucional || estudiante?.email || "Email no disponible"}</p>
               <p className="text-gray-500 text-sm mt-2">
                 Fecha de registro: {estudiante?.fechaRegistro || "Fecha no disponible"}
               </p>
@@ -199,6 +146,14 @@ const Perfil = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de edición */}
+      <EditarPerfilModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        estudiante={estudiante}
+        onPerfilActualizado={handlePerfilActualizado}
+      />
     </div>
   );
 };

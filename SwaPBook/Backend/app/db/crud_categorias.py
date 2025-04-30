@@ -1,16 +1,74 @@
-from sqlalchemy.orm import Session
+from app.db.database import SessionLocal
 from app.models.categorias import Categoria
-from app.schemas.categorias import CategoriaCreate
 
-def get_categoria_by_nombre(db: Session, nombre: str):
-    return db.query(Categoria).filter(Categoria.nombre.ilike(nombre)).first()
+db = SessionLocal()
 
-def crear_categoria_si_no_existe(db: Session, categoria_data: CategoriaCreate):
-    categoria_existente = get_categoria_by_nombre(db, categoria_data.nombre)
-    if categoria_existente:
-        return categoria_existente
-    nueva_categoria = Categoria(nombre=categoria_data.nombre)
-    db.add(nueva_categoria)
-    db.commit()
-    db.refresh(nueva_categoria)
-    return nueva_categoria
+categorias = [
+    "Ficción", 
+    "No ficción",
+    "Ciencia ficción",
+    "Fantasía",
+    "Terror",
+    "Romance",
+    "Misterio",
+    "Thriller",
+    "Suspenso",
+    "Aventura",
+    "Histórica",
+    "Biografía",
+    "Autobiografía",
+    "Memorias",
+    "Poesía",
+    "Teatro",
+    "Ensayo",
+    "Filosofía",
+    "Psicología",
+    "Autoayuda",
+    "Negocios",
+    "Finanzas",
+    "Economía",
+    "Política",
+    "Sociología",
+    "Arte",
+    "Arquitectura",
+    "Diseño",
+    "Fotografía",
+    "Cine",
+    "Música",
+    "Cocina",
+    "Gastronomía",
+    "Salud",
+    "Nutrición",
+    "Deportes",
+    "Viajes",
+    "Geografía",
+    "Historia",
+    "Ciencia",
+    "Matemáticas",
+    "Tecnología",
+    "Informática",
+    "Medicina",
+    "Ingeniería",
+    "Literatura infantil",
+    "Juvenil",
+    "Educación",
+    "Idiomas",
+    "Religión",
+    "Espiritualidad",
+    "Humor",
+    "Cómics",
+    "Manga",
+    "Novela gráfica",
+    "Erótica",
+    "Policíaca",
+    "Western",
+    "Ucronía",
+    "Distopía"
+]
+
+for nombre in categorias:
+    if not db.query(Categoria).filter_by(nombre=nombre).first():
+        db.add(Categoria(nombre=nombre))
+
+db.commit()
+db.close()
