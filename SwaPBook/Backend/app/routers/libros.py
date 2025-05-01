@@ -22,18 +22,12 @@ async def crear_libro(
     titulo: str = Form(...),
     autor: str = Form(...),
     descripcion: str = Form(...),
-    estado: str = Form(...),
     estudiante: Estudiante = Depends(get_current_user),
     idCategoria: int = Form(...),
     foto: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    print("Estado recibido:", estado)
 
-    try:
-        estado_enum = EstadoLibroEnum(estado)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Estado inválido: '{estado}'")
 
     if not estudiante:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
@@ -67,7 +61,7 @@ async def crear_libro(
         titulo=titulo,
         autor=autor,
         descripcion=descripcion,
-        estado=estado_enum,
+        estado="Disponible",
         idCategoria=categoria.idCategoria,
         idEstudiante=estudiante.idEstudiante,
         foto=f"/static/images/libros/{filename}",

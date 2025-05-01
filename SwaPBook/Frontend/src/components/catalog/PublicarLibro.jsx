@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const PublicarLibro = ({ isOpen, onClose }) => {
   const [titulo, setTitulo] = useState('');
@@ -12,20 +12,32 @@ const PublicarLibro = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [mensajeExito, setMensajeExito] = useState('');
 
-  const idEstudiante = localStorage.getItem('idEstudiante');
-
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const res = await fetch('http://localhost:8000/categorias/');
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:8000/categorias/', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!res.ok) {
+          throw new Error('Error al cargar categorías');
+        }
+        
         const data = await res.json();
         setCategoriasDisponibles(data);
       } catch (error) {
         console.error('Error al cargar categorías:', error);
+        setErrors(prev => ({ ...prev, categoria: 'Error al cargar categorías. Intenta nuevamente.' }));
       }
     };
-    fetchCategorias();
-  }, []);
+    
+    if (isOpen) {
+      fetchCategorias();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -51,8 +63,6 @@ const PublicarLibro = ({ isOpen, onClose }) => {
     setErrors({});
   };
 
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("✅ Intentando enviar formulario desde PublicarLibro.jsx");
@@ -62,7 +72,6 @@ const PublicarLibro = ({ isOpen, onClose }) => {
     if (!descripcion) nuevosErrores.descripcion = 'La descripción es requerida';
     if (!categoria) nuevosErrores.categoria = 'La categoría es requerida';
     if (!imagen) nuevosErrores.imagen = 'La portada es requerida';
-    if (!idEstudiante) nuevosErrores.estudiante = 'ID del estudiante no encontrado';
 
     setErrors(nuevosErrores);
     if (Object.keys(nuevosErrores).length > 0) return;
@@ -71,14 +80,13 @@ const PublicarLibro = ({ isOpen, onClose }) => {
     formData.append('titulo', titulo);
     formData.append('autor', autor);
     formData.append('descripcion', descripcion);
-    formData.append('estado', 'Disponible');
     formData.append('idCategoria', categoria);
     formData.append('foto', imagen);
 
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:8000/libros/', {
         method: 'POST',
         headers: {
@@ -89,15 +97,18 @@ const PublicarLibro = ({ isOpen, onClose }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(`Error: ${errorData.detail}`);
+        setErrors({ submit: errorData.detail || 'Error al publicar el libro' });
       } else {
         setMensajeExito('¡Libro publicado exitosamente!');
         limpiarFormulario();
-        setTimeout(() => setMensajeExito(''), 3000);
-        onClose();
+        setTimeout(() => {
+          setMensajeExito('');
+          onClose();
+        }, 2000);
       }
     } catch (error) {
       console.error("Error al publicar el libro:", error);
+      setErrors({ submit: 'Error de conexión con el servidor' });
     } finally {
       setIsLoading(false);
     }
@@ -119,6 +130,12 @@ const PublicarLibro = ({ isOpen, onClose }) => {
         {mensajeExito && (
           <div className="mb-4 text-green-700 bg-green-100 border border-green-300 rounded-md px-4 py-2 text-sm text-center">
             {mensajeExito}
+          </div>
+        )}
+        
+        {errors.submit && (
+          <div className="mb-4 text-red-700 bg-red-100 border border-red-300 rounded-md px-4 py-2 text-sm text-center">
+            {errors.submit}
           </div>
         )}
 

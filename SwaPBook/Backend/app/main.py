@@ -5,11 +5,19 @@ from app.routers import estudiantes
 from app.routers import libros
 from app.routers import categorias
 from app.routers import auth
-from fastapi.middleware.cors import CORSMiddleware
+from app.routers import solicitudes
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request
+from fastapi.staticfiles import StaticFiles  # Para los static files
+import os  #  os para crear directorios tambien para las fotos
 
 app = FastAPI()
+
+# directorio para las fotos de los libros
+os.makedirs("app/static/images/libros", exist_ok=True)
+
+# directorio para las fotos de los estudiantes
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 origins = [
     "http://localhost:5173",
@@ -39,10 +47,9 @@ app.include_router(estudiantes.router)
 app.include_router(libros.router)
 app.include_router(categorias.router)
 app.include_router(auth.router)
-# Crear las tablas en la base de datos si no existen (ideal para desarrollo)
+app.include_router(solicitudes.router)
 
-# Crear las tablas
-
+# Crear las tablas en la base de datos si no existen
 Base.metadata.create_all(bind=engine)
 
 # Ruta raíz

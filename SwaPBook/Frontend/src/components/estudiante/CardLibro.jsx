@@ -1,3 +1,4 @@
+// src/components/estudiante/CardLibro.jsx
 import React from "react";
 
 const CardLibro = ({
@@ -5,10 +6,15 @@ const CardLibro = ({
   usuarioFoto,
   fechaPublicacion,
   fotoLibro,
+  titulo,
   autor,
+  categoria,
   estado,
   onVerDetalles,
 }) => {
+  // Indicador de estado
+  const estadoDisponible = estado === "Disponible";
+
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 flex flex-col overflow-hidden w-full max-w-xs">
       {/* Header */}
@@ -30,18 +36,33 @@ const CardLibro = ({
       <div className="flex justify-center items-center bg-gray-100 h-40">
         <img
           src={fotoLibro}
-          alt="Portada del libro"
+          alt={titulo}
           className="h-full object-contain rounded"
         />
       </div>
-      {/* Autor y estado */}
-      <div className="px-4 py-3 flex flex-col gap-2 flex-1">
+      {/* Información del libro */}
+      <div className="px-4 py-3 flex flex-col gap-1 flex-1">
+        <h3 className="font-extrabold text-lg text-[#722F37] mb-1">{titulo}</h3>
         <div className="text-gray-700 text-sm">
           <span className="font-semibold">Autor:</span> {autor}
         </div>
-        <div>
-          <span className="font-semibold text-[#722F37]">Estado:</span>{" "}
-          <span className="inline-block px-2 py-1 text-xs rounded bg-gray-200 text-gray-700">
+        <div className="text-gray-700 text-sm">
+          <span className="font-semibold">Categoría:</span> {categoria}
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="font-semibold text-[#722F37]">Estado:</span>
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded font-semibold ${
+              estadoDisponible
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            {estadoDisponible && (
+              <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <circle cx="10" cy="10" r="10" />
+              </svg>
+            )}
             {estado}
           </span>
         </div>
