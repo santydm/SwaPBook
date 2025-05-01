@@ -16,17 +16,19 @@ class Solicitud(Base):
     idSolicitud = Column(Integer, primary_key=True, index=True)
     estudianteSolicitante = Column(Integer, ForeignKey("estudiantes.idEstudiante"))
     estudiantePropietario = Column(Integer, ForeignKey("estudiantes.idEstudiante"))
-    libroOfrecido = Column(Integer, ForeignKey("libros.idLibro"))
-    libroSolicitado = Column(Integer, ForeignKey("libros.idLibro"))
+    libroOfrecido = Column(Integer, ForeignKey("libros.idLibro", ondelete="CASCADE"))
+    libroSolicitado = Column(Integer, ForeignKey("libros.idLibro", ondelete="CASCADE"))
     fechaSolicitud = Column(DateTime, default=datetime.utcnow)
     fechaEncuentro = Column(DateTime, nullable=True)
     horaEncuentro = Column(DateTime, nullable=True)
     lugarEncuentro = Column(String(100), nullable=True)
     estado = Column(Enum(EstadoSolicitudEnum), default=EstadoSolicitudEnum.pendiente) 
 
-
+    # Relaciones
     solicitante = relationship("Estudiante", foreign_keys=[estudianteSolicitante])
     propietario = relationship("Estudiante", foreign_keys=[estudiantePropietario])
     libro_ofrecido = relationship("Libro", foreign_keys=[libroOfrecido])
     libro_solicitado = relationship("Libro", foreign_keys=[libroSolicitado])
 
+    # Relación con Intercambio
+    intercambio = relationship("Intercambio", back_populates="solicitud", uselist=False)  # Agregar esta línea

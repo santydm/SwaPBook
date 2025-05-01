@@ -6,6 +6,7 @@ from app.routers import libros
 from app.routers import categorias
 from app.routers import auth
 from app.routers import solicitudes
+from app.routers import intercambios
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request
 from fastapi.staticfiles import StaticFiles  # Para los static files
@@ -48,6 +49,7 @@ app.include_router(libros.router)
 app.include_router(categorias.router)
 app.include_router(auth.router)
 app.include_router(solicitudes.router)
+app.include_router(intercambios.router)
 
 # Crear las tablas en la base de datos si no existen
 Base.metadata.create_all(bind=engine)

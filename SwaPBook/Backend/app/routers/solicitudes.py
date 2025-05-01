@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.solicitudes import Solicitud
 from app.models.libros import Libro
-from app.schemas.solicitudes import SolicitudCreate, SolicitudResponse
+from app.schemas.solicitudes import SolicitudCreate, SolicitudResponse, EstadoSolicitudEnum
 from app.utils.auth import get_current_user
 
 router = APIRouter(prefix="/solicitudes", tags=["Solicitudes"])
@@ -38,3 +38,16 @@ def crear_solicitud(
     db.refresh(nueva_solicitud)
     return nueva_solicitud
 
+@router.put("/aceptar/{id_solicitud}")
+def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
+    solicitud = db.query(Solicitud).filter(Solicitud.idSolicitud == id_solicitud).first()
+    if not solicitud:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+
+    if solicitud.estado != EstadoSolicitudEnum.pendiente:
+        raise HTTPException(status_code=400, detail="Solo se pueden aceptar solicitudes en estado pendiente")
+
+    solicitud.estado = EstadoSolicitudEnum.aceptada
+    db.commit()
+    db.refresh(solicitud)
+    return {"mensaje": "Solicitud aceptada exitosamente", "solicitud": solicitud}
