@@ -5,6 +5,7 @@ import SidebarCatalogo from "./SidebarCatalogo";
 import PublicarLibro from "./PublicarLibro";
 import Footer from "../ui/Footer";
 import axios from "axios";
+import LibroDetalleModal from "../estudiante/LibroDetalleModal";
 
 const Catalogo = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Catalogo = () => {
   const [showModal, setShowModal] = useState(false);
   const [libros, setLibros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [libroSeleccionado, setLibroSeleccionado] = useState(null);
 
   // Cargar usuario si hay token
   useEffect(() => {
@@ -48,6 +50,17 @@ const Catalogo = () => {
     fetchLibros();
   }, [estudiante]);
 
+  const handleSolicitarIntercambio = async (libro) => {
+    // Implementar lógica para solicitar intercambio
+    console.log("Solicitar intercambio:", libro);
+    // Aquí irá tu llamada API para crear una solicitud
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <NavbarCatalogo 
@@ -61,6 +74,7 @@ const Catalogo = () => {
           estudiante={estudiante}
           onCrearLibro={() => setShowModal(true)}
           onClose={() => setShowSidebar(false)}
+          handleLogout={handleLogout}
         />
       )}
 
@@ -107,7 +121,10 @@ const Catalogo = () => {
                 <span className="mt-2 inline-block bg-Swap-beige text-white text-xs px-2 py-1 rounded">
                   {libro.categoria?.nombre || "Sin categoría"}
                 </span>
-                <button className="mt-4 w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-[#a67c52] transition-colors">
+                <button 
+                  className="mt-4 w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-[#a67c52] transition-colors"
+                  onClick={() => setLibroSeleccionado(libro)}
+                >
                   Ver detalles
                 </button>
               </div>
@@ -117,6 +134,22 @@ const Catalogo = () => {
           <p className="text-center text-gray-500 py-8">No hay libros disponibles en el catálogo.</p>
         )}
       </main>
+
+      {/* Modal de detalles */}
+      <LibroDetalleModal
+        libro={libroSeleccionado ? {
+          ...libroSeleccionado,
+          fotoLibro: libroSeleccionado ? `http://localhost:8000${libroSeleccionado.foto}` : "",
+          categoria: libroSeleccionado?.categoria?.nombre || "Sin categoría",
+          fechaPublicacion: new Date(libroSeleccionado?.fechaRegistro || Date.now()).toLocaleDateString(),
+          usuarioNombre: libroSeleccionado?.estudiante?.nombre || "Usuario"
+        } : null}
+        isOpen={!!libroSeleccionado}
+        onClose={() => setLibroSeleccionado(null)}
+        esPropio={false}
+        onSolicitarIntercambio={handleSolicitarIntercambio}
+      />
+
       <Footer />
     </div>
   );

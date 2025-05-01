@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import PanelPerfil from "../../components/estudiante/PanelPerfil";
 import CardLibro from "../../components/estudiante/CardLibro";
+import LibroDetalleModal from "../../components/estudiante/LibroDetalleModal";
 
 const MisLibros = () => {
   const navigate = useNavigate();
   const [libros, setLibros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [libroSeleccionado, setLibroSeleccionado] = useState(null);
   
   useEffect(() => {
     const fetchMisLibros = async () => {
@@ -49,6 +51,29 @@ const MisLibros = () => {
     navigate('/login');
   };
 
+  const handleEditarLibro = (libro) => {
+    // Implementar lógica para editar libro
+    console.log("Editar libro:", libro);
+  };
+
+  const handleEliminarLibro = async (idLibro) => {
+    if (!confirm("¿Estás seguro de eliminar este libro?")) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://127.0.0.1:8000/libros/${idLibro}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      // Actualizar la lista de libros sin necesidad de recargar
+      setLibros(prevLibros => prevLibros.filter(libro => libro.idLibro !== idLibro));
+      setLibroSeleccionado(null); // Cerrar el modal
+    } catch (error) {
+      console.error("Error al eliminar libro:", error);
+      alert("No se pudo eliminar el libro. Intenta nuevamente.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
@@ -71,17 +96,18 @@ const MisLibros = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center w-full">
                 {libros.map((libro) => (
                   <CardLibro
-                  key={libro.idLibro}
-                  usuarioNombre={libro.estudiante?.nombre || "Tú"}
-                  usuarioFoto={libro.estudiante?.fotoPerfil || ""}
-                  fechaPublicacion={new Date(libro.fechaRegistro || Date.now()).toLocaleDateString()}
-                  fotoLibro={`http://localhost:8000${libro.foto}`}
-                  titulo={libro.titulo || "Sin título"}
-                  autor={libro.autor || "Autor desconocido"}
-                  categoria={libro.categoria?.nombre || "Sin categoría"} // Extraemos el nombre de la categoría
-                  estado={libro.estado || "Desconocido"}
-                  onVerDetalles={() => {/* Implementar vista detalle */}}
-                />
+                    key={libro.idLibro}
+                    usuarioNombre={"Tú"}
+                    usuarioFoto={""}
+                    fechaPublicacion={new Date(libro.fechaRegistro || Date.now()).toLocaleDateString()}
+                    fotoLibro={`http://localhost:8000${libro.foto}`}
+                    titulo={libro.titulo || "Sin título"}
+                    autor={libro.autor || "Autor desconocido"}
+                    categoria={libro.categoria?.nombre || "Sin categoría"}
+                    estado={libro.estado || "Desconocido"}
+                    esPropio={true}
+                    onVerDetalles={() => setLibroSeleccionado(libro)}
+                  />
                 ))}
               </div>
             </div>
@@ -92,6 +118,22 @@ const MisLibros = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de detalles */}
+      <LibroDetalleModal
+        libro={libroSeleccionado ? {
+          ...libroSeleccionado,
+          usuarioNombre: "Tú",
+          fotoLibro: libroSeleccionado ? `http://localhost:8000${libroSeleccionado.foto}` : "",
+          categoria: libroSeleccionado?.categoria?.nombre || "Sin categoría",
+          fechaPublicacion: new Date(libroSeleccionado?.fechaRegistro || Date.now()).toLocaleDateString()
+        } : null}
+        isOpen={!!libroSeleccionado}
+        onClose={() => setLibroSeleccionado(null)}
+        esPropio={true}
+        onEditarLibro={handleEditarLibro}
+        onEliminarLibro={handleEliminarLibro}
+      />
     </div>
   );
 };
