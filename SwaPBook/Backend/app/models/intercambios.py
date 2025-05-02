@@ -25,7 +25,7 @@ class Intercambio(Base):
     estado = Column(Enum(EstadoIntercambioEnum), default=EstadoIntercambioEnum.en_proceso)
 
     # Relaciones
-    solicitud = relationship("Solicitud", back_populates="intercambio")
+    #solicitud = relationship("Solicitud", back_populates="intercambio")
     estudiante = relationship("Estudiante", foreign_keys=[idEstudiante])
     estudiante_receptor = relationship("Estudiante", foreign_keys=[idEstudianteReceptor])
     libro_solicitado = relationship("Libro", foreign_keys=[idLibroSolicitado])

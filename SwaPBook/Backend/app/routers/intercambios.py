@@ -54,48 +54,38 @@ def crear_intercambio(id_solicitud: int, db: Session = Depends(get_db)):
     return intercambio
 
 
-@router.put("/intercambios/{id_intercambio}/actualizar_estado", response_model=IntercambioResponse)
+@router.patch("/actualizar-estado/{id_intercambio}", response_model=IntercambioResponse)
 def actualizar_estado_intercambio(
     id_intercambio: int,
     estado_update: IntercambioEstadoUpdate,
     db: Session = Depends(get_db)
 ):
-    # Buscar el intercambio
     intercambio = db.query(Intercambio).filter(Intercambio.idIntercambio == id_intercambio).first()
     if not intercambio:
         raise HTTPException(status_code=404, detail="Intercambio no encontrado")
 
-    # Verificar que el estado sea "en proceso"
     if intercambio.estado != EstadoIntercambioEnum.en_proceso:
         raise HTTPException(status_code=400, detail="Solo se puede modificar un intercambio en proceso")
 
-    # Modificar estado
-    if estado_update.nuevo_estado == EstadoIntercambioEnum.finalizado:
-        # Eliminar ambos libros si se finaliza el intercambio
-        libro1 = db.query(Libro).filter(Libro.idLibro == intercambio.idLibroSolicitado).first()
-        libro2 = db.query(Libro).filter(Libro.idLibro == intercambio.idLibroOfrecido).first()
-        if libro1:
-            db.delete(libro1)
-        if libro2:
-            db.delete(libro2)
-        intercambio.estado = EstadoIntercambioEnum.finalizado
+    nuevo_estado = estado_update.nuevo_estado
 
-    elif estado_update.nuevo_estado == EstadoIntercambioEnum.cancelado:
-        # Cambiar ambos libros a "Disponible" si se cancela el intercambio
-        libro1 = db.query(Libro).filter(Libro.idLibro == intercambio.idLibroSolicitado).first()
-        libro2 = db.query(Libro).filter(Libro.idLibro == intercambio.idLibroOfrecido).first()
-        if libro1:
-            libro1.estado = EstadoLibroEnum.disponible
-        if libro2:
-            libro2.estado = EstadoLibroEnum.disponible
-        intercambio.estado = EstadoIntercambioEnum.cancelado
+    libro1 = db.query(Libro).filter(Libro.idLibro == intercambio.idLibroSolicitado).first()
+    libro2 = db.query(Libro).filter(Libro.idLibro == intercambio.idLibroOfrecido).first()
 
-    else:
-        raise HTTPException(status_code=400, detail="Estado no válido o sin cambio")
+    if not libro1 or not libro2:
+        raise HTTPException(status_code=404, detail="Uno o ambos libros no existen")
 
-    # Guardar los cambios en la base de datos
+    if nuevo_estado == EstadoIntercambioEnum.finalizado:
+        db.delete(libro1)
+        db.delete(libro2)
+
+    elif nuevo_estado == EstadoIntercambioEnum.cancelado:
+        libro1.estado = EstadoLibroEnum.disponible
+        libro2.estado = EstadoLibroEnum.disponible
+
+    intercambio.estado = nuevo_estado
+
     db.commit()
-    db.refresh(intercambio)  # Refrescar la instancia del intercambio para obtener los últimos cambios
+    db.refresh(intercambio)
 
-    # Retornar el intercambio actualizado usando el modelo de respuesta
     return intercambio
