@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.db.database import Base
 from app.models.estudiantes import Estudiante
-from app.models.libros import Libro
+from app.models.libros import Libroalem
 from app.models.categorias import Categoria
 from app.models.solicitudes import Solicitud 
 

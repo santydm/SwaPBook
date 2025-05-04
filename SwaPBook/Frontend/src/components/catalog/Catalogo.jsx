@@ -50,10 +50,10 @@ const Catalogo = () => {
     fetchLibros();
   }, [estudiante]);
 
-  const handleSolicitarIntercambio = async (libro) => {
-    // Implementar lógica para solicitar intercambio
-    console.log("Solicitar intercambio:", libro);
-    // Aquí irá tu llamada API para crear una solicitud
+  const handleSolicitarIntercambio = () => {
+    // Notificar al usuario que la solicitud fue enviada exitosamente
+    alert("¡Solicitud de intercambio enviada con éxito! Te notificaremos cuando el propietario responda.");
+    setLibroSeleccionado(null); // Cerrar modal de detalles
   };
 
   const handleLogout = () => {
@@ -136,6 +136,7 @@ const Catalogo = () => {
       </main>
 
       {/* Modal de detalles */}
+      
       <LibroDetalleModal
         libro={libroSeleccionado ? {
           ...libroSeleccionado,

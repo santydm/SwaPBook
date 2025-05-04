@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 from enum import Enum
+from app.schemas.estudiantes import EstudiantePerfilSchema
+from app.schemas.libros import LibroResponse
+
 
 class EstadoSolicitudEnum(str, Enum):
     pendiente = "Pendiente"
@@ -26,6 +29,11 @@ class SolicitudResponse(BaseModel):
     horaEncuentro: datetime
     lugarEncuentro: str
     estado: EstadoSolicitudEnum
+
+    solicitante: Optional[EstudiantePerfilSchema]
+    libro_solicitado: Optional[LibroResponse]
+    libro_ofrecido: Optional[LibroResponse]
+
 
     class Config:
         orm_mode = True

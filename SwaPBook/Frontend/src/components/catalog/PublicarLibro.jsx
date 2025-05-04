@@ -16,6 +16,11 @@ const PublicarLibro = ({ isOpen, onClose }) => {
     const fetchCategorias = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) {
+          setErrors(prev => ({ ...prev, submit: 'No hay sesión activa' }));
+          return;
+        }
+
         const res = await fetch('http://localhost:8000/categorias/', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -65,7 +70,6 @@ const PublicarLibro = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("✅ Intentando enviar formulario desde PublicarLibro.jsx");
     const nuevosErrores = {};
     if (!titulo) nuevosErrores.titulo = 'El título es requerido';
     if (!autor) nuevosErrores.autor = 'El autor es requerido';
@@ -87,6 +91,10 @@ const PublicarLibro = ({ isOpen, onClose }) => {
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No hay sesión activa');
+      }
+
       const response = await fetch('http://localhost:8000/libros/', {
         method: 'POST',
         headers: {
@@ -97,18 +105,18 @@ const PublicarLibro = ({ isOpen, onClose }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setErrors({ submit: errorData.detail || 'Error al publicar el libro' });
-      } else {
-        setMensajeExito('¡Libro publicado exitosamente!');
-        limpiarFormulario();
-        setTimeout(() => {
-          setMensajeExito('');
-          onClose();
-        }, 2000);
+        throw new Error(errorData.detail || 'Error al publicar el libro');
       }
+
+      setMensajeExito('¡Libro publicado exitosamente!');
+      limpiarFormulario();
+      setTimeout(() => {
+        setMensajeExito('');
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error("Error al publicar el libro:", error);
-      setErrors({ submit: 'Error de conexión con el servidor' });
+      setErrors({ submit: error.message || 'Error de conexión con el servidor' });
     } finally {
       setIsLoading(false);
     }

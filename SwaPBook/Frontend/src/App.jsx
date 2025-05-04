@@ -1,5 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
 import Registro from './components/auth/Registro';
 import Login from './components/auth/Login';
 import Clave from './components/auth/Claveolvidada';
@@ -10,12 +12,23 @@ import PublicarLibro from './components/catalog/PublicarLibro';
 import Modificar from './pages/estudiante/ModificarPerfil';
 import Seguridad from './pages/estudiante/Seguridad';
 import Mislibros from './pages/estudiante/MisLibros';
-
-
+import NotificacionesSolicitudes from './components/solicitudes/NotificacionesSolicitudes';
 
 function App() {
+  const [usuarioLogeado, setUsuarioLogeado] = useState(false);
+
+  useEffect(() => {
+    // Verifica si hay un token al montar la app
+    setUsuarioLogeado(!!localStorage.getItem('token'));
+    // Escucha cambios en el almacenamiento local (por si hay logout/login en otra pestaña)
+    const handler = () => setUsuarioLogeado(!!localStorage.getItem('token'));
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
+
   return (
     <Router>
+      {usuarioLogeado && <NotificacionesSolicitudes />}
       <Routes>
         <Route path="/registro" element={<Registro />} />
         <Route path="/login" element={<Login />} />

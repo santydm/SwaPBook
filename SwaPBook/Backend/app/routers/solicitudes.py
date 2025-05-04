@@ -5,6 +5,8 @@ from app.models.solicitudes import Solicitud
 from app.models.libros import Libro
 from app.schemas.solicitudes import SolicitudCreate, SolicitudResponse, EstadoSolicitudEnum
 from app.utils.auth import get_current_user
+from sqlalchemy.orm import joinedload
+
 
 router = APIRouter(prefix="/solicitudes", tags=["Solicitudes"])
 
@@ -51,3 +53,16 @@ def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(solicitud)
     return {"mensaje": "Solicitud aceptada exitosamente", "solicitud": solicitud}
+
+@router.get("/pendientes/{id_estudiante}", response_model=list[SolicitudResponse])
+def obtener_solicitudes_pendientes(id_estudiante: int, db: Session = Depends(get_db)):
+    solicitudes = db.query(Solicitud).filter(
+        Solicitud.estudiantePropietario == id_estudiante,
+        Solicitud.estado == EstadoSolicitudEnum.pendiente
+    ).options(
+        joinedload(Solicitud.solicitante),
+        joinedload(Solicitud.libro_solicitado),
+        joinedload(Solicitud.libro_ofrecido)
+    ).all()
+    
+    return solicitudes
