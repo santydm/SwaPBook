@@ -90,6 +90,7 @@ const NotificacionesSolicitudes = () => {
           onAceptar={handleAceptar}
           onRechazar={handleRechazar}
           onClose={handleClose}
+          
         />
       ))}
     </div>
