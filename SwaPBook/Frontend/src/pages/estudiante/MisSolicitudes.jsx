@@ -101,20 +101,21 @@ const MisSolicitudes = () => {
             <div className="w-full flex justify-center">
               <div className="grid grid-cols-1 gap-4 w-full max-w-4xl">
                 {solicitudes.map((solicitud) => (
-                  <SolicitudNotificacionCard
+                    <SolicitudNotificacionCard
                     key={solicitud.idSolicitud}
                     idSolicitud={solicitud.idSolicitud}
                     fotoLibro={`http://localhost:8000${solicitud.libro_solicitado?.foto}`}
                     tituloLibro={solicitud.libro_solicitado?.titulo || "Sin título"}
                     autorLibro={solicitud.libro_solicitado?.autor || "Autor desconocido"}
+                    categoriaLibro={solicitud.libro_solicitado?.categoria?.nombre || "Sin categoría"}
                     nombreSolicitante={solicitud.solicitante?.nombre || "Usuario"}
                     fechaSolicitud={new Date(solicitud.fechaSolicitud).toLocaleDateString()}
                     lugarEncuentro={solicitud.lugarEncuentro || "Lugar no especificado"}
-                    estado={solicitud.estado}
                     onAceptar={handleAceptar}
                     onRechazar={handleRechazar}
                     onVerDetalles={() => setSolicitudSeleccionada(solicitud)}
-                  />
+                    />
+
                 ))}
               </div>
             </div>
