@@ -12,7 +12,7 @@ const SolicitudNotificacionCard = ({
   onAceptar,
   onRechazar,
   onVerDetalles,
-  onClose // Si existe, se muestra el botón de cerrar
+  onClose
 }) => {
   return (
     <div className="relative flex items-stretch">
@@ -23,7 +23,6 @@ const SolicitudNotificacionCard = ({
           className="absolute -top-3 -right-3 z-20 flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-200 transition"
           title="Cerrar notificación"
         >
-          {/* Ícono SVG de close, centrado y elegante */}
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -31,28 +30,24 @@ const SolicitudNotificacionCard = ({
       )}
 
       {/* Card principal */}
-      <div className="flex bg-white shadow-sm border border-gray-200 overflow-hidden h-32 min-h-36 max-h-38 w-full">
+      <div className="flex bg-[#f9f6f2] shadow-lg border border-gray-200 overflow-hidden h-32 min-h-36 max-h-38 w-full rounded-xl">
         {/* Botones de acción - Izquierda */}
-        <div className="w-12 flex flex-col">
+        <div className="w-14 flex flex-col h-full">
           <button
             onClick={() => onAceptar(idSolicitud)}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center rounded-tl-lg"
-            style={{ borderBottomLeftRadius: 0, borderTopLeftRadius: 8 }}
+            className="flex-1 flex items-center justify-center bg-green-100 text-green-700 font-semibold transition-colors rounded-tl-xl hover:bg-green-200 border-b border-green-200"
+            style={{ borderBottomLeftRadius: 0, borderTopLeftRadius: 12 }}
             title="Aceptar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <span className="text-xs font-bold">Aceptar</span>
           </button>
           <button
             onClick={() => onRechazar(idSolicitud)}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white flex items-center justify-center rounded-bl-lg"
-            style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 8 }}
+            className="flex-1 flex items-center justify-center bg-red-100 text-red-700 font-semibold transition-colors rounded-bl-xl hover:bg-red-200 border-t border-red-200"
+            style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 12 }}
             title="Rechazar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <span className="text-xs font-bold">Rechazar</span>
           </button>
         </div>
 
@@ -68,38 +63,36 @@ const SolicitudNotificacionCard = ({
 
         {/* Información central */}
         <div className="flex-1 flex flex-col justify-center pl-4 pr-2 py-0 min-w-0">
-          <h3 className="font-extrabold text-[#722F37] text-base mt-0.2 leading-tight truncate">{tituloLibro}</h3>
-          <div className="flex flex-col gap-0.4 text-sm text-gray-800">
-            <span><span className="font-semibold">Autor:</span> {autorLibro}</span>
-            <span><span className="font-semibold">Solicitante:</span> {nombreSolicitante}</span>
-            <span><span className="font-semibold">Fecha:</span> {fechaSolicitud}</span>
-            <span><span className="font-semibold">Lugar:</span> {lugarEncuentro}</span>
-            <span><span className="font-semibold">Categoría:</span> {categoriaLibro}</span>
+          <h3 className="font-extrabold text-[#722F37] text-base mb-1 leading-tight truncate">
+            {tituloLibro}
+          </h3>
+          <div className="flex flex-col gap-0.5 text-sm text-gray-800">
+            <span>
+              <span className="font-semibold">Autor:</span> {autorLibro}
+            </span>
+            <span>
+              <span className="font-semibold">Solicitante:</span> {nombreSolicitante}
+            </span>
+            <span>
+              <span className="font-semibold">Fecha:</span> {fechaSolicitud}
+            </span>
+            <span>
+              <span className="font-semibold">Lugar:</span> {lugarEncuentro}
+            </span>
+            <span>
+              <span className="font-semibold">Categoría:</span> {categoriaLibro}
+            </span>
           </div>
         </div>
 
-        {/* Botón Ver detalles - Derecha */}
+        {/* Botón Ver detalles - Derecha, color suave y armónico */}
         <button
           onClick={() => onVerDetalles(idSolicitud)}
-          className="w-16 bg-Swap-beige text-white rounded-r-lg hover:bg-[#a67c52] transition-colors flex flex-col items-center justify-center h-full p-2 text-sm font-bold"
+          className="w-16 h-full bg-gray-200 text-[#722F37] rounded-r-lg hover:bg-gray-300 transition-colors flex flex-col items-center justify-center p-2 text-sm font-bold"
           style={{ minWidth: 64 }}
           title="Ver detalles"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 mb-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 12H9m6 0a6 6 0 11-12 0 6 6 0 0112 0zm6 0a6 6 0 11-12 0 6 6 0 0112 0z"
-            />
-          </svg>
-          <span className="hidden sm:inline">Ver</span>
+          <span className="text-base font-bold">Ver</span>
         </button>
       </div>
     </div>
