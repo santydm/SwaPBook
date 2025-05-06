@@ -4,6 +4,9 @@ from app.db.database import get_db
 from app.models.solicitudes import Solicitud
 from app.models.libros import Libro
 from app.schemas.solicitudes import SolicitudCreate, SolicitudResponse, EstadoSolicitudEnum
+from app.models.intercambios import Intercambio  # Import Intercambio
+from app.schemas.libros import EstadoLibroEnum  # Import EstadoLibroEnum
+from app.schemas.intercambios import EstadoIntercambioEnum, IntercambioResponse  # Import EstadoIntercambioEnum
 from app.utils.auth import get_current_user
 from sqlalchemy.orm import joinedload
 
@@ -40,7 +43,7 @@ def crear_solicitud(
     db.refresh(nueva_solicitud)
     return nueva_solicitud
 
-@router.put("/aceptar/{id_solicitud}")
+@router.put("/aceptar/{id_solicitud}", response_model=IntercambioResponse)
 def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
     solicitud = db.query(Solicitud).filter(Solicitud.idSolicitud == id_solicitud).first()
     if not solicitud:
@@ -49,10 +52,38 @@ def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
     if solicitud.estado != EstadoSolicitudEnum.pendiente:
         raise HTTPException(status_code=400, detail="Solo se pueden aceptar solicitudes en estado pendiente")
 
+    # Cambiar estado de la solicitud a aceptada
     solicitud.estado = EstadoSolicitudEnum.aceptada
+
+    # Verificar existencia de los libros
+    libro_solicitado = db.query(Libro).filter(Libro.idLibro == solicitud.libroSolicitado).first()
+    libro_ofrecido = db.query(Libro).filter(Libro.idLibro == solicitud.libroOfrecido).first()
+
+    if not libro_solicitado or not libro_ofrecido:
+        raise HTTPException(status_code=404, detail="Uno o ambos libros no existen")
+
+    # Cambiar estado de los libros
+    libro_solicitado.estado = EstadoLibroEnum.intercambio
+    libro_ofrecido.estado = EstadoLibroEnum.intercambio
+
+    # Crear el intercambio
+    intercambio = Intercambio(
+        idSolicitud=solicitud.idSolicitud,
+        idEstudiante=solicitud.estudianteSolicitante,
+        idEstudianteReceptor=solicitud.estudiantePropietario,
+        idLibroSolicitado=solicitud.libroSolicitado,
+        idLibroOfrecido=solicitud.libroOfrecido,
+        fechaEncuentro=solicitud.fechaEncuentro,
+        horaEncuentro=solicitud.horaEncuentro,
+        estado=EstadoIntercambioEnum.en_proceso
+    )
+
+    db.add(intercambio)
     db.commit()
-    db.refresh(solicitud)
-    return {"mensaje": "Solicitud aceptada exitosamente", "solicitud": solicitud}
+    db.refresh(intercambio)
+
+    return intercambio
+
 
 @router.get("/pendientes/{id_estudiante}", response_model=list[SolicitudResponse])
 def obtener_solicitudes_pendientes(id_estudiante: int, db: Session = Depends(get_db)):
