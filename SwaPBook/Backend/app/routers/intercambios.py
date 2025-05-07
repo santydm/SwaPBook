@@ -6,6 +6,7 @@ from app.models.solicitudes import Solicitud, EstadoSolicitudEnum
 from app.models.libros import Libro, EstadoLibroEnum
 from app.schemas.intercambios import IntercambioResponse, IntercambioEstadoUpdate
 from sqlalchemy.orm import joinedload
+from fastapi import Query
 
 
 router = APIRouter(prefix="/intercambios", tags=["Intercambios"])
@@ -77,9 +78,9 @@ def actualizar_estado_intercambio(
     if not libro1 or not libro2:
         raise HTTPException(status_code=404, detail="Uno o ambos libros no existen")
 
-    if nuevo_estado == EstadoIntercambioEnum.finalizado:
-        db.delete(libro1)
-        db.delete(libro2)
+    # if nuevo_estado == EstadoIntercambioEnum.finalizado:
+    #   db.delete(libro1)
+    #    db.delete(libro2)
 
     elif nuevo_estado == EstadoIntercambioEnum.cancelado:
         libro1.estado = EstadoLibroEnum.disponible
@@ -95,16 +96,17 @@ def actualizar_estado_intercambio(
 @router.get("/mis-intercambios/{id_estudiante}", response_model=list[IntercambioResponse])
 def obtener_intercambios_estudiante(
     id_estudiante: int,
+    estado: str = Query(None, description="Estados separados por comas"),
     db: Session = Depends(get_db)
 ):
-    intercambios = db.query(Intercambio).filter(
+    estados = estado.split(",") if estado else []
+    
+    query = db.query(Intercambio).filter(
         (Intercambio.idEstudiante == id_estudiante) |
         (Intercambio.idEstudianteReceptor == id_estudiante)
-    ).options(
-        joinedload(Intercambio.libro_solicitado),
-        joinedload(Intercambio.libro_ofrecido),
-        joinedload(Intercambio.estudiante),
-        joinedload(Intercambio.estudiante_receptor)
-    ).all()
+    )
     
-    return intercambios
+    if estados:
+        query = query.filter(Intercambio.estado.in_(estados))
+
+    return query.all()

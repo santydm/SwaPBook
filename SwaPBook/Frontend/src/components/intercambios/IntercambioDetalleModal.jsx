@@ -1,13 +1,18 @@
 import React from "react";
 
-const IntercambioDetalleModal = ({ intercambio, isOpen, onClose, onFinalizar, onCancelar }) => {
+const IntercambioDetalleModal = ({
+  intercambio,
+  isOpen,
+  onClose,
+  onFinalizar,
+  onCancelar,
+  procesando = false
+}) => {
   if (!isOpen || !intercambio) return null;
 
-  // Utilidades para formato
   const formatFecha = (fecha) => new Date(fecha).toLocaleDateString();
   const formatHora = (hora) => new Date(hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Participantes
   const solicitante = intercambio.estudiante;
   const receptor = intercambio.estudiante_receptor;
   const libroOfrecido = intercambio.libro_ofrecido || {};
@@ -173,22 +178,36 @@ const IntercambioDetalleModal = ({ intercambio, isOpen, onClose, onFinalizar, on
         {intercambio.estado === "En proceso" && (
           <div className="flex flex-col sm:flex-row gap-4 mt-6">
             <button
-              onClick={() => onCancelar && onCancelar(intercambio.idIntercambio)}
-              className="flex-1 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors flex items-center justify-center gap-2"
+              disabled={procesando}
+              onClick={() => {
+                if (window.confirm("¿Estás seguro de cancelar este intercambio?")) {
+                  onCancelar(intercambio.idIntercambio);
+                }
+              }}
+              className={`flex-1 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors flex items-center justify-center gap-2 ${
+                procesando ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
               </svg>
-              Cancelar Intercambio
+              {procesando ? 'Procesando...' : 'Cancelar Intercambio'}
             </button>
             <button
-              onClick={() => onFinalizar && onFinalizar(intercambio.idIntercambio)}
-              className="flex-1 py-3 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-semibold transition-colors flex items-center justify-center gap-2"
+              disabled={procesando}
+              onClick={() => {
+                if (window.confirm("¿Confirmas que el intercambio se realizó exitosamente?")) {
+                  onFinalizar(intercambio.idIntercambio);
+                }
+              }}
+              className={`flex-1 py-3 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-semibold transition-colors flex items-center justify-center gap-2 ${
+                procesando ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
               </svg>
-              Marcar como Finalizado
+              {procesando ? 'Procesando...' : 'Marcar como Finalizado'}
             </button>
           </div>
         )}

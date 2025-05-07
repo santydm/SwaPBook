@@ -25,16 +25,17 @@ const MisIntercambios = () => {
         const perfil = await axios.get('http://localhost:8000/estudiantes/perfil', {
           headers: { Authorization: `Bearer ${token}` }
         });
-
+        
         const response = await axios.get(
-          `http://localhost:8000/intercambios/mis-intercambios/${perfil.data.idEstudiante}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `http://localhost:8000/intercambios/mis-intercambios/${perfil.data.idEstudiante}?estado=En%20proceso`,
+          { params: { estado: "En proceso" }, 
+            headers: { Authorization: `Bearer ${token}` } }
         );
 
         setIntercambios(response.data);
       } catch (error) {
-        console.error('Error al obtener intercambios:', error);
-        setError('Error al cargar intercambios. Intenta nuevamente.');
+        console.error("Error fetching intercambios:", error);
+        setError('Error al cargar intercambios activos');
       } finally {
         setLoading(false);
       }
@@ -58,16 +59,9 @@ const MisIntercambios = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setIntercambios(prev => {
-        if (nuevoEstado === 'cancelado') {
-          return prev.filter(i => i.idIntercambio !== idIntercambio);
-        }
-        return prev.map(i =>
-          i.idIntercambio === idIntercambio ? { ...i, estado: nuevoEstado } : i
-        );
-      });
-
-      setIntercambioSeleccionado(null);
+      // Eliminar el intercambio de la lista actual
+      setIntercambios(prev => prev.filter(i => i.idIntercambio !== idIntercambio));
+      
       alert(`Intercambio ${nuevoEstado} correctamente!`);
     } catch (error) {
       console.error('Error al actualizar estado:', error);
@@ -77,16 +71,16 @@ const MisIntercambios = () => {
     }
   };
 
+  if (!intercambios) return null;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
-        {/* Panel lateral */}
         <PanelPerfil handleLogout={handleLogout} />
 
-        {/* Sección principal */}
         <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-          <h1 className="text-2xl font-bold text-[#722F37] mb-6">Mis Intercambios</h1>
-
+          <h1 className="text-2xl font-bold text-[#722F37] mb-6">Intercambios Activos</h1>
+          
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
@@ -106,20 +100,19 @@ const MisIntercambios = () => {
             </div>
           ) : (
             <p className="text-center text-gray-500">
-              No tienes intercambios registrados.
+              No tienes intercambios activos actualmente
             </p>
           )}
         </div>
       </div>
 
-      {/* Modal de detalles */}
       {intercambioSeleccionado && (
         <IntercambioDetalleModal
           intercambio={intercambioSeleccionado}
           isOpen={!!intercambioSeleccionado}
           onClose={() => setIntercambioSeleccionado(null)}
-          onFinalizar={(id) => actualizarEstadoIntercambio(id, 'finalizado')}
-          onCancelar={(id) => actualizarEstadoIntercambio(id, 'cancelado')}
+          onFinalizar={(id) => actualizarEstadoIntercambio(id, "Finalizado")}
+          onCancelar={(id) => actualizarEstadoIntercambio(id, "Cancelado")}
           procesando={procesando}
         />
       )}
