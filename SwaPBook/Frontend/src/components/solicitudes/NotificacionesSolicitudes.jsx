@@ -9,31 +9,46 @@ const NotificacionesSolicitudes = () => {
   const [detalleSolicitud, setDetalleSolicitud] = useState(null);
 
   useEffect(() => {
+    const abortController = new AbortController(); // <-- Crear controlador
+  
     const fetchSolicitudes = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-
+  
         const perfil = await axios.get("http://localhost:8000/estudiantes/perfil", {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          signal: abortController.signal // <-- Vincular señal
         });
-
+        
         const idEstudiante = perfil.data.idEstudiante;
-
-        const res = await axios.get(`http://localhost:8000/solicitudes/pendientes/${idEstudiante}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
+        
+        const res = await axios.get(
+          `http://localhost:8000/solicitudes/pendientes/${idEstudiante}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: abortController.signal // <-- Usar la misma señal
+          }
+        );
+        
         setSolicitudes(res.data);
       } catch (error) {
-        console.error("Error fetching solicitudes:", error);
+        if (error.name === 'CanceledError') {
+          console.log('Solicitud cancelada intencionalmente');
+        } else {
+          console.error("Error fetching solicitudes:", error);
+        }
       }
     };
-
+    
     if (mostrar) fetchSolicitudes();
-
+    
     const interval = setInterval(fetchSolicitudes, 30000);
-    return () => clearInterval(interval);
+    
+    return () => {
+      abortController.abort(); // <-- Cancelar al desmontar
+      clearInterval(interval);
+    };
   }, [mostrar]);
 
   const handleClose = (idSolicitud) => {

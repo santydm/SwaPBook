@@ -14,6 +14,7 @@ import Seguridad from './pages/estudiante/Seguridad';
 import Mislibros from './pages/estudiante/MisLibros';
 import NotificacionesSolicitudes from './components/solicitudes/NotificacionesSolicitudes';
 import MisSolicitudes from './pages/estudiante/MisSolicitudes';
+import MisIntercambios from './pages/estudiante/MisIntercambios';
 
 function App() {
   const [usuarioLogeado, setUsuarioLogeado] = useState(false);
@@ -42,6 +43,7 @@ function App() {
         <Route path="/mis-libros" element={<Mislibros />} />
         <Route path="/seguridad" element={<Seguridad />} />      
         <Route path="/mis-solicitudes" element={<MisSolicitudes />} />  
+        <Route path="/mis-intercambios" element={<MisIntercambios/>} />  
       </Routes>
     </Router>
   );

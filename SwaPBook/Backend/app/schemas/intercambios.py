@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
 from typing import Optional
+from app.schemas.libros import LibroResponse
+from app.schemas.estudiantes import EstudiantePerfilSchema
+
 
 class EstadoIntercambioEnum(str, Enum):
     en_proceso = "En proceso"
@@ -18,6 +21,11 @@ class IntercambioResponse(BaseModel):
     fechaEncuentro: datetime
     horaEncuentro: datetime
     estado: EstadoIntercambioEnum
+
+    libro_solicitado: Optional[LibroResponse]
+    libro_ofrecido: Optional[LibroResponse]
+    estudiante: Optional[EstudiantePerfilSchema]
+    estudiante_receptor: Optional[EstudiantePerfilSchema]
 
     class Config:
         orm_mode = True

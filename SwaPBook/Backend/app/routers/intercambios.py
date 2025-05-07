@@ -5,6 +5,8 @@ from app.models.intercambios import Intercambio, EstadoIntercambioEnum
 from app.models.solicitudes import Solicitud, EstadoSolicitudEnum
 from app.models.libros import Libro, EstadoLibroEnum
 from app.schemas.intercambios import IntercambioResponse, IntercambioEstadoUpdate
+from sqlalchemy.orm import joinedload
+
 
 router = APIRouter(prefix="/intercambios", tags=["Intercambios"])
 
@@ -89,3 +91,20 @@ def actualizar_estado_intercambio(
     db.refresh(intercambio)
 
     return intercambio
+
+@router.get("/mis-intercambios/{id_estudiante}", response_model=list[IntercambioResponse])
+def obtener_intercambios_estudiante(
+    id_estudiante: int,
+    db: Session = Depends(get_db)
+):
+    intercambios = db.query(Intercambio).filter(
+        (Intercambio.idEstudiante == id_estudiante) |
+        (Intercambio.idEstudianteReceptor == id_estudiante)
+    ).options(
+        joinedload(Intercambio.libro_solicitado),
+        joinedload(Intercambio.libro_ofrecido),
+        joinedload(Intercambio.estudiante),
+        joinedload(Intercambio.estudiante_receptor)
+    ).all()
+    
+    return intercambios

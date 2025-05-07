@@ -31,3 +31,5 @@ class Intercambio(Base):
     libro_solicitado = relationship("Libro", foreign_keys=[idLibroSolicitado])
     libro_ofrecido = relationship("Libro", foreign_keys=[idLibroOfrecido])
 
+    
+
