@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, Enum
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Enum, String
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 from app.models.libros import EstadoLibroEnum
@@ -22,6 +22,7 @@ class Intercambio(Base):
     idLibroSolicitado = Column(Integer, ForeignKey("libros.idLibro", ondelete="CASCADE"))
     fechaEncuentro = Column(DateTime)
     horaEncuentro = Column(DateTime)
+    lugarEncuentro = Column(String(100), nullable=True)
     estado = Column(Enum(EstadoIntercambioEnum), default=EstadoIntercambioEnum.en_proceso)
 
     # Relaciones
