@@ -3,17 +3,26 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from passlib.context import CryptContext
 from app.models.estudiantes import Estudiante
+from app.models.cambio_correo_pendiente import CambioCorreoPendiente
 from app.utils.auth import crear_token, autenticar_usuario
-from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin, EstudiantePerfilSchema, EstudianteDeleteRequest
-from app.utils.email_utils import enviar_correo_bienvenida
+from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin, EstudiantePerfilSchema, EstudianteDeleteRequest, EstudianteUpdate
+from app.utils.email_utils import enviar_correo_bienvenida, enviar_correo_verificacion_cambio
 from app.core.security import verify_password
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from dotenv import load_dotenv
 import os
+from datetime import datetime
 from app.utils.auth import crear_token, get_current_user
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from fastapi import UploadFile, File, Form, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from datetime import datetime
+import os
+import shutil
+from pydantic import EmailStr
+
 
 
 load_dotenv()
@@ -181,4 +190,119 @@ def perfil_estudiante(estudiante: Estudiante = Depends(obtener_estudiante_actual
     }
     
 
+#edicion de perfil
 
+@router.put("/perfil/editar", response_model=EstudiantePerfilSchema)
+async def actualizar_perfil(
+    nombre: str = Form(...),
+    numeroCelular: str = Form(...),
+    correoInstitucional: EmailStr = Form(...),
+    fotoPerfil: UploadFile = File(None),
+    db: Session = Depends(get_db),
+    estudiante: Estudiante = Depends(get_current_user)
+):
+    # Guardar la foto si se envió archivo
+    if fotoPerfil:
+        carpeta_fotos = "uploads/fotos_perfil"
+        os.makedirs(carpeta_fotos, exist_ok=True)
+
+        extension = os.path.splitext(fotoPerfil.filename)[1]
+        nombre_archivo = f"perfil_{estudiante.idEstudiante}{extension}"
+        ruta_guardado = os.path.join(carpeta_fotos, nombre_archivo)
+
+        with open(ruta_guardado, "wb") as buffer:
+            shutil.copyfileobj(fotoPerfil.file, buffer)
+
+        estudiante.fotoPerfil = f"/uploads/fotos_perfil/{nombre_archivo}"
+
+    # Actualizar campos de texto
+    if nombre:
+        estudiante.nombre = nombre
+    if numeroCelular:
+        estudiante.numeroCelular = numeroCelular
+
+    # Validar cambio de correo institucional
+    if correoInstitucional and correoInstitucional != estudiante.correoInstitucional:
+        correo_en_uso = (
+            db.query(Estudiante).filter(Estudiante.correoInstitucional == correoInstitucional).first() or
+            db.query(CambioCorreoPendiente).filter(CambioCorreoPendiente.nuevoCorreo == correoInstitucional).first()
+        )
+        if correo_en_uso:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El correo institucional ya está en uso o pendiente de verificación."
+            )
+        cambio = CambioCorreoPendiente(
+            idEstudiante=estudiante.idEstudiante,
+            nuevoCorreo=correoInstitucional,
+            fechaSolicitud=datetime.utcnow()
+        )
+        db.add(cambio)
+        db.commit()
+        db.refresh(cambio)
+        
+        
+        # Crear token para verificación del cambio de correo
+        token_cambio = s.dumps({'email': correoInstitucional, 'idCambio': cambio.idCambio}, salt="email-change-confirm")
+
+        verificacion_link_cambio = f"http://localhost:8000/estudiantes/verificar_cambio_correo/{token_cambio}"
+
+        # Enviar correo de verificación para cambio de correo
+        enviar_correo_verificacion_cambio(correoInstitucional, verificacion_link_cambio)
+        
+    db.commit()
+    db.refresh(estudiante)
+
+    msg = "Perfil actualizado correctamente."
+    if correoInstitucional and correoInstitucional != estudiante.correoInstitucional:
+        msg += " El cambio de correo está pendiente de verificación."
+
+    return {
+        "idEstudiante": estudiante.idEstudiante,
+        "nombre": estudiante.nombre,
+        "correoInstitucional": estudiante.correoInstitucional,
+        "fechaRegistro": estudiante.fechaRegistro,
+        "activo": estudiante.activo,
+        "mensaje": msg
+    }
+
+# Verificación de cambio de correo
+@router.get("/verificar_cambio_correo/{token}")
+def verificar_cambio_correo(token: str, db: Session = Depends(get_db)):
+    try:
+        data = s.loads(token, salt="email-change-confirm", max_age=3600)
+        
+        nuevo_correo = data.get("email")
+        id_cambio = data.get("idCambio")
+        
+        if not nuevo_correo or not id_cambio:
+            raise HTTPException(status_code=400, detail="Token inválido o incompleto")
+
+        cambio = db.query(CambioCorreoPendiente).filter(CambioCorreoPendiente.idCambio == id_cambio).first()
+        if not cambio:
+            raise HTTPException(status_code=404, detail="Solicitud de cambio no encontrada")
+
+        if cambio.nuevoCorreo != nuevo_correo:
+            raise HTTPException(status_code=400, detail="Datos del token no coinciden con la solicitud")
+
+        estudiante = db.query(Estudiante).filter(Estudiante.idEstudiante == cambio.idEstudiante).first()
+        if not estudiante:
+            raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+        estudiante.correoInstitucional = nuevo_correo
+
+        db.delete(cambio)
+        db.commit()
+
+        jwt_token = crear_token({"sub": nuevo_correo})
+        frontend_url = f"http://localhost:5173/cambio-correo-exitoso?token={jwt_token}&status=success"
+        
+        return RedirectResponse(frontend_url)
+
+    except SignatureExpired:
+        raise HTTPException(status_code=400, detail="Enlace expirado")
+    except BadSignature:
+        raise HTTPException(status_code=400, detail="Token inválido")
+    except Exception as e:
+        print(f"Error inesperado en verificación cambio correo: {e}")
+        raise HTTPException(status_code=500, detail="Error interno")

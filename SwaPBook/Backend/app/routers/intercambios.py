@@ -11,6 +11,8 @@ from fastapi import Query
 
 router = APIRouter(prefix="/intercambios", tags=["Intercambios"])
 
+
+#create_intercambio
 @router.post("/crear/{id_solicitud}", response_model=IntercambioResponse)
 def crear_intercambio(id_solicitud: int, db: Session = Depends(get_db)):
     # Buscar la solicitud por su ID
@@ -56,7 +58,7 @@ def crear_intercambio(id_solicitud: int, db: Session = Depends(get_db)):
     # Responder con el intercambio recién creado
     return intercambio
 
-
+#actualizar_estado_intercambio
 @router.patch("/actualizar-estado/{id_intercambio}", response_model=IntercambioResponse)
 def actualizar_estado_intercambio(
     id_intercambio: int,
@@ -93,6 +95,7 @@ def actualizar_estado_intercambio(
 
     return intercambio
 
+#obtener_intercambios_estudiante
 @router.get("/mis-intercambios/{id_estudiante}", response_model=list[IntercambioResponse])
 def obtener_intercambios_estudiante(
     id_estudiante: int,
