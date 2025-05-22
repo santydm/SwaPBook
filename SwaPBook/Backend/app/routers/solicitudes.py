@@ -75,6 +75,7 @@ def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
         idLibroOfrecido=solicitud.libroOfrecido,
         fechaEncuentro=solicitud.fechaEncuentro,
         horaEncuentro=solicitud.horaEncuentro,
+        lugarEncuentro=solicitud.lugarEncuentro,
         estado=EstadoIntercambioEnum.en_proceso
     )
 
@@ -83,6 +84,23 @@ def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
     db.refresh(intercambio)
 
     return intercambio
+
+@router.put("/rechazar/{id_solicitud}")
+def rechazar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
+    solicitud = db.query(Solicitud).filter(Solicitud.idSolicitud == id_solicitud).first()
+    
+    if not solicitud:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+
+    if solicitud.estado != EstadoSolicitudEnum.pendiente:
+        raise HTTPException(status_code=400, detail="Solo se pueden rechazar solicitudes en estado pendiente")
+
+    # Cambiar estado de la solicitud a rechazada
+    solicitud.estado = EstadoSolicitudEnum.rechazada
+
+    db.commit()
+
+    return {"detail": "Solicitud rechazada"}
 
 
 @router.get("/pendientes/{id_estudiante}", response_model=list[SolicitudResponse])
