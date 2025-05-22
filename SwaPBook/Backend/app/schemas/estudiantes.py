@@ -1,5 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
+from pydantic import BaseModel
+from typing import Optional
 
 class EstudianteCreate(BaseModel):
     nombre: str
@@ -41,3 +43,11 @@ class EstudiantePerfilSchema(BaseModel):
             obj_dict['fechaRegistro'] = obj.fechaRegistro.strftime("%Y-%m-%d")
         return super().from_orm(obj)
     
+
+
+class EstudianteUpdate(BaseModel):
+    nombre: str 
+    fotoPerfil: str 
+    numeroCelular: str 
+    correoInstitucional: str 
+
