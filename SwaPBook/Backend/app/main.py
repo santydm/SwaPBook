@@ -16,9 +16,10 @@ app = FastAPI()
 
 # directorio para las fotos de los libros
 os.makedirs("app/static/images/libros", exist_ok=True)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # directorio para las fotos de los estudiantes
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 origins = [
     "http://localhost:5173",

@@ -186,7 +186,10 @@ def perfil_estudiante(estudiante: Estudiante = Depends(obtener_estudiante_actual
         "nombre": estudiante.nombre,
         "correoInstitucional": estudiante.correoInstitucional,
         "fechaRegistro": estudiante.fechaRegistro.strftime("%Y-%m-%d"),
-        "activo": estudiante.activo
+        "activo": estudiante.activo,
+        "fotoPerfil": estudiante.fotoPerfil,
+        "numeroCelular": estudiante.numeroCelular
+        
     }
     
 

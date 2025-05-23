@@ -32,6 +32,8 @@ class EstudiantePerfilSchema(BaseModel):
     correoInstitucional: str
     fechaRegistro: datetime  # Cambiar datetime -> str para poder formatear
     activo: bool
+    fotoPerfil: Optional[str] = None
+    numeroCelular: Optional[str] = None
 
     class Config:
         from_attributes = True

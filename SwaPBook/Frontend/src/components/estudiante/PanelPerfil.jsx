@@ -55,11 +55,12 @@ const PanelPerfil = ({ handleLogout, compact = false }) => {
       <div className="flex flex-col items-center mb-6">
         <div className="w-32 h-32 rounded-full bg-gray-200 mb-4 overflow-hidden border-4 border-[#722F37]">
           <img 
-            src={
-              estudiante?.fotoPerfil ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(estudiante?.nombre || 'Usuario')}&background=722F37&color=fff&size=150`
-            }
-            alt="Foto de perfil" 
+              src={
+                estudiante?.fotoPerfil
+                  ? `http://localhost:8000${estudiante.fotoPerfil}?t=${Date.now()}`
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(estudiante?.nombre || "Usuario")}&background=722F37&color=fff&size=150`
+              }
+              alt="Foto de perfil" 
             className="w-full h-full object-cover"
           />
         </div>

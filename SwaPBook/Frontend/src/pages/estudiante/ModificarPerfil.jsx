@@ -1,4 +1,3 @@
-// src/pages/estudiante/ModificarPerfil.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PanelPerfil from "../../components/estudiante/PanelPerfil";
@@ -14,6 +13,7 @@ const ModificarPerfil = () => {
   const [imagenPreview, setImagenPreview] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -29,7 +29,7 @@ const ModificarPerfil = () => {
         setEstudiante(response.data);
         setNombre(response.data.nombre || "");
         setCorreo(response.data.correoInstitucional || "");
-        setTelefono(response.data.celular || "");
+        setTelefono(response.data.numeroCelular || "");
         setFotoPerfil(response.data.fotoPerfil || "");
         setImagenPreview(response.data.fotoPerfil || "");
       } catch (error) {
@@ -51,6 +51,8 @@ const ModificarPerfil = () => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
+    setMensaje("");
+
     // Validaciones simples
     const nuevosErrores = {};
     if (!nombre) nuevosErrores.nombre = "El nombre es requerido";
@@ -66,19 +68,23 @@ const ModificarPerfil = () => {
       const formData = new FormData();
       formData.append("nombre", nombre);
       formData.append("correoInstitucional", correo);
-      formData.append("celular", telefono);
+      formData.append("numeroCelular", telefono);
       if (fotoPerfil && fotoPerfil instanceof File) {
         formData.append("fotoPerfil", fotoPerfil);
       }
-      await axios.put("http://127.0.0.1:8000/estudiantes/perfil", formData, {
+      const response = await axios.put("http://127.0.0.1:8000/estudiantes/perfil/editar", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
-      navigate("/perfil");
+      // Si el cambio de correo requiere verificación, el backend lo indicará en el mensaje.
+      setMensaje(response.data.mensaje || "Perfil actualizado correctamente.");
+      setTimeout(() => navigate("/perfil"), 1500);
     } catch (error) {
-      setErrors({ submit: "Error al actualizar el perfil. Intenta nuevamente." });
+      let errorMsg = "Error al actualizar el perfil. Intenta nuevamente.";
+      if (error.response?.data?.detail) errorMsg = error.response.data.detail;
+      setErrors({ submit: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +92,7 @@ const ModificarPerfil = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">  
+      <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
         {/* Panel lateral de perfil */}
         <PanelPerfil handleLogout={() => {
           localStorage.removeItem("token");
@@ -95,6 +101,11 @@ const ModificarPerfil = () => {
         {/* Formulario de modificación */}
         <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-[#722F37] mb-6">Modificar perfil</h1>
+          {mensaje && (
+            <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-sm">
+              {mensaje}
+            </div>
+          )}
           {errors.submit && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
               {errors.submit}
@@ -105,8 +116,9 @@ const ModificarPerfil = () => {
             <div className="flex flex-col items-center">
               <img
                 src={
-                  imagenPreview ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre || "Usuario")}&background=722F37&color=fff&size=150`
+                  estudiante?.fotoPerfil
+                    ? `http://localhost:8000${estudiante.fotoPerfil}?t=${Date.now()}`
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(estudiante?.nombre || "Usuario")}&background=722F37&color=fff&size=150`
                 }
                 alt="Foto de perfil"
                 className="w-24 h-24 rounded-full object-cover border-2 border-[#722F37] mb-2"

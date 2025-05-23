@@ -26,9 +26,9 @@ const NavbarCatalogo = ({ estudiante, onPerfilClick }) => (
     >
       <img
         src={
-          estudiante?.fotoPerfil && estudiante.fotoPerfil.trim() !== ""
-            ? estudiante.fotoPerfil
-            : `https://ui-avatars.com/api/?name=${encodeURIComponent(estudiante?.nombre || 'Profile')}&background=722F37&color=fff&size=150`
+          estudiante?.fotoPerfil
+            ? `http://localhost:8000${estudiante.fotoPerfil}?t=${Date.now()}`
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(estudiante?.nombre || "Usuario")}&background=722F37&color=fff&size=150`
         }
         alt="Foto de perfil"
         className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
