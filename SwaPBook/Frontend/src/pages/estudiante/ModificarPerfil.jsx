@@ -122,10 +122,11 @@ const ModificarPerfil = () => {
             {/* Foto de perfil */}
             <div className="flex flex-col items-center">
               <img
-                src={
-                  imagenPreview ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre || "Usuario")}&background=722F37&color=fff&size=150`
-                }
+              src={
+                estudiante?.fotoPerfil
+                  ? `http://localhost:8000${estudiante.fotoPerfil}?t=${Date.now()}`
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(estudiante?.nombre || "Usuario")}&background=722F37&color=fff&size=150`
+              }
                 alt="Foto de perfil"
                 className="w-24 h-24 rounded-full object-cover border-2 border-[#722F37] mb-2"
               />
