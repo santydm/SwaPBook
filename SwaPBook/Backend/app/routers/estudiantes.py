@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status , BackgroundTasks
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from passlib.context import CryptContext
@@ -22,6 +22,7 @@ from datetime import datetime
 import os
 import shutil
 from pydantic import EmailStr
+from fastapi import Body
 
 
 
@@ -162,20 +163,21 @@ def obtener_estudiantes(db: Session = Depends(get_db)):
 
 #eliminar estudiante
 @router.delete("/eliminar", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_mi_cuenta(
-    datos: EstudianteDeleteRequest,
-    db: Session = Depends(get_db),
+async def eliminar_cuenta(
+    contrasenia: str = Body(..., embed=True), 
     estudiante_actual: Estudiante = Depends(get_current_user)
 ):
-    if not verify_password(datos.contrasenia, estudiante_actual.contrasenia):
+    # Verificar contraseña
+    if not verify_password(contrasenia, estudiante_actual.contrasenia):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Contraseña incorrecta. No se pudo eliminar la cuenta."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Contraseña incorrecta"
         )
     
+    # Eliminar cuenta
     db.delete(estudiante_actual)
     db.commit()
-    return
+
 
 
 
@@ -189,7 +191,6 @@ def perfil_estudiante(estudiante: Estudiante = Depends(obtener_estudiante_actual
         "activo": estudiante.activo,
         "fotoPerfil": estudiante.fotoPerfil,
         "numeroCelular": estudiante.numeroCelular
-        
     }
     
 

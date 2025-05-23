@@ -1,19 +1,23 @@
-// src/components/estudiante/LibroDetalleModal.jsx
 import React, { useState } from "react";
 import SolicitarIntercambioModal from "./SolicitarIntercambioModal";
 
-const LibroDetalleModal = ({ 
-  libro, 
-  isOpen, 
-  onClose, 
-  esPropio, 
+const LibroDetalleModal = ({
+  libro,
+  isOpen,
+  onClose,
+  esPropio,
   onSolicitarIntercambio,
   onEditarLibro,
-  onEliminarLibro
+  onEliminarLibro,
 }) => {
   const [mostrarModalSolicitud, setMostrarModalSolicitud] = useState(false);
 
   if (!isOpen || !libro) return null;
+
+  // Construir la URL de la foto de perfil del usuario que publicó el libro
+  const usuarioFotoUrl = libro.usuarioFoto
+    ? `http://localhost:8000${libro.usuarioFoto}`
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(libro.usuarioNombre || "Usuario")}&background=722F37&color=fff&size=36`;
 
   return (
     <>
@@ -28,7 +32,7 @@ const LibroDetalleModal = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          
+
           {/* Contenido del modal */}
           <div className="flex flex-col md:flex-row">
             {/* Imagen del libro - Lado izquierdo */}
@@ -39,25 +43,30 @@ const LibroDetalleModal = ({
                 className="max-h-96 object-contain rounded-md shadow-md"
               />
             </div>
-            
+
             {/* Detalles del libro - Lado derecho */}
             <div className="md:w-2/3 p-6 md:p-8 flex flex-col md:flex-row gap-8">
               {/* Información del libro */}
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-[#722F37] mb-2">{libro.titulo}</h2>
-                
+
                 <div className="mb-4">
                   <div className="flex items-center">
                     <img
-                      src={libro.usuarioFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(libro.usuarioNombre || 'Usuario')}&background=722F37&color=fff&size=36`}
-                      alt="Usuario"
-                      className="w-8 h-8 rounded-full mr-2 border-2 border-[#722F37]"
+                      src={usuarioFotoUrl}
+                      alt={libro.usuarioNombre}
+                      className="w-8 h-8 rounded-full mr-2 border-2 border-[#722F37] object-cover"
                     />
-                    <span className="text-gray-700">Publicado por <span className="font-semibold">{libro.usuarioNombre}</span></span>
+                    <span className="text-gray-700">
+                      Publicado por{" "}
+                      <span className="font-semibold">{libro.usuarioNombre}</span>
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500 ml-10">{libro.fechaPublicacion}</span>
+                  <span className="text-sm text-gray-500 ml-10">
+                    {libro.fechaPublicacion}
+                  </span>
                 </div>
-                
+
                 <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-3">
                   <div>
                     <span className="font-semibold text-[#722F37]">Autor:</span> {libro.autor}
@@ -67,9 +76,13 @@ const LibroDetalleModal = ({
                   </div>
                   <div>
                     <span className="font-semibold text-[#722F37]">Estado:</span>
-                    <span className={`ml-2 inline-flex items-center gap-1 px-2 py-1 text-xs rounded font-semibold ${
-                      libro.estado === "Disponible" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-700"
-                    }`}>
+                    <span
+                      className={`ml-2 inline-flex items-center gap-1 px-2 py-1 text-xs rounded font-semibold ${
+                        libro.estado === "Disponible"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
                       {libro.estado === "Disponible" && (
                         <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                           <circle cx="10" cy="10" r="10" />
@@ -84,13 +97,13 @@ const LibroDetalleModal = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* Acciones - Lado derecho */}
               <div className="w-full md:w-44 flex flex-col space-y-4">
                 {esPropio ? (
                   // Acciones para libros propios
                   <>
-                    <button 
+                    <button
                       onClick={() => onEditarLibro(libro)}
                       className="w-full py-3 bg-Swap-beige text-white rounded-md font-semibold hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2"
                     >
@@ -99,8 +112,8 @@ const LibroDetalleModal = ({
                       </svg>
                       Editar libro
                     </button>
-                    
-                    <button 
+
+                    <button
                       onClick={() => onEliminarLibro(libro.idLibro)}
                       className="w-full py-3 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                     >
@@ -111,8 +124,7 @@ const LibroDetalleModal = ({
                     </button>
                   </>
                 ) : (
-                  // Acciones para libros de otros usuarios
-                  <button 
+                  <button
                     onClick={() => setMostrarModalSolicitud(true)}
                     className="w-full py-3 bg-Swap-green text-white rounded-md font-semibold hover:bg-Swap-green-dark transition-colors flex items-center justify-center gap-2"
                     disabled={libro.estado !== "Disponible"}
@@ -120,7 +132,7 @@ const LibroDetalleModal = ({
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                     </svg>
-                    Solicitar intercambio
+                    Solicitar Intercambio
                   </button>
                 )}
               </div>

@@ -52,7 +52,6 @@ const ModificarPerfil = () => {
     setIsLoading(true);
     setErrors({});
     setMensaje("");
-
     // Validaciones simples
     const nuevosErrores = {};
     if (!nombre) nuevosErrores.nombre = "El nombre es requerido";
@@ -78,13 +77,17 @@ const ModificarPerfil = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      // Si el cambio de correo requiere verificación, el backend lo indicará en el mensaje.
       setMensaje(response.data.mensaje || "Perfil actualizado correctamente.");
-      setTimeout(() => navigate("/perfil"), 1500);
+      // Si el cambio de correo está pendiente, restablece el campo a su valor anterior
+      if (
+        response.data.mensaje &&
+        response.data.mensaje.includes("pendiente de verificación") &&
+        estudiante
+      ) {
+        setCorreo(estudiante.correoInstitucional);
+      }
     } catch (error) {
-      let errorMsg = "Error al actualizar el perfil. Intenta nuevamente.";
-      if (error.response?.data?.detail) errorMsg = error.response.data.detail;
-      setErrors({ submit: errorMsg });
+      setErrors({ submit: "Error al actualizar el perfil. Intenta nuevamente." });
     } finally {
       setIsLoading(false);
     }
@@ -93,17 +96,21 @@ const ModificarPerfil = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
-        {/* Panel lateral de perfil */}
         <PanelPerfil handleLogout={() => {
           localStorage.removeItem("token");
           navigate("/login");
         }} />
-        {/* Formulario de modificación */}
         <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-[#722F37] mb-6">Modificar perfil</h1>
           {mensaje && (
-            <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-sm">
+            <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-md text-sm">
               {mensaje}
+              {mensaje.includes("pendiente de verificación") && (
+                <div className="mt-2 text-xs">
+                  Por favor revisa tu nuevo correo y confirma el cambio desde el enlace enviado.<br />
+                  Mientras no confirmes, tu correo anterior seguirá activo.
+                </div>
+              )}
             </div>
           )}
           {errors.submit && (
@@ -116,9 +123,8 @@ const ModificarPerfil = () => {
             <div className="flex flex-col items-center">
               <img
                 src={
-                  estudiante?.fotoPerfil
-                    ? `http://localhost:8000${estudiante.fotoPerfil}?t=${Date.now()}`
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(estudiante?.nombre || "Usuario")}&background=722F37&color=fff&size=150`
+                  imagenPreview ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre || "Usuario")}&background=722F37&color=fff&size=150`
                 }
                 alt="Foto de perfil"
                 className="w-24 h-24 rounded-full object-cover border-2 border-[#722F37] mb-2"

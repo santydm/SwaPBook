@@ -119,7 +119,7 @@ const Registro = () => {
                       <p className="text-sm mt-2">Esperando confirmación...</p>
                     </div>
                     <Link
-                      to="/iniciar-sesion"
+                      to="/login"
                       className="text-blue-600 hover:text-blue-500 font-medium"
                     >
                       Volver al inicio
