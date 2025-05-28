@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PanelPerfil from "../../components/estudiante/PanelPerfil";
+import Navbar from "../../components/ui/Navbar";
 
 const Perfil = () => {
   const navigate = useNavigate();
@@ -63,19 +64,7 @@ const Perfil = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-[#722F37] text-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">SwapBook</h1>
-          <nav>
-            <Link 
-              to="/catalogo" 
-              className="px-4 py-2 bg-white text-[#722F37] rounded-md hover:bg-gray-100 transition-colors"
-            >
-              Catálogo
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar usuario={estudiante} onLogout={handleLogout} />
 
       <div className="container mx-auto p-4 md:p-6">
         <div className="flex flex-col md:flex-row gap-6">

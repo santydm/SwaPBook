@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SolicitarIntercambioModal from "./SolicitarIntercambioModal";
 import axios from "axios";
 
@@ -13,6 +13,7 @@ const LibroDetalleModal = ({
   const [mostrarModalSolicitud, setMostrarModalSolicitud] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const [categorias, setCategorias] = useState([]);
   const [form, setForm] = useState({
     titulo: libro?.titulo || "",
     autor: libro?.autor || "",
@@ -25,7 +26,17 @@ const LibroDetalleModal = ({
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
-  React.useEffect(() => {
+  // Cargar categorías al abrir el modal
+  useEffect(() => {
+    if (modoEdicion && categorias.length === 0) {
+      axios.get("http://localhost:8000/categorias")
+        .then(res => setCategorias(res.data))
+        .catch(() => setCategorias([]));
+    }
+  }, [modoEdicion, categorias.length]);
+
+  // Resetear estado al abrir/cambiar libro
+  useEffect(() => {
     if (libro) {
       setForm({
         titulo: libro.titulo,
@@ -121,7 +132,7 @@ const LibroDetalleModal = ({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-        <div className="relative bg-white rounded-lg shadow-xl w-full max-w-5xl mx-4">
+        <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-5xl mx-4">
           {/* Botón cerrar */}
           <button
             onClick={onClose}
@@ -132,14 +143,13 @@ const LibroDetalleModal = ({
             </svg>
           </button>
 
-          {/* Contenido */}
           <div className="flex flex-col md:flex-row">
             {/* Imagen del libro */}
             <div className="md:w-1/3 bg-gray-50 p-6 flex items-center justify-center md:rounded-l-lg">
               <img
                 src={imagenPreview}
                 alt={form.titulo}
-                className="max-h-96 object-contain rounded-md shadow-md"
+                className="max-h-96 object-contain rounded-md shadow-md border"
               />
             </div>
 
@@ -147,12 +157,12 @@ const LibroDetalleModal = ({
             <div className="md:w-2/3 p-6 md:p-8 flex flex-col gap-8">
               {/* Mensajes */}
               {mensaje && (
-                <div className="mb-2 p-3 bg-green-100 text-green-700 rounded-md text-sm text-center">
+                <div className="mb-2 p-3 bg-green-100 text-green-700 rounded-md text-sm text-center font-semibold">
                   {mensaje}
                 </div>
               )}
               {error && (
-                <div className="mb-2 p-3 bg-red-100 text-red-700 rounded-md text-sm text-center">
+                <div className="mb-2 p-3 bg-red-100 text-red-700 rounded-md text-sm text-center font-semibold">
                   {error}
                 </div>
               )}
@@ -162,20 +172,16 @@ const LibroDetalleModal = ({
                 <>
                   <div className="flex-1">
                     <h2 className="text-2xl font-bold text-[#722F37] mb-2">{libro.titulo}</h2>
-                    <div className="mb-4">
-                      <div className="flex items-center">
-                        <img
-                          src={usuarioFotoUrl}
-                          alt={libro.usuarioNombre}
-                          className="w-8 h-8 rounded-full mr-2 border-2 border-[#722F37] object-cover"
-                        />
-                        <span className="text-gray-700">
-                          Publicado por <span className="font-semibold">{libro.usuarioNombre}</span>
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500 ml-10">
-                        {libro.fechaPublicacion}
+                    <div className="mb-4 flex items-center">
+                      <img
+                        src={usuarioFotoUrl}
+                        alt={libro.usuarioNombre}
+                        className="w-8 h-8 rounded-full mr-2 border-2 border-[#722F37] object-cover"
+                      />
+                      <span className="text-gray-700">
+                        Publicado por <span className="font-semibold">{libro.usuarioNombre}</span>
                       </span>
+                      <span className="text-sm text-gray-500 ml-4">{libro.fechaPublicacion}</span>
                     </div>
                     <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-3">
                       <div>
@@ -274,13 +280,20 @@ const LibroDetalleModal = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                    <input
+                    <select
                       name="idCategoria"
                       value={form.idCategoria}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                       required
-                    />
+                    >
+                      <option value="">Selecciona una categoría</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.idCategoria} value={cat.idCategoria}>
+                          {cat.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Nueva foto (opcional)</label>
