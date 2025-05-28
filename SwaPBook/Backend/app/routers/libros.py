@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile,
 import shutil
 import os
 from uuid import uuid4
+from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.db.database import get_db
@@ -90,3 +91,82 @@ def obtener_mis_libros(id_estudiante: int, db: Session = Depends(get_db)):
     return libros
 
 
+#editar libro
+
+@router.put("/{id_libro}", response_model=LibroResponse)
+async def editar_libro(
+    id_libro: int,
+    titulo: Optional[str] = Form(None),
+    autor: Optional[str] = Form(None),
+    descripcion: Optional[str] = Form(None),
+    idCategoria: Optional[int] = Form(None),
+    nueva_foto: Optional[UploadFile] = File(None),
+    estudiante: Estudiante = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    libro = db.query(Libro).filter(Libro.idLibro == id_libro).first()
+
+    if not libro:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+
+    if libro.estado != EstadoLibroEnum.disponible:
+        raise HTTPException(status_code=400, detail="No se puede editar un libro que no está disponible")
+
+    if libro.idEstudiante != estudiante.idEstudiante:
+        raise HTTPException(status_code=403, detail="No tienes permiso para editar este libro")
+
+    if idCategoria:
+        categoria = db.query(Categoria).filter(Categoria.idCategoria == idCategoria).first()
+        if not categoria:
+            raise HTTPException(status_code=404, detail="Categoría no encontrada")
+        libro.idCategoria = idCategoria
+
+    if titulo:
+        libro.titulo = titulo
+    if autor:
+        libro.autor = autor
+    if descripcion:
+        libro.descripcion = descripcion
+
+    if nueva_foto:
+        if not nueva_foto.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+            raise HTTPException(status_code=400, detail="Formato de imagen no permitido (solo .jpg/.png)")
+
+        extension = nueva_foto.filename.split('.')[-1]
+        filename = f"{uuid4()}.{extension}"
+        file_path = os.path.join(UPLOAD_DIR, filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(nueva_foto.file, buffer)
+
+        libro.foto = f"/static/images/libros/{filename}"
+
+    db.commit()
+    db.refresh(libro)
+
+    return libro
+
+
+#eliminar libro
+
+@router.delete("/{id_libro}", status_code=204)
+def eliminar_libro(
+    id_libro: int,
+    estudiante: Estudiante = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    libro = db.query(Libro).filter(Libro.idLibro == id_libro).first()
+
+    if not libro:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+
+    if libro.estado != EstadoLibroEnum.disponible:
+        raise HTTPException(status_code=400, detail="Solo se pueden eliminar libros en estado Disponible")
+
+    if libro.idEstudiante != estudiante.idEstudiante:
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar este libro")
+
+    db.delete(libro)
+    db.commit()
+
+    return  # 204 No Content
