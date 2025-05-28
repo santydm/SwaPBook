@@ -15,6 +15,7 @@ import Mislibros from './pages/estudiante/MisLibros';
 import NotificacionesSolicitudes from './components/solicitudes/NotificacionesSolicitudes';
 import MisSolicitudes from './pages/estudiante/MisSolicitudes';
 import MisIntercambios from './pages/estudiante/MisIntercambios';
+import Home from './pages/estudiante/Home';
 
 function App() {
   const [usuarioLogeado, setUsuarioLogeado] = useState(false);
@@ -32,6 +33,7 @@ function App() {
     <Router>
       {usuarioLogeado && <NotificacionesSolicitudes />}
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/login" element={<Login />} />
         <Route path="/recuperacion-clave" element={<Clave />} />
