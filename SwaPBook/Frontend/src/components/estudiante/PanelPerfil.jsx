@@ -75,8 +75,8 @@ const PanelPerfil = ({ handleLogout, compact = false }) => {
             </Link>
           </li>
           <li>
-            <Link to="/modificar-perfil" className="block py-2 px-3 hover:bg-gray-100 rounded text-gray-700 text-center">
-              Modificar perfil
+            <Link to="/historial" className="block py-2 px-3 hover:bg-gray-100 rounded text-gray-700 text-center">
+              Historial
             </Link>
           </li>
           <li>

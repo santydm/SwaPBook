@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 
 import Registro from './components/auth/Registro';
 import Login from './components/auth/Login';
+import Perfil from './pages/estudiante/Perfil';
 import Clave from './components/auth/Claveolvidada';
 import Confirmacion from './components/auth/Confirmacion';
-import Perfil from './pages/estudiante/Perfil';
+import Historial from './pages/estudiante/Historial';
 import Catalogo from './components/catalog/Catalogo';
 import PublicarLibro from './components/catalog/PublicarLibro';
-import Modificar from './pages/estudiante/ModificarPerfil';
+import Modificar from './pages/estudiante/Perfil';
 import Seguridad from './pages/estudiante/Seguridad';
 import Mislibros from './pages/estudiante/MisLibros';
 import NotificacionesSolicitudes from './components/solicitudes/NotificacionesSolicitudes';
@@ -46,6 +47,7 @@ function App() {
         <Route path="/seguridad" element={<Seguridad />} />      
         <Route path="/mis-solicitudes" element={<MisSolicitudes />} />  
         <Route path="/mis-intercambios" element={<MisIntercambios/>} />  
+        <Route path="/historial" element={<Historial/>} />  
       </Routes>
     </Router>
   );
