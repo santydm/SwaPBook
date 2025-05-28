@@ -1,62 +1,61 @@
-// src/components/ui/Footer.jsx
+import { Link } from "react-router-dom";
+import { FiBook } from "react-icons/fi";
+
 const Footer = () => (
-    <footer className="w-full bg-[#722F37] py-2">
-      <div className="max-w-6xl mx-auto px-2">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
-          {/* Columna Nosotros */}
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold border-b border-white/20 pb-2">Nosotros</h3>
-            <ul className="space-y-1">
-              <li>
-                <a href="#" className="hover:text-gray-300 transition-colors">Formulario de contacto</a>
-              </li>
-              <li>
-                <a href="mailto:contacto@swapbook.edu" className="hover:text-gray-300 transition-colors">Correo Swapbook</a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-gray-300 transition-colors">Preguntas frecuentes</a>
-              </li>
-            </ul>
+  <footer className="bg-[#722F37] text-white py-4">
+    <div className="container mx-auto px-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <FiBook className="text-2xl" />
+            <span className="text-xl font-bold">SwapBook</span>
           </div>
-          {/* Columna Páginas Legales */}
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold border-b border-white/20 pb-2">Páginas legales</h3>
-            <ul className="space-y-1">
-              <li>
-                <a href="#" className="hover:text-gray-300 transition-colors">Términos y condiciones</a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-gray-300 transition-colors">Política de privacidad</a>
-              </li>
-            </ul>
-          </div>
-          {/* Columna Información del Matorral */}
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold border-b border-white/20 pb-2">Información del Matorral</h3>
-            <ul className="space-y-2">
-              <li>
-                <a 
-                  href="https://www.matorral.com.co" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-gray-300 transition-colors"
-                >
-                  Visita nuestro sitio web
-                </a>
-              </li>
-              <li className="text-sm text-white/80">
-                Plataforma desarrollada en colaboración con El Matorral
-              </li>
-            </ul>
-          </div>
+          <p className="text-gray-300">
+            La plataforma de intercambio de libros que conecta estudiantes universitarios.
+          </p>
         </div>
-        {/* Derechos de autor */}
-        <div className="mt-8 pt-2 border-t border-white/20 text-center text-white/70 text-sm">
-          © {new Date().getFullYear()} SwaPBook.
+        <div>
+          <h3 className="font-semibold mb-4">Enlaces</h3>
+          <ul className="space-y-2 text-gray-300">
+            <li>
+              <Link to="/about" className="hover:text-white">Acerca de</Link>
+            </li>
+            <li>
+              <Link to="/catalogo" className="hover:text-white">Catálogo</Link>
+            </li>
+            <li>
+              <Link to="/contact" className="hover:text-white">Contacto</Link>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold mb-4">Soporte</h3>
+          <ul className="space-y-2 text-gray-300">
+            <li>
+              <Link to="/help" className="hover:text-white">Ayuda</Link>
+            </li>
+            <li>
+              <Link to="/terms" className="hover:text-white">Términos</Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="hover:text-white">Privacidad</Link>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold mb-4">El Matorral</h3>
+          <ul className="space-y-2 text-gray-300">
+            <li>Cra. 19 # 36-55</li>
+            <li>Teusaquillo, Bogotá</li>
+            <li>Lun-Sáb: 10AM-8PM</li>
+          </ul>
         </div>
       </div>
-    </footer>
-  );
-  
-  export default Footer;
-  
+      <div className="border-t border-gray-600 mt-4 pt-2 text-center text-gray-300">
+        <p>&copy; 2025 SwapBook. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+);
+
+export default Footer;

@@ -141,7 +141,9 @@ const Home = () => {
               </div>
             </div>
             <div className="relative">
-              <img src="/api/placeholder/500/400" alt="Estudiantes intercambiando libros" className="rounded-lg shadow-lg" />
+              <img src="images/Intercambio.jpg" 
+              alt="Estudiantes intercambiando libros" 
+              className="rounded-lg shadow-lg" />
             </div>
           </div>
         </div>
@@ -178,7 +180,7 @@ const Home = () => {
             </div>
             <div className="relative">
               <img 
-                src="/api/placeholder/600/400" 
+                src="/images/Matorral.jpg" 
                 alt="El Matorral - Librería en Bogotá" 
                 className="rounded-lg shadow-2xl"
               />
@@ -211,7 +213,7 @@ const Home = () => {
                 <FiBook className="text-2xl" />
                 <span className="text-xl font-bold">SwapBook</span>
               </div>
-              <p className="text-gray-300">La plataforma de intercambio de libros que conecta estudiantes universitarios.</p>
+              <p className="text-gray-300">La plataforma de intercambio de libros que conecta estudiantes.</p>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Enlaces</h3>

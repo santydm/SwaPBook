@@ -113,7 +113,7 @@ const Login = () => {
                       className={`w-full px-3 py-2 border ${
                         errors.correoInstitucional ? 'border-red-500' : 'border-gray-300'
                       } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      placeholder="correo@institucion.edu"
+                      placeholder="Correo Electronico Institucional"
                       value={correoInstitucional}
                       onChange={(e) => setCorreoInstitucional(e.target.value)}
                     />
