@@ -90,7 +90,9 @@ def confirmar_cambio_contrasenia(data: PasswordResetConfirm, db: Session = Depen
 #cambio de contraseña
 @router.post("/cambiar-contrasenia")
 def cambiar_contrasenia(
-    data: ChangePasswordRequest, db: Session = Depends(get_db), current_user: Estudiante = Depends(get_current_user)
+    data: ChangePasswordRequest, 
+    db: Session = Depends(get_db), 
+    current_user: Estudiante = Depends(get_current_user)
 ):
     """
     Cambiar la contraseña de un estudiante autenticado.

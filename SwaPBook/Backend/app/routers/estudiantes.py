@@ -165,7 +165,8 @@ def obtener_estudiantes(db: Session = Depends(get_db)):
 @router.delete("/eliminar", status_code=status.HTTP_204_NO_CONTENT)
 async def eliminar_cuenta(
     contrasenia: str = Body(..., embed=True), 
-    estudiante_actual: Estudiante = Depends(get_current_user)
+    estudiante_actual: Estudiante = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     # Verificar contraseña
     if not verify_password(contrasenia, estudiante_actual.contrasenia):
