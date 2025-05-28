@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import SolicitarIntercambioModal from "./SolicitarIntercambioModal";
+import axios from "axios";
 
 const LibroDetalleModal = ({
   libro,
@@ -7,17 +8,115 @@ const LibroDetalleModal = ({
   onClose,
   esPropio,
   onSolicitarIntercambio,
-  onEditarLibro,
-  onEliminarLibro,
+  actualizarLibros // función para refrescar la lista de libros en el padre
 }) => {
   const [mostrarModalSolicitud, setMostrarModalSolicitud] = useState(false);
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const [form, setForm] = useState({
+    titulo: libro?.titulo || "",
+    autor: libro?.autor || "",
+    descripcion: libro?.descripcion || "",
+    idCategoria: libro?.idCategoria || "",
+    nueva_foto: null,
+  });
+  const [imagenPreview, setImagenPreview] = useState(libro?.fotoLibro || "");
+  const [isLoading, setIsLoading] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+  const [error, setError] = useState("");
+
+  React.useEffect(() => {
+    if (libro) {
+      setForm({
+        titulo: libro.titulo,
+        autor: libro.autor,
+        descripcion: libro.descripcion,
+        idCategoria: libro.idCategoria,
+        nueva_foto: null,
+      });
+      setImagenPreview(libro.fotoLibro);
+      setModoEdicion(false);
+      setConfirmarEliminar(false);
+      setMensaje("");
+      setError("");
+    }
+  }, [libro, isOpen]);
 
   if (!isOpen || !libro) return null;
 
-  // Construir la URL de la foto de perfil del usuario que publicó el libro
   const usuarioFotoUrl = libro.usuarioFoto
     ? `http://localhost:8000${libro.usuarioFoto}`
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(libro.usuarioNombre || "Usuario")}&background=722F37&color=fff&size=36`;
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setForm((prev) => ({ ...prev, nueva_foto: file }));
+      setImagenPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleEditarLibro = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setMensaje("");
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("titulo", form.titulo);
+      formData.append("autor", form.autor);
+      formData.append("descripcion", form.descripcion);
+      formData.append("idCategoria", form.idCategoria);
+      if (form.nueva_foto) formData.append("nueva_foto", form.nueva_foto);
+
+      await axios.put(`http://localhost:8000/libros/${libro.idLibro}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setMensaje("¡Libro editado exitosamente!");
+      setModoEdicion(false);
+      actualizarLibros && actualizarLibros();
+    } catch (err) {
+      setError(
+        err.response?.data?.detail || "Error al editar el libro. Intenta nuevamente."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEliminarLibro = async () => {
+    setIsLoading(true);
+    setError("");
+    setMensaje("");
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:8000/libros/${libro.idLibro}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMensaje("¡Libro eliminado exitosamente!");
+      actualizarLibros && actualizarLibros();
+      setTimeout(() => {
+        setIsLoading(false);
+        setConfirmarEliminar(false);
+        onClose();
+      }, 1200);
+    } catch (err) {
+      setError(
+        err.response?.data?.detail || "Error al eliminar el libro. Intenta nuevamente."
+      );
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -33,109 +132,210 @@ const LibroDetalleModal = ({
             </svg>
           </button>
 
-          {/* Contenido del modal */}
+          {/* Contenido */}
           <div className="flex flex-col md:flex-row">
-            {/* Imagen del libro - Lado izquierdo */}
+            {/* Imagen del libro */}
             <div className="md:w-1/3 bg-gray-50 p-6 flex items-center justify-center md:rounded-l-lg">
               <img
-                src={libro.fotoLibro}
-                alt={libro.titulo}
+                src={imagenPreview}
+                alt={form.titulo}
                 className="max-h-96 object-contain rounded-md shadow-md"
               />
             </div>
 
-            {/* Detalles del libro - Lado derecho */}
-            <div className="md:w-2/3 p-6 md:p-8 flex flex-col md:flex-row gap-8">
-              {/* Información del libro */}
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-[#722F37] mb-2">{libro.titulo}</h2>
+            {/* Detalles y acciones */}
+            <div className="md:w-2/3 p-6 md:p-8 flex flex-col gap-8">
+              {/* Mensajes */}
+              {mensaje && (
+                <div className="mb-2 p-3 bg-green-100 text-green-700 rounded-md text-sm text-center">
+                  {mensaje}
+                </div>
+              )}
+              {error && (
+                <div className="mb-2 p-3 bg-red-100 text-red-700 rounded-md text-sm text-center">
+                  {error}
+                </div>
+              )}
 
-                <div className="mb-4">
-                  <div className="flex items-center">
-                    <img
-                      src={usuarioFotoUrl}
-                      alt={libro.usuarioNombre}
-                      className="w-8 h-8 rounded-full mr-2 border-2 border-[#722F37] object-cover"
+              {/* Vista normal */}
+              {!modoEdicion && !confirmarEliminar && (
+                <>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-[#722F37] mb-2">{libro.titulo}</h2>
+                    <div className="mb-4">
+                      <div className="flex items-center">
+                        <img
+                          src={usuarioFotoUrl}
+                          alt={libro.usuarioNombre}
+                          className="w-8 h-8 rounded-full mr-2 border-2 border-[#722F37] object-cover"
+                        />
+                        <span className="text-gray-700">
+                          Publicado por <span className="font-semibold">{libro.usuarioNombre}</span>
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-500 ml-10">
+                        {libro.fechaPublicacion}
+                      </span>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-3">
+                      <div>
+                        <span className="font-semibold text-[#722F37]">Autor:</span> {libro.autor}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-[#722F37]">Categoría:</span> {libro.categoria}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-[#722F37]">Estado:</span>
+                        <span
+                          className={`ml-2 inline-flex items-center gap-1 px-2 py-1 text-xs rounded font-semibold ${
+                            libro.estado === "Disponible"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {libro.estado === "Disponible" && (
+                            <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                              <circle cx="10" cy="10" r="10" />
+                            </svg>
+                          )}
+                          {libro.estado}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-[#722F37] block mb-1">Descripción:</span>
+                        <p className="text-gray-700 text-sm">{libro.descripcion}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="w-full md:w-44 flex flex-col space-y-4">
+                    {esPropio ? (
+                      <>
+                        <button
+                          onClick={() => setModoEdicion(true)}
+                          className="w-full py-3 bg-Swap-beige text-white rounded-md font-semibold hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2"
+                        >
+                          Editar libro
+                        </button>
+                        <button
+                          onClick={() => setConfirmarEliminar(true)}
+                          className="w-full py-3 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                        >
+                          Eliminar libro
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => setMostrarModalSolicitud(true)}
+                        className="w-full py-3 bg-Swap-green text-white rounded-md font-semibold hover:bg-Swap-green-dark transition-colors flex items-center justify-center gap-2"
+                        disabled={libro.estado !== "Disponible"}
+                      >
+                        Solicitar Intercambio
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Modo edición */}
+              {modoEdicion && (
+                <form onSubmit={handleEditarLibro} className="space-y-4">
+                  <h3 className="text-xl font-bold text-[#722F37] mb-2">Editar libro</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                    <input
+                      name="titulo"
+                      value={form.titulo}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      required
                     />
-                    <span className="text-gray-700">
-                      Publicado por{" "}
-                      <span className="font-semibold">{libro.usuarioNombre}</span>
-                    </span>
-                  </div>
-                  <span className="text-sm text-gray-500 ml-10">
-                    {libro.fechaPublicacion}
-                  </span>
-                </div>
-
-                <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-3">
-                  <div>
-                    <span className="font-semibold text-[#722F37]">Autor:</span> {libro.autor}
                   </div>
                   <div>
-                    <span className="font-semibold text-[#722F37]">Categoría:</span> {libro.categoria}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Autor</label>
+                    <input
+                      name="autor"
+                      value={form.autor}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      required
+                    />
                   </div>
                   <div>
-                    <span className="font-semibold text-[#722F37]">Estado:</span>
-                    <span
-                      className={`ml-2 inline-flex items-center gap-1 px-2 py-1 text-xs rounded font-semibold ${
-                        libro.estado === "Disponible"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {libro.estado === "Disponible" && (
-                        <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <circle cx="10" cy="10" r="10" />
-                        </svg>
-                      )}
-                      {libro.estado}
-                    </span>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea
+                      name="descripcion"
+                      value={form.descripcion}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      required
+                    />
                   </div>
                   <div>
-                    <span className="font-semibold text-[#722F37] block mb-1">Descripción:</span>
-                    <p className="text-gray-700 text-sm">{libro.descripcion}</p>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <input
+                      name="idCategoria"
+                      value={form.idCategoria}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      required
+                    />
                   </div>
-                </div>
-              </div>
-
-              {/* Acciones - Lado derecho */}
-              <div className="w-full md:w-44 flex flex-col space-y-4">
-                {esPropio ? (
-                  // Acciones para libros propios
-                  <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nueva foto (opcional)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div className="flex gap-3">
                     <button
-                      onClick={() => onEditarLibro(libro)}
-                      className="w-full py-3 bg-Swap-beige text-white rounded-md font-semibold hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2"
+                      type="button"
+                      onClick={() => setModoEdicion(false)}
+                      className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                      disabled={isLoading}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Editar libro
+                      Cancelar
                     </button>
-
                     <button
-                      onClick={() => onEliminarLibro(libro.idLibro)}
-                      className="w-full py-3 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                      type="submit"
+                      className="flex-1 py-2 px-4 bg-Swap-beige text-white rounded-md hover:bg-[#a67c52] disabled:opacity-50"
+                      disabled={isLoading}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      Eliminar libro
+                      {isLoading ? "Guardando..." : "Guardar cambios"}
                     </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setMostrarModalSolicitud(true)}
-                    className="w-full py-3 bg-Swap-green text-white rounded-md font-semibold hover:bg-Swap-green-dark transition-colors flex items-center justify-center gap-2"
-                    disabled={libro.estado !== "Disponible"}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                    Solicitar Intercambio
-                  </button>
-                )}
-              </div>
+                  </div>
+                </form>
+              )}
+
+              {/* Confirmar eliminación */}
+              {confirmarEliminar && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-red-700 mb-2">¿Eliminar libro?</h3>
+                  <p className="text-gray-700">
+                    Esta acción no se puede deshacer. ¿Seguro que deseas eliminar este libro?
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setConfirmarEliminar(false)}
+                      className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                      disabled={isLoading}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleEliminarLibro}
+                      className="flex-1 py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Eliminando..." : "Confirmar"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
