@@ -1,11 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiBook, FiUsers, FiStar, FiMapPin, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import axios from 'axios';
 
 const Home = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [usuario, setUsuario] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Verificar si hay usuario logeado al cargar
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios.get("http://127.0.0.1:8000/estudiantes/perfil", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => setUsuario(res.data))
+      .catch(() => setUsuario(null))
+      .finally(() => setLoading(false));
+    } else {
+      setUsuario(null);
+      setLoading(false);
+    }
+  }, []);
+
+  // Redirección automática si intentan ir a /login o /registro estando logeados
+  // (esto se hace mejor en las rutas privadas, pero aquí mostramos la idea)
+
+  // Renderizado condicional basado en estado de autenticación
   return (
     <div className="min-h-screen bg-white">
       {/* Header/Navbar */}
@@ -21,12 +43,37 @@ const Home = () => {
             <a href="#matorral" className="text-gray-600 hover:text-[#722F37]">El Matorral</a>
           </nav>
           <div className="flex gap-3">
-            <Link to="/login" className="px-4 py-2 text-[#722F37] border border-[#722F37] rounded-md hover:bg-[#722F37] hover:text-white transition-colors">
-              Iniciar Sesión
-            </Link>
-            <Link to="/registro" className="px-4 py-2 bg-Swap-beige text-white rounded-md hover:bg-[#a67c52] transition-colors">
-              Registrarse
-            </Link>
+            {loading ? null : usuario ? (
+              <>
+                <Link
+                  to="/catalogo"
+                  className="px-4 py-2 bg-Swap-beige text-white rounded-md hover:bg-[#a67c52] transition-colors"
+                >
+                  Ir al catálogo
+                </Link>
+                <Link
+                  to="/perfil"
+                  className="px-4 py-2 text-[#722F37] border border-[#722F37] rounded-md hover:bg-[#722F37] hover:text-white transition-colors"
+                >
+                  Mi perfil
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-[#722F37] border border-[#722F37] rounded-md hover:bg-[#722F37] hover:text-white transition-colors"
+                >
+                  Iniciar Sesión
+                </Link>
+                <Link
+                  to="/registro"
+                  className="px-4 py-2 bg-Swap-beige text-white rounded-md hover:bg-[#a67c52] transition-colors"
+                >
+                  Registrarse
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -35,20 +82,45 @@ const Home = () => {
       <section className="bg-gradient-to-br from-[#f9f6f2] to-white py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-[#722F37] mb-6">
-            Intercambia libros, 
+            Intercambia libros,
             <span className="text-Swap-beige"> conecta conocimiento</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            La plataforma que conecta estudiantes universitarios para intercambiar libros académicos. 
+            La plataforma que conecta estudiantes universitarios para intercambiar libros académicos.
             Ahorra dinero, ayuda al medio ambiente y amplía tu biblioteca personal.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/registro" className="px-8 py-4 bg-Swap-beige text-white text-lg font-semibold rounded-lg hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2">
-              Comenzar intercambio <FiArrowRight />
-            </Link>
-            <Link to="/catalogo" className="px-8 py-4 border-2 border-[#722F37] text-[#722F37] text-lg font-semibold rounded-lg hover:bg-[#722F37] hover:text-white transition-colors">
-              Ver catálogo
-            </Link>
+            {loading ? null : usuario ? (
+              <>
+                <Link
+                  to="/catalogo"
+                  className="px-8 py-4 bg-Swap-beige text-white text-lg font-semibold rounded-lg hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2"
+                >
+                  Ir al catálogo <FiArrowRight />
+                </Link>
+                <Link
+                  to="/perfil"
+                  className="px-8 py-4 border-2 border-[#722F37] text-[#722F37] text-lg font-semibold rounded-lg hover:bg-[#722F37] hover:text-white transition-colors"
+                >
+                  Mi perfil
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/registro"
+                  className="px-8 py-4 bg-Swap-beige text-white text-lg font-semibold rounded-lg hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2"
+                >
+                  Comenzar intercambio <FiArrowRight />
+                </Link>
+                <Link
+                  to="/catalogo"
+                  className="px-8 py-4 border-2 border-[#722F37] text-[#722F37] text-lg font-semibold rounded-lg hover:bg-[#722F37] hover:text-white transition-colors"
+                >
+                  Ver catálogo
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -198,9 +270,15 @@ const Home = () => {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">¿Listo para comenzar?</h2>
           <p className="text-white text-lg mb-8">Únete a nuestra comunidad de estudiantes que intercambian conocimiento</p>
-          <Link to="/registro" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-Swap-beige text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors">
-            Crear cuenta gratis <FiArrowRight />
-          </Link>
+          {loading ? null : usuario ? (
+            <Link to="/catalogo" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-Swap-beige text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Ir al catálogo <FiArrowRight />
+            </Link>
+          ) : (
+            <Link to="/registro" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-Swap-beige text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Crear cuenta gratis <FiArrowRight />
+            </Link>
+          )}
         </div>
       </section>
 

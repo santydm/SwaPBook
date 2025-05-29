@@ -51,15 +51,19 @@ const Catalogo = () => {
   }, [estudiante]);
 
   const handleSolicitarIntercambio = () => {
-    // Notificar al usuario que la solicitud fue enviada exitosamente
     alert("¡Solicitud de intercambio enviada con éxito! Te notificaremos cuando el propietario responda.");
-    setLibroSeleccionado(null); // Cerrar modal de detalles
+    setLibroSeleccionado(null);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
+
+  // Filtrar libros que no estén en estado "Intercambio"
+  const librosFiltrados = libros.filter(
+    (libro) => libro.estado !== "Intercambio"
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -106,9 +110,9 @@ const Catalogo = () => {
             <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
             <span className="ml-4 text-[#722F37] font-semibold">Cargando libros...</span>
           </div>
-        ) : libros.length > 0 ? (
+        ) : librosFiltrados.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {libros.map((libro) => (
+            {librosFiltrados.map((libro) => (
               <div key={libro.idLibro} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex flex-col">
                 <img
                   src={`http://localhost:8000${libro.foto}`}
@@ -136,7 +140,6 @@ const Catalogo = () => {
       </main>
 
       {/* Modal de detalles */}
-      
       <LibroDetalleModal
         libro={libroSeleccionado ? {
           ...libroSeleccionado,
