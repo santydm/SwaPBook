@@ -76,6 +76,26 @@ async def crear_libro(
 
     return nuevo_libro
 
+
+#filtrar catalogo por categoria
+@router.get("/catalogo/filtrar-por-categoria", response_model=List[LibroResponse])
+def filtrar_por_categoria(
+    categoria: str = Query(..., description="Parte inicial del nombre de la categoría"),
+    db: Session = Depends(get_db),
+):
+    libros = (
+        db.query(Libro)
+        .join(Categoria, Libro.idCategoria == Categoria.idCategoria)
+        .options(joinedload(Libro.categoria))
+        .filter(
+            Libro.visibleCatalogo == True,
+            func.lower(Categoria.nombre).ilike(f"{categoria.lower()}%")
+        )
+        .all()
+    )
+    return libros
+
+#filtrar libros por sus datos
 @router.get("/catalogo/{id_estudiante}", response_model=List[LibroResponse])
 def obtener_catalogo(
     id_estudiante: int,
@@ -95,12 +115,15 @@ def obtener_catalogo(
             or_(
                 Libro.titulo.ilike(search_pattern),
                 Libro.autor.ilike(search_pattern),
-                Libro.descripcion.ilike(search_pattern),
-                Categoria.nombre.ilike(search_pattern)
+                Libro.descripcion.ilike(search_pattern)
             )
         )
 
     return query.all()
+
+
+
+
 
 @router.get("/mis-libros/{id_estudiante}", response_model=list[LibroResponse])
 def obtener_mis_libros(id_estudiante: int, db: Session = Depends(get_db)):
