@@ -76,16 +76,17 @@ async def crear_libro(
 
     return nuevo_libro
 
-@router.get("/catalogo/{id_otro_estudiante}", response_model=List[LibroResponse])
+@router.get("/catalogo/{id_estudiante}", response_model=List[LibroResponse])
 def obtener_catalogo(
-    id_otro_estudiante: int,
+    id_estudiante: int,
     search: Optional[str] = Query(None, description="Buscar por título, autor, descripción o categoría"),
-    db: Session = Depends(get_db),
-    estudiante_actual: Estudiante = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     query = db.query(Libro).options(joinedload(Libro.categoria)).filter(
-        Libro.visibleCatalogo == True,
-        Libro.idEstudiante == id_otro_estudiante
+        
+        Libro.idEstudiante != id_estudiante,
+        Libro.visibleCatalogo == True
+        
     )
 
     if search:
