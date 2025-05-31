@@ -20,7 +20,7 @@ class IntercambioResponse(BaseModel):
     idLibroOfrecido: int
     fechaEncuentro: datetime
     horaEncuentro: datetime
-    lugarIntercambio: Optional[str] = None
+    lugarEncuentro: Optional[str] = None
     estado: EstadoIntercambioEnum
 
     libro_solicitado: Optional[LibroResponse]

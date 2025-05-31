@@ -15,6 +15,9 @@ const Catalogo = () => {
   const [libros, setLibros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [libroSeleccionado, setLibroSeleccionado] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
 
   // Cargar usuario si hay token
   useEffect(() => {
@@ -49,6 +52,44 @@ const Catalogo = () => {
     };
     fetchLibros();
   }, [estudiante]);
+    
+    // Cargar categorías una vez
+    useEffect(() => {
+    axios.get("http://localhost:8000/categorias")
+      .then(res => setCategorias(res.data))
+      .catch(() => setCategorias([]));
+  }, []);
+
+    useEffect(() => {
+    const fetchLibros = async () => {
+      setLoading(true);
+      try {
+        let url;
+        // Si hay filtro de categoría, usar endpoint de categoría
+        if (categoriaSeleccionada) {
+          url = `http://127.0.0.1:8000/libros/catalogo/filtrar-por-categoria?categoria=${encodeURIComponent(categoriaSeleccionada)}`;
+        } else {
+          // Si hay estudiante logeado, excluye sus libros, si no, muestra todos los visibles
+          url = "http://127.0.0.1:8000/libros/catalogo/0";
+          if (estudiante?.idEstudiante) {
+            url = `http://127.0.0.1:8000/libros/catalogo/${estudiante.idEstudiante}`;
+          }
+          if (searchText) {
+            url += `?search=${encodeURIComponent(searchText)}`;
+          }
+        }
+        const res = await axios.get(url);
+        setLibros(res.data);
+      } catch (error) {
+        setLibros([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLibros();
+  }, [estudiante, searchText, categoriaSeleccionada]);
+
+
 
   const handleSolicitarIntercambio = () => {
     alert("¡Solicitud de intercambio enviada con éxito! Te notificaremos cuando el propietario responda.");
@@ -67,9 +108,14 @@ const Catalogo = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <NavbarCatalogo 
-        estudiante={estudiante} 
-        onPerfilClick={() => setShowSidebar(true)} 
+      <NavbarCatalogo
+        estudiante={estudiante}
+        onPerfilClick={() => setShowSidebar(true)}
+        searchText={searchText}
+        onSearch={setSearchText}
+        categorias={categorias}
+        categoriaSeleccionada={categoriaSeleccionada}
+        onCategoriaChange={setCategoriaSeleccionada}
       />
 
       {/* Sidebar solo si logeado */}

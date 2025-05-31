@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
 from typing import Optional
+from .estudiantes import EstudiantePerfilSchema
 
 class EstadoLibroEnum(str, Enum):
     disponible = "Disponible"
@@ -22,6 +23,8 @@ class LibroResponse(BaseModel):
     idCategoria: int
     foto: Optional[str]
     estado: EstadoLibroEnum
+    categoria: Optional[CategoriaResponse] = None
+    estudiante: EstudiantePerfilSchema 
 
     # Relación anidada para mostrar el nombre de la categoría
     categoria: Optional[CategoriaResponse] = None

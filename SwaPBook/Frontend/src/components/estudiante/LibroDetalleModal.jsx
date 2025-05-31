@@ -25,6 +25,7 @@ const LibroDetalleModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
+  
 
   // Cargar categorías al abrir el modal
   useEffect(() => {
@@ -55,9 +56,14 @@ const LibroDetalleModal = ({
 
   if (!isOpen || !libro) return null;
 
-  const usuarioFotoUrl = libro.usuarioFoto
-    ? `http://localhost:8000${libro.usuarioFoto}`
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(libro.usuarioNombre || "Usuario")}&background=722F37&color=fff&size=36`;
+  // Foto del usuario que publicó el libro
+  let usuarioFotoUrl = libro.usuarioFoto;
+  if (usuarioFotoUrl && !usuarioFotoUrl.startsWith("http")) {
+    usuarioFotoUrl = `http://localhost:8000${usuarioFotoUrl}`;
+  }
+  if (!usuarioFotoUrl) {
+    usuarioFotoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(libro.usuarioNombre || "Usuario")}&background=722F37&color=fff&size=36`;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -174,9 +180,9 @@ const LibroDetalleModal = ({
                     <h2 className="text-2xl font-bold text-[#722F37] mb-2">{libro.titulo}</h2>
                     <div className="mb-4 flex items-center">
                       <img
-                        src={usuarioFotoUrl}
-                        alt={libro.usuarioNombre}
-                        className="w-8 h-8 rounded-full mr-2 border-2 border-[#722F37] object-cover"
+                        src={`http://localhost:8000${libro.estudiante.fotoPerfil}`}
+                        alt={usuarioFotoUrl}
+                        className="w-10 h-10 rounded-full mr-3 border-2 border-[#722F37] object-cover"
                       />
                       <span className="text-gray-700">
                         Publicado por <span className="font-semibold">{libro.usuarioNombre}</span>
@@ -213,11 +219,10 @@ const LibroDetalleModal = ({
                       </div>
                     </div>
                   </div>
-
                   {/* Acciones */}
-                  <div className="w-full md:w-44 flex flex-col space-y-4">
+                  <div className="w-full flex flex-col items-center mt-4">
                     {esPropio ? (
-                      <>
+                      <div className="w-full md:w-44 flex flex-col space-y-4">
                         <button
                           onClick={() => setModoEdicion(true)}
                           className="w-full py-3 bg-Swap-beige text-white rounded-md font-semibold hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2"
@@ -230,11 +235,11 @@ const LibroDetalleModal = ({
                         >
                           Eliminar libro
                         </button>
-                      </>
+                      </div>
                     ) : (
                       <button
                         onClick={() => setMostrarModalSolicitud(true)}
-                        className="w-full py-3 bg-Swap-green text-white rounded-md font-semibold hover:bg-Swap-green-dark transition-colors flex items-center justify-center gap-2"
+                        className="w-full md:w-60 py-3 bg-Swap-green text-white rounded-md font-semibold hover:bg-Swap-green-dark transition-colors flex items-center justify-center gap-2 mt-2"
                         disabled={libro.estado !== "Disponible"}
                       >
                         Solicitar Intercambio

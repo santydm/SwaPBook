@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form, Query
+from sqlalchemy import or_
 import shutil
 import os
 from uuid import uuid4
-from typing import Optional
-from sqlalchemy.orm import Session
+from typing import Optional, List
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from app.db.database import get_db
 from app.models.estudiantes import Estudiante
@@ -75,14 +76,53 @@ async def crear_libro(
 
     return nuevo_libro
 
-#Devuelve libros visibles para todos, excepto los del mismo estudiante.
-@router.get("/catalogo/{id_estudiante}", response_model=list[LibroResponse])
-def obtener_catalogo(id_estudiante: int, db: Session = Depends(get_db)):
-    libros = db.query(Libro).filter(
+
+#filtrar catalogo por categoria
+@router.get("/catalogo/filtrar-por-categoria", response_model=List[LibroResponse])
+def filtrar_por_categoria(
+    categoria: str = Query(..., description="Parte inicial del nombre de la categoría"),
+    db: Session = Depends(get_db),
+):
+    libros = (
+        db.query(Libro)
+        .join(Categoria, Libro.idCategoria == Categoria.idCategoria)
+        .options(joinedload(Libro.categoria))
+        .filter(
+            Libro.visibleCatalogo == True,
+            func.lower(Categoria.nombre).ilike(f"{categoria.lower()}%")
+        )
+        .all()
+    )
+    return libros
+
+#filtrar libros por sus datos
+@router.get("/catalogo/{id_estudiante}", response_model=List[LibroResponse])
+def obtener_catalogo(
+    id_estudiante: int,
+    search: Optional[str] = Query(None, description="Buscar por título, autor, descripción o categoría"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Libro).options(joinedload(Libro.categoria),joinedload(Libro.estudiante)).filter(
+        
         Libro.idEstudiante != id_estudiante,
         Libro.visibleCatalogo == True
-    ).all()
-    return libros
+        
+    )
+
+    if search:
+        search_pattern = f"%{search.lower()}%"
+        query = query.join(Libro.categoria).filter(
+            or_(
+                Libro.titulo.ilike(search_pattern),
+                Libro.autor.ilike(search_pattern),
+                Libro.descripcion.ilike(search_pattern)
+            )
+        )
+
+    return query.all()
+
+
+
 
 
 @router.get("/mis-libros/{id_estudiante}", response_model=list[LibroResponse])
