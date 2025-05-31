@@ -1,19 +1,17 @@
-// src/components/estudiante/SolicitarIntercambioModal.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import LibroMiniCard from "./LibroMiniCard";
+import { FiMapPin, FiRepeat } from "react-icons/fi";
 
-
-const SolicitarIntercambioModal = ({ 
-  isOpen, 
-  onClose, 
-  libroSolicitado, 
-  onSolicitudEnviada 
+const SolicitarIntercambioModal = ({
+  isOpen,
+  onClose,
+  libroSolicitado,
+  onSolicitudEnviada
 }) => {
   const [misLibros, setMisLibros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [libroSeleccionado, setLibroSeleccionado] = useState(null);
-  const [lugarEncuentro, setLugarEncuentro] = useState('');
   const [fechaEncuentro, setFechaEncuentro] = useState('');
   const [horaEncuentro, setHoraEncuentro] = useState('');
   const [error, setError] = useState('');
@@ -29,27 +27,18 @@ const SolicitarIntercambioModal = ({
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      
-      // Primero obtenemos el perfil para tener el ID del estudiante
       const perfilResponse = await axios.get('http://127.0.0.1:8000/estudiantes/perfil', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
       const idEstudiante = perfilResponse.data.idEstudiante;
-      
-      // Obtenemos los libros del estudiante
       const librosResponse = await axios.get(`http://127.0.0.1:8000/libros/mis-libros/${idEstudiante}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
-      // Filtramos para mostrar solo libros disponibles
-      const librosDisponibles = librosResponse.data.filter(libro => 
+      const librosDisponibles = librosResponse.data.filter(libro =>
         libro.estado === "Disponible"
       );
-      
       setMisLibros(librosDisponibles);
     } catch (error) {
-      console.error('Error al cargar libros:', error);
       setError('No se pudieron cargar tus libros. Por favor, intenta nuevamente.');
     } finally {
       setLoading(false);
@@ -58,48 +47,31 @@ const SolicitarIntercambioModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!libroSeleccionado) {
       setError('Debes seleccionar un libro para ofrecer');
       return;
     }
-    
-    if (!lugarEncuentro) {
-      setError('Debes especificar un lugar de encuentro');
-      return;
-    }
-    
     if (!fechaEncuentro || !horaEncuentro) {
       setError('Debes especificar fecha y hora de encuentro');
       return;
     }
-    
     try {
       setEnviando(true);
       const token = localStorage.getItem('token');
-      
-      // Crear fecha y hora en formato ISO
       const fechaHoraEncuentro = new Date(`${fechaEncuentro}T${horaEncuentro}`);
-      
       const data = {
         libroOfrecido: libroSeleccionado.idLibro,
         libroSolicitado: libroSolicitado.idLibro,
-        lugarEncuentro,
+        lugarEncuentro: "El Matorral",
         fechaEncuentro: fechaHoraEncuentro.toISOString(),
         horaEncuentro: fechaHoraEncuentro.toISOString()
       };
-      
       await axios.post('http://127.0.0.1:8000/solicitudes/', data, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
-      if (onSolicitudEnviada) {
-        onSolicitudEnviada();
-      }
-      
+      if (onSolicitudEnviada) onSolicitudEnviada();
       onClose();
     } catch (error) {
-      console.error('Error al enviar solicitud:', error);
       setError(error.response?.data?.detail || 'Error al enviar la solicitud. Intenta nuevamente.');
     } finally {
       setEnviando(false);
@@ -108,10 +80,15 @@ const SolicitarIntercambioModal = ({
 
   if (!isOpen) return null;
 
+  // Construir la URL de la foto del libro solicitado
+  let fotoSolicitada = libroSolicitado?.fotoLibro || libroSolicitado?.foto;
+  if (fotoSolicitada && !fotoSolicitada.startsWith("http")) {
+    fotoSolicitada = `http://localhost:8000${fotoSolicitada}`;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4">
-        {/* Botón para cerrar */}
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
@@ -120,35 +97,78 @@ const SolicitarIntercambioModal = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        
+
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-[#722F37] mb-6">Solicitar Intercambio</h2>
-          
-          {/* Información del libro solicitado */}
-          <div className="bg-gray-100 p-4 rounded-lg mb-6 flex items-center">
-            <img 
-              src={libroSolicitado.fotoLibro} 
-              alt={libroSolicitado.titulo}
-              className="w-16 h-20 object-cover rounded mr-4"
-            />
-            <div>
-              <h3 className="font-semibold">Solicitando: {libroSolicitado.titulo}</h3>
-              <p className="text-sm text-gray-600">Autor: {libroSolicitado.autor}</p>
-              <p className="text-sm text-gray-600">Propietario: {libroSolicitado.usuarioNombre}</p>
+          <h2 className="text-2xl font-bold text-[#722F37] mb-6 text-center">Solicitar Intercambio</h2>
+
+          {/* Previsualización del intercambio */}
+          <div className="flex items-center justify-center gap-6 mb-8">
+            <div className="flex flex-col items-center max-w-xs flex-1">
+              <span className="font-semibold text-[#722F37] mb-2">Solicitando</span>
+              <div className="bg-gray-100 p-4 rounded-lg flex flex-row items-center w-32">
+                <img
+                  src={fotoSolicitada}
+                  alt={libroSolicitado.titulo}
+                  className="w-20 h-28 object-cover rounded mb-2 border border-gray-300"
+                />
+                <div className="text-center pl-6" >
+                  <p className="font-medium text-xs">{libroSolicitado.titulo}</p>
+                  <p className="text-xs text-gray-600">{libroSolicitado.autor}</p>
+                  <p className="text-xs text-gray-500 mt-1">{libroSolicitado.categoria}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center">
+              <FiRepeat className="text-3xl text-Swap-beige mb-2" />
+            </div>
+            <div className="flex flex-col items-center max-w-xs flex-1">
+              <span className="font-semibold text-[#722F37] mb-2">Ofreciendo</span>
+              {libroSeleccionado ? (
+                <LibroMiniCard
+                  libro={libroSeleccionado}
+                  seleccionado={true}
+                  small
+                  disabled
+                />
+              ) : (
+                <div className="bg-gray-100 p-4 rounded-lg text-center w-28 h-40 flex items-center justify-center">
+                  <span className="text-gray-400 text-xs">Selecciona un libro</span>
+                </div>
+              )}
             </div>
           </div>
-          
+
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
               <p>{error}</p>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit}>
+            <div className="mb-6">
+              <label className="block text-gray-700 font-semibold mb-2">Lugar de encuentro</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value="El Matorral"
+                  readOnly
+                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#722F37] bg-gray-100"
+                />
+                <a
+                  href="https://maps.app.goo.gl/ridUkDvUjJiwez8v9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-Swap-beige hover:text-[#a67c52]"
+                  title="Ver en Google Maps"
+                >
+                  <FiMapPin className="text-2xl" />
+                </a>
+              </div>
+            </div>
+
             {/* Selección de libro a ofrecer */}
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Selecciona un libro para ofrecer:</h3>
-              
               {loading ? (
                 <div className="flex justify-center items-center h-32">
                   <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
@@ -160,31 +180,20 @@ const SolicitarIntercambioModal = ({
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-64 overflow-y-auto p-2">
-                {misLibros.map(libro => (
+                  {misLibros.map(libro => (
                     <LibroMiniCard
-                    key={libro.idLibro}
-                    libro={libro}
-                    seleccionado={libroSeleccionado?.idLibro === libro.idLibro}
-                    onClick={() => setLibroSeleccionado(libro)}
+                      key={libro.idLibro}
+                      libro={libro}
+                      seleccionado={libroSeleccionado?.idLibro === libro.idLibro}
+                      onClick={() => setLibroSeleccionado(libro)}
                     />
-                ))}
+                  ))}
                 </div>
               )}
             </div>
-            
+
             {/* Detalles del encuentro */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">Lugar de encuentro</label>
-                <input
-                  type="text"
-                  value={lugarEncuentro}
-                  onChange={(e) => setLugarEncuentro(e.target.value)}
-                  placeholder="Ej: Biblioteca central, piso 2"
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#722F37]"
-                  required
-                />
-              </div>
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">Fecha de encuentro</label>
                 <input
@@ -207,7 +216,7 @@ const SolicitarIntercambioModal = ({
                 />
               </div>
             </div>
-            
+
             {/* Botones de acción */}
             <div className="flex justify-end gap-4">
               <button
