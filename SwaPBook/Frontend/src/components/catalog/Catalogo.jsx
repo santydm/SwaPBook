@@ -32,62 +32,51 @@ const Catalogo = () => {
       setEstudiante(null);
     }
   }, []);
-
-  // Cargar libros del catálogo (siempre)
   useEffect(() => {
-    const fetchLibros = async () => {
-      try {
-        // Si hay estudiante logeado, excluye sus libros, si no, muestra todos los visibles
-        let url = "http://127.0.0.1:8000/libros/catalogo/0";
-        if (estudiante?.idEstudiante) {
-          url = `http://127.0.0.1:8000/libros/catalogo/${estudiante.idEstudiante}`;
-        }
-        const res = await axios.get(url);
-        setLibros(res.data);
-      } catch (error) {
-        setLibros([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLibros();
-  }, [estudiante]);
-    
-    // Cargar categorías una vez
-    useEffect(() => {
-    axios.get("http://localhost:8000/categorias")
-      .then(res => setCategorias(res.data))
-      .catch(() => setCategorias([]));
-  }, []);
+  axios.get("http://localhost:8000/categorias")
+    .then(res => setCategorias(res.data))
+    .catch(() => setCategorias([]));
+}, []);
 
-    useEffect(() => {
-    const fetchLibros = async () => {
-      setLoading(true);
-      try {
-        let url;
-        // Si hay filtro de categoría, usar endpoint de categoría
-        if (categoriaSeleccionada) {
-          url = `http://127.0.0.1:8000/libros/catalogo/filtrar-por-categoria?categoria=${encodeURIComponent(categoriaSeleccionada)}`;
-        } else {
-          // Si hay estudiante logeado, excluye sus libros, si no, muestra todos los visibles
-          url = "http://127.0.0.1:8000/libros/catalogo/0";
-          if (estudiante?.idEstudiante) {
-            url = `http://127.0.0.1:8000/libros/catalogo/${estudiante.idEstudiante}`;
+
+// Catalogo.jsx
+useEffect(() => {
+  const fetchLibros = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      let url;
+      let response;
+
+      if (categoriaSeleccionada) {
+        // Usar el endpoint de categoría con autenticación
+        response = await axios.get(
+          `http://127.0.0.1:8000/libros/catalogo/filtrar-por-categoria?categoria=${encodeURIComponent(categoriaSeleccionada)}`,
+          {
+            headers: { 
+              Authorization: `Bearer ${token}` 
+            }
           }
-          if (searchText) {
-            url += `?search=${encodeURIComponent(searchText)}`;
-          }
-        }
-        const res = await axios.get(url);
-        setLibros(res.data);
-      } catch (error) {
-        setLibros([]);
-      } finally {
-        setLoading(false);
+        );
+      } else {
+        // Búsqueda normal
+        url = estudiante?.idEstudiante 
+          ? `http://127.0.0.1:8000/libros/catalogo/${estudiante.idEstudiante}?search=${encodeURIComponent(searchText)}`
+          : `http://127.0.0.1:8000/libros/catalogo/0?search=${encodeURIComponent(searchText)}`;
+        
+        response = await axios.get(url);
       }
-    };
-    fetchLibros();
-  }, [estudiante, searchText, categoriaSeleccionada]);
+
+      setLibros(response.data);
+    } catch (error) {
+      console.error("Error al cargar libros:", error);
+      setLibros([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchLibros();
+}, [estudiante, searchText, categoriaSeleccionada]); // <--- Añadir categoriaSeleccionada como dependencia
 
 
 
@@ -112,12 +101,17 @@ const Catalogo = () => {
         estudiante={estudiante}
         onPerfilClick={() => setShowSidebar(true)}
         searchText={searchText}
-        onSearch={setSearchText}
+        onSearch={(text) => {
+          setSearchText(text);
+          setCategoriaSeleccionada(""); // Limpiar categoría al buscar
+        }}
         categorias={categorias}
         categoriaSeleccionada={categoriaSeleccionada}
-        onCategoriaChange={setCategoriaSeleccionada}
+        onCategoriaChange={(cat) => {
+          setCategoriaSeleccionada(cat);
+          setSearchText(""); // Limpiar búsqueda al seleccionar categoría
+        }}
       />
-
       {/* Sidebar solo si logeado */}
       {estudiante && showSidebar && (
         <SidebarCatalogo
