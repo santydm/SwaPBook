@@ -5,6 +5,7 @@ import PanelPerfil from "../../components/estudiante/PanelPerfil";
 import CardLibro from "../../components/estudiante/CardLibro";
 import LibroDetalleModal from "../../components/estudiante/LibroDetalleModal";
 import Navbar from "../../components/ui/Navbar";
+import PublicarLibro from "../../components/catalog/PublicarLibro"; // Asegúrate de la ruta correcta
 
 const MisLibros = () => {
   const navigate = useNavigate();
@@ -13,7 +14,8 @@ const MisLibros = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [libroSeleccionado, setLibroSeleccionado] = useState(null);
-  
+  const [showModalPublicar, setShowModalPublicar] = useState(false);
+
   useEffect(() => {
     const fetchMisLibros = async () => {
       try {
@@ -22,20 +24,14 @@ const MisLibros = () => {
           navigate('/login');
           return;
         }
-        
-        // Obtener información del estudiante
         const perfilResponse = await axios.get('http://127.0.0.1:8000/estudiantes/perfil', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
         setEstudiante(perfilResponse.data);
         const idEstudiante = perfilResponse.data.idEstudiante;
-        
-        // Obtener libros
         const librosResponse = await axios.get(`http://127.0.0.1:8000/libros/mis-libros/${idEstudiante}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
         setLibros(librosResponse.data);
       } catch (error) {
         console.error('Error al obtener libros:', error);
@@ -49,29 +45,25 @@ const MisLibros = () => {
         setLoading(false);
       }
     };
-    
     fetchMisLibros();
   }, [navigate]);
-  
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
 
   const handleEditarLibro = (libro) => {
-    // Implementar lógica para editar libro
     console.log("Editar libro:", libro);
   };
 
   const handleEliminarLibro = async (idLibro) => {
     if (!confirm("¿Estás seguro de eliminar este libro?")) return;
-    
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`http://127.0.0.1:8000/libros/${idLibro}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
       setLibros(prevLibros => prevLibros.filter(libro => libro.idLibro !== idLibro));
       setLibroSeleccionado(null);
     } catch (error) {
@@ -80,18 +72,35 @@ const MisLibros = () => {
     }
   };
 
+  const handleLibroPublicado = () => {
+    setShowModalPublicar(false);
+    setLoading(true);
+    // Vuelve a cargar los libros
+    setTimeout(() => {
+      window.location.reload();
+    }, 700);
+  };
+
   return (
     <>
       <Navbar usuario={estudiante} />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
-          {/* Panel lateral */}
           <PanelPerfil handleLogout={handleLogout} />
 
-          {/* Sección de libros */}
           <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-[#722F37] mb-6 text-center">Mis libros</h1>
-            
+            <div className="flex flex-col sm:flex-row items-center justify-between w-full mb-6 gap-3">
+              <h1 className="text-2xl font-bold text-[#722F37] text-center flex-1">
+                Mis libros
+              </h1>
+              <button
+                onClick={() => setShowModalPublicar(true)}
+                className="py-2 px-5 bg-Swap-green text-white rounded-md font-semibold hover:bg-Swap-green-dark transition-colors shadow"
+              >
+                + Publicar libro
+              </button>
+            </div>
+
             {loading ? (
               <div className="flex justify-center items-center h-64">
                 <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
@@ -127,7 +136,14 @@ const MisLibros = () => {
           </div>
         </div>
 
-        {/* Modal de detalles */}
+        {showModalPublicar && (
+          <PublicarLibro
+            isOpen={showModalPublicar}
+            onClose={() => setShowModalPublicar(false)}
+            onLibroPublicado={handleLibroPublicado}
+          />
+        )}
+
         <LibroDetalleModal
           libro={libroSeleccionado ? {
             ...libroSeleccionado,

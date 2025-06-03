@@ -81,7 +81,6 @@ useEffect(() => {
 
 
   const handleSolicitarIntercambio = () => {
-    alert("¡Solicitud de intercambio enviada con éxito! Te notificaremos cuando el propietario responda.");
     setLibroSeleccionado(null);
   };
 
