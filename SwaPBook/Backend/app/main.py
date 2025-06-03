@@ -9,6 +9,7 @@ from app.routers import solicitudes
 from app.routers import intercambios
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request
+from app.admin.router import router as admin_router
 from fastapi.staticfiles import StaticFiles  # Para los static files
 import os  #  os para crear directorios tambien para las fotos
 
@@ -51,6 +52,7 @@ app.include_router(categorias.router)
 app.include_router(auth.router)
 app.include_router(solicitudes.router)
 app.include_router(intercambios.router)
+app.include_router(admin_router)
 
 # Crear las tablas en la base de datos si no existen
 Base.metadata.create_all(bind=engine)
