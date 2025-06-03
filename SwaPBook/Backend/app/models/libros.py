@@ -18,7 +18,6 @@ class Libro(Base):
     foto = Column(String(255), nullable=True)
     idEstudiante = Column(Integer, ForeignKey("estudiantes.idEstudiante", ondelete="CASCADE"), nullable=False)
     idCategoria = Column(Integer, ForeignKey("categorias.idCategoria"), nullable=False)
-    visibleCatalogo = Column(Boolean, default=True)
 
     estudiante = relationship("Estudiante", back_populates="libros")
     categoria = relationship("Categoria", back_populates="libros")

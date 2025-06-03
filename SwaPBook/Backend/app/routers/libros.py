@@ -66,8 +66,7 @@ async def crear_libro(
         estado="Disponible",
         idCategoria=categoria.idCategoria,
         idEstudiante=estudiante.idEstudiante,
-        foto=f"/static/images/libros/{filename}",
-        visibleCatalogo=True
+        foto=f"/static/images/libros/{filename}"
     )
 
     db.add(nuevo_libro)
@@ -82,14 +81,15 @@ async def crear_libro(
 def filtrar_por_categoria(
     categoria: str = Query(..., description="Parte inicial del nombre de la categoría"),
     db: Session = Depends(get_db),
+    estudiante: Estudiante = Depends(get_current_user), 
 ):
     libros = (
         db.query(Libro)
         .join(Categoria, Libro.idCategoria == Categoria.idCategoria)
         .options(joinedload(Libro.categoria))
         .filter(
-            Libro.visibleCatalogo == True,
-            func.lower(Categoria.nombre).ilike(f"{categoria.lower()}%")
+            Libro.idEstudiante != estudiante.idEstudiante,
+            func.lower(Categoria.nombre).ilike(f"{categoria}%")
         )
         .all()
     )
@@ -104,8 +104,7 @@ def obtener_catalogo(
 ):
     query = db.query(Libro).options(joinedload(Libro.categoria),joinedload(Libro.estudiante)).filter(
         
-        Libro.idEstudiante != id_estudiante,
-        Libro.visibleCatalogo == True
+        Libro.idEstudiante != id_estudiante
         
     )
 
@@ -120,9 +119,6 @@ def obtener_catalogo(
         )
 
     return query.all()
-
-
-
 
 
 @router.get("/mis-libros/{id_estudiante}", response_model=list[LibroResponse])
