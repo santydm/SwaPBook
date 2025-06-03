@@ -23,6 +23,10 @@ def crear_token(data: dict):
     datos = data.copy()
     expira = datetime.utcnow() + timedelta(minutes=EXPIRE_MINUTES)
     datos.update({"exp": expira})
+
+    if "sub" not in datos or "rol" not in datos:
+        raise Exception("El token debe incluir 'sub' y 'rol'.")
+        
     token = jwt.encode(datos, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
