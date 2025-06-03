@@ -6,6 +6,7 @@ import PublicarLibro from "./PublicarLibro";
 import Footer from "../ui/Footer";
 import axios from "axios";
 import LibroDetalleModal from "../estudiante/LibroDetalleModal";
+import CardLibro from "../estudiante/CardLibro";
 
 const Catalogo = () => {
   const navigate = useNavigate();
@@ -32,53 +33,46 @@ const Catalogo = () => {
       setEstudiante(null);
     }
   }, []);
+
+  // Cargar categorías
   useEffect(() => {
-  axios.get("http://localhost:8000/categorias")
-    .then(res => setCategorias(res.data))
-    .catch(() => setCategorias([]));
-}, []);
+    axios.get("http://localhost:8000/categorias")
+      .then(res => setCategorias(res.data))
+      .catch(() => setCategorias([]));
+  }, []);
 
+  // Cargar libros
+  useEffect(() => {
+    const fetchLibros = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        let url;
+        let response;
 
-// Catalogo.jsx
-useEffect(() => {
-  const fetchLibros = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      let url;
-      let response;
+        if (categoriaSeleccionada) {
+          response = await axios.get(
+            `http://127.0.0.1:8000/libros/catalogo/filtrar-por-categoria?categoria=${encodeURIComponent(categoriaSeleccionada)}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } else {
+          url = estudiante?.idEstudiante 
+            ? `http://127.0.0.1:8000/libros/catalogo/${estudiante.idEstudiante}?search=${encodeURIComponent(searchText)}`
+            : `http://127.0.0.1:8000/libros/catalogo/0?search=${encodeURIComponent(searchText)}`;
+          
+          response = await axios.get(url);
+        }
 
-      if (categoriaSeleccionada) {
-        // Usar el endpoint de categoría con autenticación
-        response = await axios.get(
-          `http://127.0.0.1:8000/libros/catalogo/filtrar-por-categoria?categoria=${encodeURIComponent(categoriaSeleccionada)}`,
-          {
-            headers: { 
-              Authorization: `Bearer ${token}` 
-            }
-          }
-        );
-      } else {
-        // Búsqueda normal
-        url = estudiante?.idEstudiante 
-          ? `http://127.0.0.1:8000/libros/catalogo/${estudiante.idEstudiante}?search=${encodeURIComponent(searchText)}`
-          : `http://127.0.0.1:8000/libros/catalogo/0?search=${encodeURIComponent(searchText)}`;
-        
-        response = await axios.get(url);
+        setLibros(response.data);
+      } catch (error) {
+        console.error("Error al cargar libros:", error);
+        setLibros([]);
+      } finally {
+        setLoading(false);
       }
-
-      setLibros(response.data);
-    } catch (error) {
-      console.error("Error al cargar libros:", error);
-      setLibros([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchLibros();
-}, [estudiante, searchText, categoriaSeleccionada]); // <--- Añadir categoriaSeleccionada como dependencia
-
-
+    };
+    fetchLibros();
+  }, [estudiante, searchText, categoriaSeleccionada]);
 
   const handleSolicitarIntercambio = () => {
     setLibroSeleccionado(null);
@@ -89,10 +83,7 @@ useEffect(() => {
     navigate('/login');
   };
 
-  // Filtrar libros que no estén en estado "Intercambio"
-  const librosFiltrados = libros.filter(
-    (libro) => libro.estado !== "Intercambio"
-  );
+  const librosFiltrados = libros.filter(libro => libro.estado !== "Intercambio");
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -102,16 +93,17 @@ useEffect(() => {
         searchText={searchText}
         onSearch={(text) => {
           setSearchText(text);
-          setCategoriaSeleccionada(""); // Limpiar categoría al buscar
+          setCategoriaSeleccionada("");
         }}
         categorias={categorias}
         categoriaSeleccionada={categoriaSeleccionada}
         onCategoriaChange={(cat) => {
           setCategoriaSeleccionada(cat);
-          setSearchText(""); // Limpiar búsqueda al seleccionar categoría
+          setSearchText("");
         }}
       />
-      {/* Sidebar solo si logeado */}
+
+      {/* Sidebar y modales (mantener igual) */}
       {estudiante && showSidebar && (
         <SidebarCatalogo
           estudiante={estudiante}
@@ -121,12 +113,10 @@ useEffect(() => {
         />
       )}
 
-      {/* Modal crear libro solo si logeado */}
       {estudiante && showModal && (
         <PublicarLibro isOpen={showModal} onClose={() => setShowModal(false)} />
       )}
 
-      {/* Si NO logeado, muestra botones en vez de sidebar/modal */}
       {!estudiante && showSidebar && (
         <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 flex flex-col items-center justify-center">
           <button
@@ -144,33 +134,28 @@ useEffect(() => {
 
       <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
         <h2 className="text-3xl font-bold mb-6 text-[#722F37]">Catálogo de Libros</h2>
+        
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
             <span className="ml-4 text-[#722F37] font-semibold">Cargando libros...</span>
           </div>
         ) : librosFiltrados.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
             {librosFiltrados.map((libro) => (
-              <div key={libro.idLibro} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex flex-col">
-                <img
-                  src={`http://localhost:8000${libro.foto}`}
-                  alt={libro.titulo}
-                  className="h-40 w-full object-cover rounded mb-4"
-                />
-                <h3 className="text-xl font-semibold text-[#722F37]">{libro.titulo}</h3>
-                <p className="text-gray-600">{libro.autor}</p>
-                <p className="text-sm text-gray-500 mt-2">{libro.descripcion}</p>
-                <span className="mt-2 inline-block bg-Swap-beige text-white text-xs px-2 py-1 rounded">
-                  {libro.categoria?.nombre || "Sin categoría"}
-                </span>
-                <button 
-                  className="mt-4 w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-[#a67c52] transition-colors"
-                  onClick={() => setLibroSeleccionado(libro)}
-                >
-                  Ver detalles
-                </button>
-              </div>
+              <CardLibro
+                key={libro.idLibro}
+                usuarioNombre={libro.estudiante?.nombre || "Usuario"}
+                usuarioFoto={libro.estudiante?.fotoPerfil}
+                fechaPublicacion={new Date(libro.fechaRegistro).toLocaleDateString()}
+                fotoLibro={`http://localhost:8000${libro.foto}`}
+                titulo={libro.titulo}
+                autor={libro.autor}
+                descripcion={libro.descripcion}
+                categoria={libro.categoria?.nombre || "Sin categoría"}
+                estado={libro.estado}
+                onVerDetalles={() => setLibroSeleccionado(libro)}
+              />
             ))}
           </div>
         ) : (
@@ -178,14 +163,13 @@ useEffect(() => {
         )}
       </main>
 
-      {/* Modal de detalles */}
       <LibroDetalleModal
         libro={libroSeleccionado ? {
           ...libroSeleccionado,
-          fotoLibro: libroSeleccionado ? `http://localhost:8000${libroSeleccionado.foto}` : "",
-          categoria: libroSeleccionado?.categoria?.nombre || "Sin categoría",
-          fechaPublicacion: new Date(libroSeleccionado?.fechaRegistro || Date.now()).toLocaleDateString(),
-          usuarioNombre: libroSeleccionado?.estudiante?.nombre || "Usuario"
+          fotoLibro: `http://localhost:8000${libroSeleccionado.foto}`,
+          categoria: libroSeleccionado.categoria?.nombre,
+          fechaPublicacion: new Date(libroSeleccionado.fechaRegistro).toLocaleDateString(),
+          usuarioNombre: libroSeleccionado.estudiante?.nombre
         } : null}
         isOpen={!!libroSeleccionado}
         onClose={() => setLibroSeleccionado(null)}
