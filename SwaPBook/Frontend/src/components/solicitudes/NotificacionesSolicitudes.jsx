@@ -121,6 +121,8 @@ const NotificacionesSolicitudes = () => {
           solicitud={detalleSolicitud}
           isOpen={!!detalleSolicitud}
           onClose={handleCerrarDetalles}
+          onAceptar={handleAceptar}
+          onRechazar={handleRechazar}
         />
       )}
     </div>

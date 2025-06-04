@@ -5,7 +5,7 @@ import PanelPerfil from "../../components/estudiante/PanelPerfil";
 import CardLibro from "../../components/estudiante/CardLibro";
 import LibroDetalleModal from "../../components/estudiante/LibroDetalleModal";
 import Navbar from "../../components/ui/Navbar";
-import PublicarLibro from "../../components/catalog/PublicarLibro"; // Asegúrate de la ruta correcta
+import PublicarLibro from "../../components/catalog/PublicarLibro"; // Ajusta la ruta si es necesario
 
 const MisLibros = () => {
   const navigate = useNavigate();
@@ -54,6 +54,7 @@ const MisLibros = () => {
   };
 
   const handleEditarLibro = (libro) => {
+    // Implementar lógica para editar libro
     console.log("Editar libro:", libro);
   };
 
@@ -72,10 +73,10 @@ const MisLibros = () => {
     }
   };
 
+  // Refrescar libros después de publicar uno nuevo
   const handleLibroPublicado = () => {
     setShowModalPublicar(false);
     setLoading(true);
-    // Vuelve a cargar los libros
     setTimeout(() => {
       window.location.reload();
     }, 700);
@@ -86,8 +87,10 @@ const MisLibros = () => {
       <Navbar usuario={estudiante} />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
+          {/* Panel lateral */}
           <PanelPerfil handleLogout={handleLogout} />
 
+          {/* Sección de libros scrollable */}
           <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
             <div className="flex flex-col sm:flex-row items-center justify-between w-full mb-6 gap-3">
               <h1 className="text-2xl font-bold text-[#722F37] text-center flex-1">
@@ -109,8 +112,11 @@ const MisLibros = () => {
             ) : error ? (
               <div className="text-center p-4 text-red-600">{error}</div>
             ) : libros.length > 0 ? (
-              <div className="w-full flex justify-center">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center w-full">
+              <div className="w-full">
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center max-h-[70vh] overflow-y-auto pr-2"
+                  style={{ minHeight: "200px" }}
+                >
                   {libros.map((libro) => (
                     <CardLibro
                       key={libro.idLibro}
@@ -121,6 +127,7 @@ const MisLibros = () => {
                       titulo={libro.titulo || "Sin título"}
                       autor={libro.autor || "Autor desconocido"}
                       categoria={libro.categoria?.nombre || "Sin categoría"}
+                      descripcion={libro.descripcion || ""}
                       estado={libro.estado || "Desconocido"}
                       esPropio={true}
                       onVerDetalles={() => setLibroSeleccionado(libro)}
@@ -136,6 +143,7 @@ const MisLibros = () => {
           </div>
         </div>
 
+        {/* Modal de publicación de libro */}
         {showModalPublicar && (
           <PublicarLibro
             isOpen={showModalPublicar}
@@ -144,6 +152,7 @@ const MisLibros = () => {
           />
         )}
 
+        {/* Modal de detalles */}
         <LibroDetalleModal
           libro={libroSeleccionado ? {
             ...libroSeleccionado,

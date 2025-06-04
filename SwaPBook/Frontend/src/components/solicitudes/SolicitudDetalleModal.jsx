@@ -1,4 +1,5 @@
 import React from "react";
+import { FiBookOpen, FiUser, FiInfo, FiLayers, FiX } from "react-icons/fi";
 
 const SolicitudDetalleModal = ({
   solicitud,
@@ -9,44 +10,41 @@ const SolicitudDetalleModal = ({
 }) => {
   if (!isOpen || !solicitud) return null;
 
-  // Datos del solicitante
+  // Datos del solicitante y libros
   const perfilSolicitante = solicitud.solicitante || {};
   const libroSolicitado = solicitud.libro_solicitado || {};
   const libroOfrecido = solicitud.libro_ofrecido || {};
 
-  // Formato de fecha y hora
-  const fecha = solicitud.fechaEncuentro
-    ? new Date(solicitud.fechaEncuentro)
-    : null;
+  // Fechas
+  const fecha = solicitud.fechaEncuentro ? new Date(solicitud.fechaEncuentro) : null;
   const fechaStr = fecha?.toLocaleDateString() || "";
   const horaStr = fecha?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6">
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
-        >
-          <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-
-        {/* Encabezado con info del solicitante */}
-        <div className="flex items-center gap-4 mb-6 border-b pb-4">
-          <img
-            src={perfilSolicitante.fotoPerfil 
-              ? `http://localhost:8000${perfilSolicitante.fotoPerfil}`
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(perfilSolicitante.nombre || "Usuario")}`}
-            alt={perfilSolicitante.nombre}
-            className="w-12 h-12 rounded-full object-cover border-2 border-[#c1a57b]"
-          />
-          <div>
-            <h3 className="font-bold text-[#722F37]">{perfilSolicitante.nombre}</h3>
-            <p className="text-xs text-gray-500">{perfilSolicitante.correo}</p>
+        {/* Barra superior */}
+        <div className="flex items-center justify-between border-b pb-4 mb-6">
+          <div className="flex items-center gap-4">
+            <img
+              src={perfilSolicitante.fotoPerfil 
+                ? `http://localhost:8000${perfilSolicitante.fotoPerfil}`
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(perfilSolicitante.nombre || "Usuario")}`}
+              alt={perfilSolicitante.nombre}
+              className="w-12 h-12 rounded-full object-cover border-2 border-[#c1a57b]"
+            />
+            <div>
+              <h3 className="font-bold text-[#722F37]">{perfilSolicitante.nombre}</h3>
+              <p className="text-xs text-gray-500">{perfilSolicitante.correo}</p>
+            </div>
           </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-2xl"
+            aria-label="Cerrar"
+          >
+            <FiX />
+          </button>
         </div>
 
         {/* Sección de intercambio de libros */}
@@ -54,24 +52,29 @@ const SolicitudDetalleModal = ({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             {/* Libro solicitado */}
             <div className="flex-1 text-center">
-              <div className="mb-3">
-                <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md">
-                  Libro Solicitado
-                </span>
-              </div>
+              <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md mb-2">
+                Libro Solicitado
+              </span>
               <img
                 src={libroSolicitado.foto 
                   ? `http://localhost:8000${libroSolicitado.foto}`
                   : "https://via.placeholder.com/150x200?text=Libro+solicitado"}
                 alt={libroSolicitado.titulo}
-                className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-3"
+                className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-2"
               />
               <div className="space-y-1">
-                <h4 className="font-bold text-[#722F37]">{libroSolicitado.titulo}</h4>
-                <p className="text-sm text-gray-600">{libroSolicitado.autor}</p>
-                <span className="inline-block bg-Swap-beige text-white px-2 py-0.5 rounded text-xs">
-                  {libroSolicitado.categoria?.nombre || "Sin categoría"}
-                </span>
+                <div className="flex items-center justify-center gap-2 text-[#722F37] font-bold">
+                  <FiBookOpen /> {libroSolicitado.titulo}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+                  <FiUser /> {libroSolicitado.autor}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-xs">
+                  <FiLayers /> {libroSolicitado.categoria?.nombre || "Sin categoría"}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-700 max-h-12 overflow-y-auto">
+                  <FiInfo /> {libroSolicitado.descripcion}
+                </div>
               </div>
             </div>
 
@@ -97,31 +100,36 @@ const SolicitudDetalleModal = ({
 
             {/* Libro ofrecido */}
             <div className="flex-1 text-center">
-              <div className="mb-3">
-                <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md">
-                  Libro Ofrecido
-                </span>
-              </div>
+              <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md mb-2">
+                Libro Ofrecido
+              </span>
               <img
                 src={libroOfrecido.foto 
                   ? `http://localhost:8000${libroOfrecido.foto}`
                   : "https://via.placeholder.com/150x200?text=Libro+ofrecido"}
                 alt={libroOfrecido.titulo}
-                className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-3"
+                className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-2"
               />
               <div className="space-y-1">
-                <h4 className="font-bold text-[#722F37]">{libroOfrecido.titulo}</h4>
-                <p className="text-sm text-gray-600">{libroOfrecido.autor}</p>
-                <span className="inline-block bg-Swap-beige text-white px-2 py-0.5 rounded text-xs">
-                  {libroOfrecido.categoria?.nombre || "Sin categoría"}
-                </span>
+                <div className="flex items-center justify-center gap-2 text-[#722F37] font-bold">
+                  <FiBookOpen /> {libroOfrecido.titulo}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+                  <FiUser /> {libroOfrecido.autor}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-xs">
+                  <FiLayers /> {libroOfrecido.categoria?.nombre || "Sin categoría"}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-700 max-h-12 overflow-y-auto">
+                  <FiInfo /> {libroOfrecido.descripcion}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Detalles del encuentro */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        {/* Detalles del encuentro y estado */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-semibold text-[#722F37] mb-2 flex items-center gap-2">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,7 +150,6 @@ const SolicitudDetalleModal = ({
               <span className="font-semibold">Lugar:</span> {solicitud.lugarEncuentro}
             </p>
           </div>
-          
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-semibold text-[#722F37] mb-2 flex items-center gap-2">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,9 +173,7 @@ const SolicitudDetalleModal = ({
               onClick={() => onRechazar(solicitud.idSolicitud)}
               className="flex-1 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors flex items-center justify-center gap-2"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-              </svg>
+              <FiX className="h-5 w-5" />
               Rechazar
             </button>
             <button

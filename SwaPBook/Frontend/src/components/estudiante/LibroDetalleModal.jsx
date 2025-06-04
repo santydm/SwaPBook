@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SolicitarIntercambioModal from "./SolicitarIntercambioModal";
 import axios from "axios";
+import { FiUser, FiBookOpen, FiLayers, FiInfo, FiCheckCircle, FiX } from "react-icons/fi";
 
 const LibroDetalleModal = ({
   libro,
@@ -8,7 +9,7 @@ const LibroDetalleModal = ({
   onClose,
   esPropio,
   onSolicitarIntercambio,
-  actualizarLibros // función para refrescar la lista de libros en el padre
+  actualizarLibros
 }) => {
   const [mostrarModalSolicitud, setMostrarModalSolicitud] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -25,9 +26,7 @@ const LibroDetalleModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
-  
 
-  // Cargar categorías al abrir el modal
   useEffect(() => {
     if (modoEdicion && categorias.length === 0) {
       axios.get("http://localhost:8000/categorias")
@@ -36,7 +35,6 @@ const LibroDetalleModal = ({
     }
   }, [modoEdicion, categorias.length]);
 
-  // Resetear estado al abrir/cambiar libro
   useEffect(() => {
     if (libro) {
       setForm({
@@ -57,12 +55,12 @@ const LibroDetalleModal = ({
   if (!isOpen || !libro) return null;
 
   // Foto del usuario que publicó el libro
-  let usuarioFotoUrl = libro.usuarioFoto;
+  let usuarioFotoUrl = libro.estudiante?.fotoPerfil;
   if (usuarioFotoUrl && !usuarioFotoUrl.startsWith("http")) {
     usuarioFotoUrl = `http://localhost:8000${usuarioFotoUrl}`;
   }
   if (!usuarioFotoUrl) {
-    usuarioFotoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(libro.usuarioNombre || "Usuario")}&background=722F37&color=fff&size=36`;
+    usuarioFotoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(libro.estudiante?.nombre || "Usuario")}&background=722F37&color=fff&size=36`;
   }
 
   const handleInputChange = (e) => {
@@ -135,23 +133,46 @@ const LibroDetalleModal = ({
     }
   };
 
+  // Estado visual
+  const estadoDisponible = libro.estado === "Disponible";
+
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
         <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-5xl mx-4">
-          {/* Botón cerrar */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
-          >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          {/* Barra superior */}
+          <div className="flex items-center justify-between px-6 py-4 bg-[#722F37] rounded-t-lg">
+            <div className="flex items-center gap-4">
+              <img
+                src={usuarioFotoUrl}
+                alt={libro.estudiante?.nombre}
+                className="w-10 h-10 rounded-full border-2 border-white object-cover"
+              />
+              <div>
+                <div className="text-white font-semibold flex items-center gap-2">
+                  <FiUser className="inline-block" /> {libro.estudiante?.nombre || "Usuario"}
+                </div>
+                <div className="text-gray-200 text-xs">{libro.fechaPublicacion}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-white flex items-center gap-2">
+                <FiCheckCircle className={estadoDisponible ? "text-green-300" : "text-gray-300"} />
+                {libro.estado}
+              </span>
+              <button
+                onClick={onClose}
+                className="text-white hover:text-gray-200 text-2xl focus:outline-none"
+                aria-label="Cerrar"
+              >
+                <FiX />
+              </button>
+            </div>
+          </div>
 
           <div className="flex flex-col md:flex-row">
             {/* Imagen del libro */}
-            <div className="md:w-1/3 bg-gray-50 p-6 flex items-center justify-center md:rounded-l-lg">
+            <div className="md:w-1/3 bg-gray-50 p-6 flex items-center justify-center md:rounded-bl-lg">
               <img
                 src={imagenPreview}
                 alt={form.titulo}
@@ -177,46 +198,28 @@ const LibroDetalleModal = ({
               {!modoEdicion && !confirmarEliminar && (
                 <>
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-[#722F37] mb-2">{libro.titulo}</h2>
-                    <div className="mb-4 flex items-center">
-                      <img
-                        src={`http://localhost:8000${libro.estudiante.fotoPerfil}`}
-                        alt={usuarioFotoUrl}
-                        className="w-10 h-10 rounded-full mr-3 border-2 border-[#722F37] object-cover"
-                      />
-                      <span className="text-gray-700">
-                        Publicado por <span className="font-semibold">{libro.usuarioNombre}</span>
-                      </span>
-                      <span className="text-sm text-gray-500 ml-4">{libro.fechaPublicacion}</span>
+                    <h2 className="text-2xl font-bold text-[#722F37] mb-2 flex items-center gap-2">
+                      <FiBookOpen className="text-Swap-beige" />
+                      {libro.titulo}
+                    </h2>
+                    <div className="flex flex-col md:flex-row gap-4 mb-4">
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <FiUser className="text-Swap-beige" />
+                        <span className="font-semibold">Autor:</span>
+                        <span>{libro.autor}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <FiLayers className="text-Swap-beige" />
+                        <span className="font-semibold">Categoría:</span>
+                        <span>{libro.categoria}</span>
+                      </div>
                     </div>
-                    <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-3">
-                      <div>
-                        <span className="font-semibold text-[#722F37]">Autor:</span> {libro.autor}
-                      </div>
-                      <div>
-                        <span className="font-semibold text-[#722F37]">Categoría:</span> {libro.categoria}
-                      </div>
-                      <div>
-                        <span className="font-semibold text-[#722F37]">Estado:</span>
-                        <span
-                          className={`ml-2 inline-flex items-center gap-1 px-2 py-1 text-xs rounded font-semibold ${
-                            libro.estado === "Disponible"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          {libro.estado === "Disponible" && (
-                            <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                              <circle cx="10" cy="10" r="10" />
-                            </svg>
-                          )}
-                          {libro.estado}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-semibold text-[#722F37] block mb-1">Descripción:</span>
-                        <p className="text-gray-700 text-sm">{libro.descripcion}</p>
-                      </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FiInfo className="text-Swap-beige" />
+                      <span className="font-semibold text-[#722F37]">Descripción:</span>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-gray-200 text-gray-700 text-sm mb-4 max-h-32 overflow-y-auto">
+                      {libro.descripcion}
                     </div>
                   </div>
                   {/* Acciones */}
@@ -240,7 +243,7 @@ const LibroDetalleModal = ({
                       <button
                         onClick={() => setMostrarModalSolicitud(true)}
                         className="w-full md:w-60 py-3 bg-Swap-green text-white rounded-md font-semibold hover:bg-Swap-green-dark transition-colors flex items-center justify-center gap-2 mt-2"
-                        disabled={libro.estado !== "Disponible"}
+                        disabled={!estadoDisponible}
                       >
                         Solicitar Intercambio
                       </button>
