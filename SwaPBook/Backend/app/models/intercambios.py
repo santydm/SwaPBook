@@ -21,6 +21,7 @@ class Intercambio(Base):
     idLibroOfrecido = Column(Integer, ForeignKey("libros.idLibro", ondelete="CASCADE"))
     idLibroSolicitado = Column(Integer, ForeignKey("libros.idLibro", ondelete="CASCADE"))
     fechaEncuentro = Column(DateTime)
+    fechaCambioEstado = Column(DateTime, nullable=True)
     horaEncuentro = Column(DateTime)
     lugarEncuentro = Column(String(100), nullable=True)
     estado = Column(Enum(EstadoIntercambioEnum), default=EstadoIntercambioEnum.en_proceso)

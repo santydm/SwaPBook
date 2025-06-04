@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import PanelPerfil from "../../components/estudiante/PanelPerfil";
-import SolicitudNotificacionCard from "../../components/solicitudes/SolicitudNotificacionCard";
 import SolicitudDetalleModal from "../../components/solicitudes/SolicitudDetalleModal";
+import SolicitudNotificacionCard from "../../components/solicitudes/SolicitudNotificacionCard";
 import Navbar from "../../components/ui/Navbar";
 
 const MisSolicitudes = () => {

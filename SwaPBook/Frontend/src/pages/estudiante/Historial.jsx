@@ -3,52 +3,100 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import PanelPerfil from "../../components/estudiante/PanelPerfil";
 import Navbar from "../../components/ui/Navbar";
+import { FiBookOpen, FiUser, FiLayers, FiClock } from "react-icons/fi";
 
-// Card profesional para cada intercambio
-const CardIntercambio = ({ intercambio }) => (
-  <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200 w-full max-w-4xl mb-4">
-    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-      <div className="flex-1">
-        <h3 className="font-semibold text-[#722F37] text-lg mb-2">
-          Estado:{" "}
-          <span
-            className={
-              intercambio.estado === "Finalizado"
-                ? "bg-green-100 text-green-700 px-2 py-1 rounded"
-                : intercambio.estado === "Cancelado"
-                ? "bg-red-100 text-red-700 px-2 py-1 rounded"
-                : "bg-yellow-100 text-yellow-700 px-2 py-1 rounded"
-            }
-          >
-            {intercambio.estado}
+// Card compacta, alineada y sin espacios en blanco
+const CardIntercambio = ({ intercambio }) => {
+  const formatFecha = (fecha) =>
+    fecha ? new Date(fecha).toLocaleDateString() : "Sin fecha";
+  const formatHora = (fecha) =>
+    fecha ? new Date(fecha).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+
+  return (
+    <div
+      className="bg-white rounded-2xl shadow-lg border border-gray-200 flex flex-col justify-between transition-transform hover:scale-[1.01] mb-4 w-full"
+      style={{ minWidth: 260, maxWidth: 320, minHeight: 270, maxHeight: "auto" }}
+    >
+      {/* Cabecera alineada */}
+      <div className="bg-[#722F37] p-4 flex items-center justify-between">
+        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+          intercambio.estado === "Finalizado"
+            ? "bg-green-100 text-green-700"
+            : intercambio.estado === "Cancelado"
+            ? "bg-red-100 text-red-700"
+            : "bg-yellow-100 text-yellow-700"
+        }`}>
+          {intercambio.estado}
+        </span>
+        <span className="text-white/90 text-sm flex items-center gap-1">
+          <FiClock className="inline-block" />
+          {formatFecha(intercambio.fechaCambioEstado)} {formatHora(intercambio.fechaCambioEstado)}
+        </span>
+      </div>
+
+      {/* Nombres de los implicados */}
+      <div className="px-5 pt-3 flex flex-col gap-1 text-sm">
+        <div className="flex items-center gap-2">
+          <FiUser className="text-Swap-beige" />
+          <span className="font-semibold text-[#722F37]">Solicitante:</span>
+          <span className="truncate">{intercambio.estudiante?.nombre || "Desconocido"}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <FiUser className="text-Swap-beige" />
+          <span className="font-semibold text-[#722F37]">Receptor:</span>
+          <span className="truncate">{intercambio.estudiante_receptor?.nombre || "Desconocido"}</span>
+        </div>
+      </div>
+
+      {/* Libros involucrados */}
+      <div className="flex-1 flex flex-row gap-2 px-5 py-3 items-center">
+        {/* Libro solicitado */}
+        <div className="flex-1 flex flex-col items-center">
+          <img
+            src={intercambio.libro_solicitado?.foto 
+              ? `http://localhost:8000${intercambio.libro_solicitado.foto}`
+              : "/images/book-placeholder.png"}
+            alt={intercambio.libro_solicitado?.titulo}
+            className="w-14 h-20 object-cover rounded border mb-1"
+          />
+          <div className="text-xs text-[#722F37] font-bold text-center truncate w-20">
+            {intercambio.libro_solicitado?.titulo}
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center px-1">
+          <span className="text-[#c1a57b] font-bold text-lg">⇄</span>
+        </div>
+        {/* Libro ofrecido */}
+        <div className="flex-1 flex flex-col items-center">
+          <img
+            src={intercambio.libro_ofrecido?.foto 
+              ? `http://localhost:8000${intercambio.libro_ofrecido.foto}`
+              : "/images/book-placeholder.png"}
+            alt={intercambio.libro_ofrecido?.titulo}
+            className="w-14 h-20 object-cover rounded border mb-1"
+          />
+          <div className="text-xs text-[#722F37] font-bold text-center truncate w-20">
+            {intercambio.libro_ofrecido?.titulo}
+          </div>
+        </div>
+      </div>
+
+      {/* Detalles compactos */}
+      <div className="px-5 pb-3 flex flex-col gap-0.5 text-xs text-gray-700">
+        <div className="flex items-center gap-1">
+          <FiLayers className="text-Swap-beige" />
+          <span className="truncate">{intercambio.lugarEncuentro || "Sin lugar"}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <FiClock className="text-Swap-beige" />
+          <span>
+            {formatFecha(intercambio.fechaEncuentro)} {formatHora(intercambio.horaEncuentro)}
           </span>
-        </h3>
-        <p className="text-sm text-gray-600 mb-1">
-          <strong>Fecha del encuentro:</strong>{" "}
-          {intercambio.fechaEncuentro
-            ? new Date(intercambio.fechaEncuentro).toLocaleDateString()
-            : "Sin fecha"}
-        </p>
-        <p className="text-sm text-gray-600 mb-1">
-          <strong>Lugar del encuentro:</strong>{" "}
-          {intercambio.lugarEncuentro || "No especificado"}
-        </p>
-        <p className="text-sm text-gray-600 mb-1">
-          <strong>Solicitante:</strong>{" "}
-          {intercambio.solicitante?.nombre || "Desconocido"}
-        </p>
-        <p className="text-sm text-gray-600 mb-1">
-          <strong>Libro solicitado:</strong>{" "}
-          {intercambio.libro_solicitado?.titulo || "Sin título"}
-        </p>
-        <p className="text-sm text-gray-600 mb-1">
-          <strong>Libro ofrecido:</strong>{" "}
-          {intercambio.libro_ofrecido?.titulo || "Sin título"}
-        </p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Historial = () => {
   const navigate = useNavigate();
@@ -108,7 +156,7 @@ const Historial = () => {
       <div className="container mx-auto p-4 md:p-6">
         <div className="flex flex-col md:flex-row gap-6">
           <PanelPerfil handleLogout={handleLogout} />
-          {/* Bandeja scrollable */}
+          {/* Bandeja scrollable, cards compactas */}
           <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
             <h1 className="text-2xl font-bold text-[#722F37] mb-6">Historial de Intercambios</h1>
             {loadingHistorial ? (
@@ -120,7 +168,7 @@ const Historial = () => {
               <div className="text-center p-4 text-red-600">{error}</div>
             ) : historial.length > 0 ? (
               <div
-                className="w-full flex flex-col items-center max-h-[70vh] overflow-y-auto pr-2"
+                className="w-full grid grid-cols-2 md:grid-cols-4 gap-4 max-h-[70vh] overflow-y-auto pr-2"
                 style={{ minHeight: "200px" }}
               >
                 {historial.map((intercambio) => (

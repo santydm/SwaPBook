@@ -1,4 +1,5 @@
 import React from "react";
+import { FiBookOpen, FiUser, FiLayers, FiInfo, FiX, FiRepeat } from "react-icons/fi";
 
 const IntercambioDetalleModal = ({
   intercambio,
@@ -26,42 +27,41 @@ const IntercambioDetalleModal = ({
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
         >
-          <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-          </svg>
+          <FiX className="h-7 w-7" />
         </button>
 
-        {/* Encabezado */}
+        {/* Encabezado: usuarios */}
         <div className="flex items-center gap-4 mb-6 border-b pb-4">
-          <img
-            src={solicitante?.fotoPerfil 
-              ? `http://localhost:8000${solicitante.fotoPerfil}`
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(solicitante?.nombre || "Usuario")}`}
-            alt={solicitante?.nombre}
-            className="w-12 h-12 rounded-full object-cover border-2 border-[#c1a57b]"
-          />
-          <div>
-            <h3 className="font-bold text-[#722F37]">{solicitante?.nombre}</h3>
-            <p className="text-xs text-gray-500">{solicitante?.correo}</p>
-            <span className="text-xs text-[#b4a07a] font-semibold">Solicitante</span>
+          <div className="flex flex-col items-center">
+            <img
+              src={solicitante?.fotoPerfil 
+                ? `http://localhost:8000${solicitante.fotoPerfil}`
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(solicitante?.nombre || "Usuario")}`}
+              alt={solicitante?.nombre}
+              className="w-12 h-12 rounded-full object-cover border-2 border-[#c1a57b]"
+            />
+            <div className="text-center">
+              <h3 className="font-bold text-[#722F37]">{solicitante?.nombre}</h3>
+              <p className="text-xs text-gray-500">{solicitante?.correo}</p>
+              <span className="text-xs text-[#b4a07a] font-semibold">Solicitante</span>
+            </div>
           </div>
           <div className="mx-4 animate-pulse">
-            <svg className="h-8 w-8 text-Swap-beige" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-            </svg>
+            <FiRepeat className="h-8 w-8 text-Swap-beige" />
           </div>
-          <img
-            src={receptor?.fotoPerfil 
-              ? `http://localhost:8000${receptor.fotoPerfil}`
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(receptor?.nombre || "Usuario")}`}
-            alt={receptor?.nombre}
-            className="w-12 h-12 rounded-full object-cover border-2 border-[#c1a57b]"
-          />
-          <div>
-            <h3 className="font-bold text-[#722F37]">{receptor?.nombre}</h3>
-            <p className="text-xs text-gray-500">{receptor?.correo}</p>
-            <span className="text-xs text-[#b4a07a] font-semibold">Receptor</span>
+          <div className="flex flex-col items-center">
+            <img
+              src={receptor?.fotoPerfil 
+                ? `http://localhost:8000${receptor.fotoPerfil}`
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(receptor?.nombre || "Usuario")}`}
+              alt={receptor?.nombre}
+              className="w-12 h-12 rounded-full object-cover border-2 border-[#c1a57b]"
+            />
+            <div className="text-center">
+              <h3 className="font-bold text-[#722F37]">{receptor?.nombre}</h3>
+              <p className="text-xs text-gray-500">{receptor?.correo}</p>
+              <span className="text-xs text-[#b4a07a] font-semibold">Receptor</span>
+            </div>
           </div>
         </div>
 
@@ -69,74 +69,71 @@ const IntercambioDetalleModal = ({
         <div className="relative bg-[#f9f6f2] rounded-xl p-6 mb-6 flex flex-col sm:flex-row items-center justify-between gap-6">
           {/* Libro ofrecido */}
           <div className="flex-1 text-center">
-            <div className="mb-3">
-              <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md">
-                Libro Ofrecido
-              </span>
-            </div>
+            <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md mb-2">
+              Libro Ofrecido
+            </span>
             <img
               src={libroOfrecido.foto 
                 ? `http://localhost:8000${libroOfrecido.foto}`
                 : "https://via.placeholder.com/150x200?text=Libro+ofrecido"}
               alt={libroOfrecido.titulo}
-              className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-3"
+              className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-2"
             />
             <div className="space-y-1">
-              <h4 className="font-bold text-[#722F37]">{libroOfrecido.titulo}</h4>
-              <p className="text-sm text-gray-600">{libroOfrecido.autor}</p>
-              <span className="inline-block bg-Swap-beige text-white px-2 py-0.5 rounded text-xs">
-                {libroOfrecido.categoria?.nombre || "Sin categoría"}
-              </span>
+              <div className="flex items-center justify-center gap-2 text-[#722F37] font-bold">
+                <FiBookOpen /> {libroOfrecido.titulo}
+              </div>
+              <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+                <FiUser /> {libroOfrecido.autor}
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs">
+                <FiLayers /> {libroOfrecido.categoria?.nombre || "Sin categoría"}
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-700 max-h-10 overflow-y-auto">
+                <FiInfo /> {libroOfrecido.descripcion}
+              </div>
             </div>
           </div>
 
-          {/* Animación de intercambio */}
+          {/* Ícono de intercambio */}
           <div className="relative my-4 sm:my-0 flex flex-col items-center">
-            <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg animate-spin-slow">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-7 w-7 text-Swap-beige" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                />
-              </svg>
+            <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg">
+              <FiRepeat className="h-7 w-7 text-Swap-beige" />
             </div>
             <span className="text-xs text-[#b4a07a] mt-2 font-bold">Intercambio</span>
           </div>
 
           {/* Libro solicitado */}
           <div className="flex-1 text-center">
-            <div className="mb-3">
-              <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md">
-                Libro Solicitado
-              </span>
-            </div>
+            <span className="bg-[#722F37] text-white px-3 py-1 rounded-t-lg inline-block text-sm font-bold shadow-md mb-2">
+              Libro Solicitado
+            </span>
             <img
               src={libroSolicitado.foto 
                 ? `http://localhost:8000${libroSolicitado.foto}`
                 : "https://via.placeholder.com/150x200?text=Libro+solicitado"}
               alt={libroSolicitado.titulo}
-              className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-3"
+              className="w-full max-w-[150px] h-[200px] object-cover rounded-lg shadow mx-auto mb-2"
             />
             <div className="space-y-1">
-              <h4 className="font-bold text-[#722F37]">{libroSolicitado.titulo}</h4>
-              <p className="text-sm text-gray-600">{libroSolicitado.autor}</p>
-              <span className="inline-block bg-Swap-beige text-white px-2 py-0.5 rounded text-xs">
-                {libroSolicitado.categoria?.nombre || "Sin categoría"}
-              </span>
+              <div className="flex items-center justify-center gap-2 text-[#722F37] font-bold">
+                <FiBookOpen /> {libroSolicitado.titulo}
+              </div>
+              <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+                <FiUser /> {libroSolicitado.autor}
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs">
+                <FiLayers /> {libroSolicitado.categoria?.nombre || "Sin categoría"}
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-700 max-h-10 overflow-y-auto">
+                <FiInfo /> {libroSolicitado.descripcion}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Detalles del intercambio */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-semibold text-[#722F37] mb-2 flex items-center gap-2">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +154,6 @@ const IntercambioDetalleModal = ({
               <span className="font-semibold">Lugar:</span> {intercambio.lugarEncuentro}
             </p>
           </div>
-          
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-semibold text-[#722F37] mb-2 flex items-center gap-2">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,9 +184,7 @@ const IntercambioDetalleModal = ({
                 procesando ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-              </svg>
+              <FiX className="h-5 w-5" />
               {procesando ? 'Procesando...' : 'Cancelar Intercambio'}
             </button>
             <button
