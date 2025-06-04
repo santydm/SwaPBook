@@ -6,6 +6,7 @@ from uuid import uuid4
 from typing import Optional, List
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
+from datetime import datetime
 from app.db.database import get_db
 from app.models.estudiantes import Estudiante
 from app.models.categorias import Categoria
@@ -66,8 +67,12 @@ async def crear_libro(
         estado="Disponible",
         idCategoria=categoria.idCategoria,
         idEstudiante=estudiante.idEstudiante,
-        foto=f"/static/images/libros/{filename}"
+        foto=f"/static/images/libros/{filename}",
+        fechaRegistro=datetime.utcnow()
+        
     )
+        
+
 
     db.add(nuevo_libro)
     db.commit()

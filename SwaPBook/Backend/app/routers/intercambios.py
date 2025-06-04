@@ -7,6 +7,7 @@ from app.models.libros import Libro, EstadoLibroEnum
 from app.schemas.intercambios import IntercambioResponse, IntercambioEstadoUpdate
 from sqlalchemy.orm import joinedload
 from fastapi import Query
+from datetime import datetime
 
 
 router = APIRouter(prefix="/intercambios", tags=["Intercambios"])
@@ -87,6 +88,11 @@ def actualizar_estado_intercambio(
     elif nuevo_estado == EstadoIntercambioEnum.cancelado:
         libro1.estado = EstadoLibroEnum.disponible
         libro2.estado = EstadoLibroEnum.disponible
+        
+    
+    if nuevo_estado in [EstadoIntercambioEnum.finalizado, EstadoIntercambioEnum.cancelado]:
+        intercambio.fechaCambioEstado = datetime.utcnow()
+
 
     intercambio.estado = nuevo_estado
 

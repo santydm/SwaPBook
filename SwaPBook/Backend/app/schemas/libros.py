@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
 from typing import Optional
+from datetime import datetime
 from .estudiantes import EstudiantePerfilSchema
 
 class EstadoLibroEnum(str, Enum):
@@ -20,6 +21,7 @@ class LibroResponse(BaseModel):
     titulo: str
     autor: str
     descripcion: str
+    fechaRegistro: datetime
     idCategoria: int
     foto: Optional[str]
     estado: EstadoLibroEnum
