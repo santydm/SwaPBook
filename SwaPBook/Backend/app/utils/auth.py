@@ -70,7 +70,8 @@ def crear_token_recuperacion(correo_institucional: str):
     payload = {
         "sub": correo_institucional,
         "exp": expira,
-        "tipo": "recuperacion"
+        "tipo": "recuperacion",
+        "rol": "recuperacion" 
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 

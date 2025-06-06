@@ -17,6 +17,8 @@ import NotificacionesSolicitudes from './components/solicitudes/NotificacionesSo
 import MisSolicitudes from './pages/estudiante/MisSolicitudes';
 import MisIntercambios from './pages/estudiante/MisIntercambios';
 import Home from './pages/estudiante/Home';
+import RecuperarContrasenia from './components/auth/RecuperarContrasenia';
+import RestablecerContrasenia from './components/auth/RestablecerContrasenia';
 
 function App() {
   const [usuarioLogeado, setUsuarioLogeado] = useState(false);
@@ -48,6 +50,9 @@ function App() {
         <Route path="/mis-solicitudes" element={<MisSolicitudes />} />  
         <Route path="/mis-intercambios" element={<MisIntercambios/>} />  
         <Route path="/historial" element={<Historial/>} />  
+        <Route path="/recuperacion-clave" element={<RecuperarContrasenia />} />
+        <Route path="/restablecer-clave" element={<RestablecerContrasenia />} />
+
       </Routes>
     </Router>
   );

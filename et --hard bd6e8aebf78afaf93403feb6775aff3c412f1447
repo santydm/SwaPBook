@@ -1,0 +1,506 @@
+[33mcommit bd6e8aebf78afaf93403feb6775aff3c412f1447[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdetalles-admin[m[33m, [m[1;31morigin/detalles-admin[m[33m)[m
+Merge: 15b0ce4 238be66
+Author: Your Name <you@example.com>
+Date:   Tue Jun 3 22:39:54 2025 -0500
+
+    Ajustes en el historial
+
+[33mcommit 15b0ce43706ac00d50d66d2c8600181e6e8c02f7[m
+Author: Your Name <you@example.com>
+Date:   Tue Jun 3 19:38:54 2025 -0500
+
+    detalles
+
+[33mcommit 238be66123dbecf7223fc5df58591e25d0a43fc1[m[33m ([m[1;31morigin/catalogo-filtrar[m[33m)[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Tue Jun 3 19:29:56 2025 -0500
+
+    agregar fechas a libros e intercambio
+
+[33mcommit 0a648adc63659db34e09f0bac96a450410ea58d6[m
+Merge: 44dfbac 3975c71
+Author: Your Name <you@example.com>
+Date:   Tue Jun 3 18:12:38 2025 -0500
+
+    Merge branch 'admin-parte1' into detalles-admin, resolving conflicts in .pyc files by removing them
+
+[33mcommit 44dfbacf12dac736d5c4deea15f3597f372b69bb[m[33m ([m[1;31morigin/catalogo-update[m[33m, [m[1;32mcatalogo-update[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Tue Jun 3 17:54:03 2025 -0500
+
+    Update components
+
+[33mcommit 3975c710f72b37e082101ec3b16026b9272127f1[m[33m ([m[1;31morigin/admin-parte1[m[33m)[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Tue Jun 3 17:38:26 2025 -0500
+
+    implementacion admin
+
+[33mcommit 6c39fe244bd949187fa2525543e633080d95bfed[m
+Author: Your Name <you@example.com>
+Date:   Tue Jun 3 17:28:23 2025 -0500
+
+    Cambio de alert, y boton de crear libro en mis libros
+
+[33mcommit eca724052cc28361da496566c5db54693591e27f[m
+Author: Your Name <you@example.com>
+Date:   Tue Jun 3 16:38:11 2025 -0500
+
+    Update catalogo
+
+[33mcommit 329bb11cbc166f6dcd674b56e3f316b5aa4017de[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Tue Jun 3 16:07:47 2025 -0500
+
+    actualizacion filtrar por categoria
+
+[33mcommit 2881cfc153be88b2c123e07214c0a466f1822b42[m[33m ([m[1;31morigin/front-filtros[m[33m, [m[1;32mfront-filtros[m[33m)[m
+Merge: bf843e4 5b989b8
+Author: Your Name <you@example.com>
+Date:   Sat May 31 12:59:23 2025 -0500
+
+    Barra funcional y solucion de schemas
+
+[33mcommit bf843e4c96fd6f23942898a6f0606f47d319be57[m[33m ([m[1;31morigin/front-detalles[m[33m, [m[1;32mfront-detalles[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Sat May 31 11:27:29 2025 -0500
+
+    fav icon y detalles
+
+[33mcommit 5b989b8f10568b140104a947d45fe28f649fa862[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Fri May 30 17:03:36 2025 -0500
+
+    arreglo de categoria y filtracion solo por categoria
+
+[33mcommit 968b9a3d60305a2027fe882f77210b8efb8d8f5b[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Fri May 30 15:58:59 2025 -0500
+
+    arreglo de categoria
+
+[33mcommit 991654917f3e5fa8b7bea4a02f7826c1e217a81c[m
+Author: Sebastián <sebitas0363@gmail.com>
+Date:   Thu May 29 20:20:25 2025 -0500
+
+    filtracion de catalogo
+
+[33mcommit 6ab30e4a7c9ef27786ae4ecd6bb5b8602a7ac38e[m
+Author: Your Name <you@example.com>
+Date:   Wed May 28 19:02:01 2025 -0500
+
+    Actualización de Home y catalogo
+
+[33mcommit 08925747309d44828e17b7fc9864f7fd4877836e[m
+Author: Your Name <you@example.com>
+Date:   Wed May 28 18:50:10 2025 -0500
+
+    Cambio de perfil y historial
+
+[33mcommit fda60086b587989e313a4971c742545d7e02036f[m
+Author: Your Name <you@example.com>
+Date:   Wed May 28 18:00:46 2025 -0500
+
+    actualizacion de componentes
+
+[33mcommit 8db01e328aadc76b55c82a6c189084b5814618be[m
+Merge: a728ce7 03a7d9e
+Author: Your Name <you@example.com>
+Date:   Wed May 28 17:20:03 2025 -0500
+
+    libros implementacion
+
+[33mcommit a728ce7e9effce4bfc49891ef26d099f25b473dc[m
+Author: Your Name <you@example.com>
+Date:   Wed May 28 16:57:59 2025 -0500
+
+    Cambios del footer
+
+[33mcommit 03a7d9e576dfa4eb2cde62a82acb31bb92f6b5ba[m[33m ([m[1;31morigin/libro-funcionalidades[m[33m)[m
+Author: Sebastián <sebitas0363@gmail.com>
+Date:   Wed May 28 16:51:43 2025 -0500
+
+    edicion y eliminacion de libro
+
+[33mcommit bde917e6d20b92e034b2294e224bdd0c4a4ba662[m[33m ([m[1;31morigin/front-implementaciones[m[33m, [m[1;32mfront-implementaciones[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Wed May 28 16:08:59 2025 -0500
+
+    Creacion del hombe
+
+[33mcommit 9f4e26acaa45076ae71444a7a974b49ed60ed650[m
+Author: Sebastián <sebitas0363@gmail.com>
+Date:   Wed May 28 15:33:06 2025 -0500
+
+    cambio de contraseña y eliminacion de cuenta
+
+[33mcommit dc6627bba4c6974adc4e28513004c72bc9038d78[m
+Author: Your Name <you@example.com>
+Date:   Fri May 23 01:16:40 2025 -0500
+
+    backup de recuperacion de contraseña
+
+[33mcommit 2a4afbeae08bfa04e2874a28057c7abc6fc3a804[m
+Author: Your Name <you@example.com>
+Date:   Fri May 23 00:10:46 2025 -0500
+
+    previo a confirmacion de correo
+
+[33mcommit aa76a12b7bddf8ea3ae1be67637da2e6342e6fce[m
+Author: Your Name <you@example.com>
+Date:   Thu May 22 20:27:48 2025 -0500
+
+    editar perfil- foto de perfil
+
+[33mcommit 9bd03d11c21115e7b8d81a3b02ba7fcea6675285[m
+Merge: 8b25220 5afd6c5
+Author: Your Name <you@example.com>
+Date:   Thu May 22 18:21:03 2025 -0500
+
+    mergee perfil
+
+[33mcommit 8b25220b894654bd455849848f9f2ad2fafc4a2c[m
+Merge: 6ae1182 de793f4
+Author: Your Name <you@example.com>
+Date:   Thu May 22 18:20:09 2025 -0500
+
+    merge para nueva rama
+
+[33mcommit 5afd6c5e15607d82568aa48ec9057813a88b285d[m[33m ([m[1;31morigin/edicion-perfil[m[33m)[m
+Author: Sebastián <sebitas0363@gmail.com>
+Date:   Thu May 22 15:10:22 2025 -0500
+
+    edicion de perfil y cambio de correo exitoso
+
+[33mcommit de793f48364b535fbc28718b2a6bebd64d43f815[m[33m ([m[1;31morigin/solicitud-aceptar[m[33m)[m
+Author: Sebastián <sebitas0363@gmail.com>
+Date:   Sun May 11 14:12:25 2025 -0500
+
+    rechazar solicitud y ver liugar de encuentro en intercambios
+
+[33mcommit 6ae1182bfc6e3dfab86ea550db2811dc3c9f1645[m[33m ([m[1;31morigin/front-intercambios[m[33m, [m[1;32mfront-intercambios[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Thu May 8 20:48:19 2025 -0500
+
+    funcionalidades-probadas
+
+[33mcommit c0ab12f290a5d66ab2f2db0e37448c18194b9bfb[m
+Author: Your Name <you@example.com>
+Date:   Wed May 7 18:15:23 2025 -0500
+
+    intercambio-funcionalidades
+
+[33mcommit 68f997666b934b95e9efc797b8e43341d618a3a0[m[33m ([m[1;32mIntercambios-front[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Wed May 7 00:56:19 2025 -0500
+
+    front de intercambio, sin cambio de estado
+
+[33mcommit 71303392421bf166fead3a7a08cc7036ef2af335[m
+Merge: cd03404 a93ba01
+Author: Your Name <you@example.com>
+Date:   Tue May 6 23:23:51 2025 -0500
+
+    merge rama intercambios
+
+[33mcommit cd03404706afa70f5ffe1e29ea24f61206f49782[m[33m ([m[1;31morigin/actualizacion-intercambio[m[33m)[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Mon May 5 23:22:41 2025 -0500
+
+    actualizacion de intercambios
+
+[33mcommit a93ba01f95282ce60da8df7e8e6eb448970c9ce7[m[33m ([m[1;31morigin/solicitudes-front[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Mon May 5 22:30:16 2025 -0500
+
+    Corrección de estilo menor
+
+[33mcommit 7a3954944d931fc40d20b36c9a24c2baff16b8e0[m
+Author: Your Name <you@example.com>
+Date:   Mon May 5 21:01:03 2025 -0500
+
+    Ajustes de notificaciones, y detalles
+
+[33mcommit 95bcab98210fed0baefb47cfa00de8039a9613b8[m
+Author: Your Name <you@example.com>
+Date:   Sun May 4 15:57:11 2025 -0500
+
+    front de solicitudes, con cambio de estado a aceptada
+
+[33mcommit 3514f6fd6844e4035a25b8f68174169cf79fc92e[m
+Author: Your Name <you@example.com>
+Date:   Sat May 3 22:42:23 2025 -0500
+
+    notificaciones y solicitudes
+
+[33mcommit e8b6ca43543075820f2939534cd004b5bf6385c8[m[33m ([m[1;31morigin/solicitudes[m[33m)[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Sat May 3 16:10:50 2025 -0500
+
+    intercambio hecho
+
+[33mcommit 3ed436393400ae15cf497ee55fdb18eb653a8d9d[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Thu May 1 22:29:05 2025 -0500
+
+    cambio de estado de intercambio exitoso
+
+[33mcommit 6a93a09fa45b387037dd8d728146e97e16ff8ef0[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Thu May 1 02:26:27 2025 -0500
+
+    creacion de intercambio y problemas de cambio de estado
+
+[33mcommit aaf9aa2e0bfae74bff909348877569cdf6743025[m[33m ([m[1;31morigin/libros-funcionalidades[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Wed Apr 30 22:11:08 2025 -0500
+
+    actualizacion de componentes
+
+[33mcommit d5922a649a25d51eec93d95f350be87dea14617e[m
+Merge: bdb1088 71f7db7
+Author: Your Name <you@example.com>
+Date:   Wed Apr 30 21:30:24 2025 -0500
+
+    agregado el formulario de libros funcional y aparece en mis libros
+
+[33mcommit 71f7db77cebdfc374e671f5db2a2ac16b844484b[m[33m ([m[1;31morigin/seccionLibro[m[33m)[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Wed Apr 30 18:37:50 2025 -0500
+
+    Actualización de la rama seccionLibro: creación de solicitudes y ajustes
+
+[33mcommit bdb1088c79a568ad84ee269dfdf1e95f371e7223[m
+Author: Your Name <you@example.com>
+Date:   Wed Apr 30 17:54:06 2025 -0500
+
+    Updates
+
+[33mcommit 5f00085f4898417d7adc98f0331af26db5335b85[m[33m ([m[1;31morigin/bloque_usuarios[m[33m)[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Wed Apr 30 12:24:12 2025 -0500
+
+    base de datos realizada y bloque de usuarios
+
+[33mcommit 3d808f12c3ab131e36445812f662f099eab5346c[m
+Merge: eee19b2 3e001ed
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Wed Apr 30 11:31:35 2025 -0500
+
+    remove __pycache__ and ignore pyc files
+
+[33mcommit eee19b23ed0d0f073b4cd9996b16f9e32247dd0e[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Wed Apr 30 11:29:18 2025 -0500
+
+    cambios de usuarios hechos
+
+[33mcommit 3e001edcee686747ed521b0b479978fa13bea95a[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Tue Apr 29 18:21:39 2025 -0500
+
+    creacion de libro desde el back, arreglar front
+
+[33mcommit 125ea2b5d58dca6b74b53a63597fc961ef53cbe1[m[33m ([m[1;31morigin/catalogo-front[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Tue Apr 29 12:57:02 2025 -0500
+
+    implemetacion del front end catalogo y perfil
+
+[33mcommit 2349e6248d5c5f41610d2e4cc8c0fdfd63f1379f[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Tue Apr 29 00:49:15 2025 -0500
+
+    cambio y recuperacion de contraseñas hechos
+
+[33mcommit 0b82100175afba62d644025d572a94a91003db7a[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/elminacion_estudiante[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Mon Apr 28 22:47:39 2025 -0500
+
+    eliminacion de estudiante exitosa y cambios en fecharegistro
+
+[33mcommit 65e8ae5366ddb352c48361f25b2520253902d727[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Mon Apr 28 21:13:48 2025 -0500
+
+    cambios realizados, pruebas hechas
+
+[33mcommit 6655e20135360161152c690bc839d1710221f246[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Mon Apr 28 20:12:30 2025 -0500
+
+    Guardar cambios pendientes antes de cambiar a main
+
+[33mcommit 4bb0e26fba8d758222460cdaf50815eec1beb7e7[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Mon Apr 28 20:08:06 2025 -0500
+
+    validacion del perfil por medio del token de autenticacion
+
+[33mcommit 593c12e15403f03a93964f8c8f0516563bd4bc08[m[33m ([m[1;31morigin/Perfil_con_funcionalides[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Mon Apr 28 17:19:12 2025 -0500
+
+    Update frontend
+
+[33mcommit 24a8e660fb5f7e208eb5835cc77dbc2249e9c698[m
+Author: Your Name <you@example.com>
+Date:   Sat Apr 26 14:26:10 2025 -0500
+
+    Perfil sin backend
+
+[33mcommit c20c4c4a67ec1aedb07295c072bbc7089314bbf9[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Sat Apr 26 00:46:35 2025 -0500
+
+    hasheo de contraseña y validacion login
+
+[33mcommit 1632c5f37f1d1e1b341c028144a904af80dcc856[m
+Merge: 4497489 545e884
+Author: santydm <104222970+santydm@users.noreply.github.com>
+Date:   Fri Apr 25 21:00:20 2025 -0500
+
+    Merge pull request #6 from santydm/crearLoginBackend
+    
+    Crear login backend
+
+[33mcommit 545e884d0bb20a907034aaa176b9473d6fdec474[m[33m ([m[1;31morigin/crearLoginBackend[m[33m)[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Fri Apr 25 20:58:18 2025 -0500
+
+    por si acaso
+
+[33mcommit 0ec6728320aa101a45dd2a593c07e9c50972b28f[m
+Merge: 1caead6 28b2776
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Fri Apr 25 20:57:52 2025 -0500
+
+    conflictos resueltos
+
+[33mcommit 1caead608b60732f47e6b309d91f359d70ee777a[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Fri Apr 25 19:12:09 2025 -0500
+
+    revision JWT
+
+[33mcommit 28b2776cd9144d4d6a43e3023799710702b5625c[m[33m ([m[1;31morigin/Login[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Fri Apr 25 19:05:39 2025 -0500
+
+    Modificaciones al registro y confirmacion
+
+[33mcommit 276ba214bfcd776e25bb3f9f981ab8405ff3a1cb[m
+Merge: 6889051 14625e3
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Fri Apr 25 18:30:38 2025 -0500
+
+    por si acaso
+
+[33mcommit 6889051c6ab927e5562a75543a7895b5289d31cf[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Fri Apr 25 18:21:54 2025 -0500
+
+    creacion de autenticacion con JWT
+
+[33mcommit 14625e34c0b5b9715ebc0f8f237f00fbce6dbd4b[m
+Author: Your Name <you@example.com>
+Date:   Fri Apr 25 18:05:43 2025 -0500
+
+    Registro con verificacion, pantalla de registro exitoso
+
+[33mcommit 8310438374d458c4a83da1f61994487bbc7bdd80[m
+Author: Your Name <you@example.com>
+Date:   Fri Apr 25 17:28:41 2025 -0500
+
+    Login y Olvidaste Tu contraseña
+
+[33mcommit 449748904991767cc6b39bb212af120313cd1a68[m[33m ([m[1;31morigin/libros[m[33m)[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Fri Apr 25 15:04:43 2025 -0500
+
+    retirar venv y __pycache__
+
+[33mcommit 5c0a4d0bfbe659c11d4248bdf19de79b694c67d9[m
+Merge: 2cbd36b 69a976b
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Fri Apr 25 14:57:14 2025 -0500
+
+    validacion backend con frontend
+
+[33mcommit 2cbd36bd451fcd0106f53512008de07df10a9ab7[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Fri Apr 25 13:27:11 2025 -0500
+
+    guardando mis cambios antes de clonar rama main
+
+[33mcommit 69a976b4e029296852fb7f138717455128367147[m
+Author: santydm <104222970+santydm@users.noreply.github.com>
+Date:   Fri Apr 25 02:16:44 2025 -0500
+
+    Update main.py
+
+[33mcommit 407acf336813b8e83f9714ed055023e1e89a1d52[m
+Merge: c3405d7 7892101
+Author: santydm <104222970+santydm@users.noreply.github.com>
+Date:   Fri Apr 25 02:15:48 2025 -0500
+
+    Merge pull request #5 from santydm/validacionBackend
+    
+    integracion de validacion por link de estudiantes en el back
+
+[33mcommit 7892101700c9623fd7410f3fb25e47778af9c686[m[33m ([m[1;31morigin/validacionBackend[m[33m)[m
+Author: Santiago Duarte <santidm58@gmail.com>
+Date:   Fri Apr 25 02:11:18 2025 -0500
+
+    integracion de validacion por link de estudiantes en el back
+
+[33mcommit c3405d752a2a47300b8a473ad8943245606943a6[m
+Merge: 43d6a6b 5e411f0
+Author: santydm <104222970+santydm@users.noreply.github.com>
+Date:   Fri Apr 25 00:31:21 2025 -0500
+
+    Merge pull request #4 from santydm/Registro-verificacion
+    
+    Registro verificacion
+
+[33mcommit 5e411f033d9e6c7976d24ba626f9ae32b1f8a3fa[m[33m ([m[1;31morigin/Registro-verificacion[m[33m)[m
+Author: Your Name <you@example.com>
+Date:   Fri Apr 25 00:29:34 2025 -0500
+
+    correcciones
+
+[33mcommit d5902560bc0b100bade5602153def7f45943827e[m
+Author: Your Name <you@example.com>
+Date:   Fri Apr 25 00:17:27 2025 -0500
+
+    formulario de registro con las verificaciones
+
+[33mcommit 43d6a6bc30fe6139913e73a81ac82545c3e75899[m
+Merge: 9e9dee7 c40b11b
+Author: santydm <104222970+santydm@users.noreply.github.com>
+Date:   Thu Apr 24 21:49:22 2025 -0500
+
+    Merge pull request #3 from santydm/Conexion
+    
+    Conexion
+
+[33mcommit c40b11bf15fb11d53eb5009168731a9c8c3b6416[m[33m ([m[1;31morigin/Conexion[m[33m)[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Thu Apr 24 21:46:05 2025 -0500
+
+    eliminar venv y .env del repositorio y agregarlos a .gitignore
+
+[33mcommit 28246902922d793e50970998ba7b0435aa11130a[m
+Author: Sebastian <sebitas0363@gmail.com>
+Date:   Thu Apr 24 21:28:31 2025 -0500
+
+    Conexion exitosa entre el backend y frontend, estudiantes exitosamente registrados
+
+[33mcommit 9e9dee7a5133cfb8e5399050830e02bd4f394648[m
+Merge: ad24c86 9c231d9
+Author: santydm <104222970+santydm@users.noreply.github.com>
+Date:   Thu Apr 24 01:25:34 2025 -0500
+
+    Merge pull request #2 from santydm/registro
+    
+    Registro

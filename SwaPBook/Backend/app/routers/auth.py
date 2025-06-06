@@ -8,6 +8,7 @@ from app.schemas.token_schema import Token
 from app.utils.auth import verify_password, crear_token, get_current_user  # Asegúrate de que las funciones están bien importadas
 from jose import jwt, JWTError
 from app.core.security import hash_password
+from app.utils.auth import crear_token_recuperacion
 
 #Obtener la clave secreta del archivo .env
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -43,49 +44,45 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 # recuperar contraseña
 @router.post("/recuperar-contrasenia")
 def solicitar_recuperacion(request: PasswordResetRequest, db: Session = Depends(get_db)):
-    estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == request.correoInstitucional).first()
-    if not estudiante:
-        raise HTTPException(status_code=404, detail="Correo no registrado.")
-    
-    # Crear el token para el estudiante
-    token_data = {"idEstudiante": estudiante.idEstudiante}
-    token = crear_token(token_data)
-    
-    # Crear el enlace para la recuperación
-    enlace_recuperacion = f"http://localhost:8000/restablecer-contrasenia?token={token}"  # Cambiar URL por la correcta
+    try:
+        estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == request.correoInstitucional).first()
+        
+        if estudiante:
+            # Usar la función específica para recuperación
+            token = crear_token_recuperacion(estudiante.correoInstitucional)
+            enlace_recuperacion = f"http://localhost:5173/restablecer-contrasenia?token={token}"
+            
+            from app.utils.email_utils import enviar_correo_recuperacion
+            enviar_correo_recuperacion(estudiante.correoInstitucional, enlace_recuperacion)
 
-    # Enviar correo con el enlace de recuperación
-    from app.utils.email_utils import enviar_correo_recuperacion
-    enviar_correo_recuperacion(estudiante.correoInstitucional, enlace_recuperacion)
+        return {"mensaje": "Si el correo existe, recibirás un enlace de recuperación"}
 
-    return {"mensaje": "Se ha enviado un correo con instrucciones para restablecer la contraseña."}
-
-
+    except Exception as e:
+        print(f"Error en recuperación: {str(e)}")
+        return {"mensaje": "Error interno del servidor"}, 500
 
 # restablecer contraseña
 @router.post("/restablecer-contrasenia")
 def confirmar_cambio_contrasenia(data: PasswordResetConfirm, db: Session = Depends(get_db)):
-    # Verificar que las contraseñas coinciden usando la validación en el schema
     try:
-        # Validar el token
         payload = jwt.decode(data.token, SECRET_KEY, algorithms=[ALGORITHM])
-        id_estudiante = payload.get("idEstudiante")
+        if payload.get("tipo") != "recuperacion":
+            raise HTTPException(status_code=400, detail="Token inválido para recuperación.")
+        
+        correo = payload.get("sub")
+        estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == correo).first()
+        
+        if not estudiante:
+            raise HTTPException(status_code=404, detail="Estudiante no encontrado.")
+        
+        estudiante.contrasenia = hash_password(data.nueva_contrasenia)
+        db.commit()
+
+        return {"mensaje": "Contraseña actualizada exitosamente."}
+
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido o expirado.")
-    
-    # Buscar al estudiante en la base de datos
-    estudiante = db.query(Estudiante).filter(Estudiante.idEstudiante == id_estudiante).first()
-    if not estudiante:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado.")
-    
-    # Si el schema ya validó que las contraseñas coinciden, se puede proceder a actualizar
-    from app.core.security import hash_password
-    estudiante.contrasenia = hash_password(data.nueva_contrasenia)
-    
-    # Guardar el cambio en la base de datos
-    db.commit()
 
-    return {"mensaje": "Contraseña actualizada exitosamente."}
 
 #cambio de contraseña
 @router.post("/cambiar-contrasenia")
