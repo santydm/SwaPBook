@@ -21,7 +21,7 @@ const SolicitudDetalleModal = ({
   const horaStr = fecha?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-60">
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6">
         {/* Barra superior */}
         <div className="flex items-center justify-between border-b pb-4 mb-6">

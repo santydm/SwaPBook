@@ -123,6 +123,8 @@ const MisSolicitudes = () => {
                       onAceptar={handleAceptar}
                       onRechazar={handleRechazar}
                       onVerDetalles={() => setSolicitudSeleccionada(solicitud)}
+                      animate={false}
+                      wide={true}
                     />
                   ))}
                 </div>

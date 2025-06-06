@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { FiCheck, FiX, FiInfo, FiUser, FiCalendar, FiMapPin, FiBook } from "react-icons/fi";
 
 const SolicitudNotificacionCard = ({
   idSolicitud,
@@ -12,87 +13,106 @@ const SolicitudNotificacionCard = ({
   onAceptar,
   onRechazar,
   onVerDetalles,
-  onClose
+  onClose,
+  animated = true, // por defecto animada
+  wide = false,    // por defecto compacta
+  autoClose = false, // solo para notificaciones
+  autoCloseTime = 5000 // ms
 }) => {
+  // Manejo seguro de la imagen
+  const getFotoUrl = (foto) => {
+    if (!foto || foto.trim() === "") return "/images/book-placeholder.png";
+    if (foto.startsWith("http")) return foto;
+    return `http://localhost:8000${foto}`;
+  };
+
+  // Descartar automáticamente tras X segundos (solo si autoClose)
+  useEffect(() => {
+    if (!autoClose || !onClose) return;
+    const timer = setTimeout(() => onClose(idSolicitud), autoCloseTime);
+    return () => clearTimeout(timer);
+  }, [autoClose, autoCloseTime, idSolicitud, onClose]);
+
   return (
-    <div className="relative flex items-stretch">
-      {/* Botón cerrar notificación (solo si onClose existe) */}
-      {onClose && (
+    <div
+      className={`
+        relative bg-white rounded-xl shadow-lg border border-gray-200 flex
+        ${wide ? "w-[520px] min-h-[160px]" : "w-[410px] min-h-[144px]"}
+        ${animated ? "animate-slide-in" : ""}
+      `}
+    >
+      {/* Botones de acción */}
+      <div className="flex flex-col justify-center items-center px-2 gap-2">
         <button
-          onClick={() => onClose(idSolicitud)}
-          className="absolute -top-3 -right-3 z-20 flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-200 transition"
-          title="Cerrar notificación"
+          onClick={() => onAceptar(idSolicitud)}
+          className="p-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition"
+          title="Aceptar solicitud"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <FiCheck className="w-5 h-5" />
         </button>
-      )}
+        <button
+          onClick={() => onRechazar(idSolicitud)}
+          className="p-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition"
+          title="Rechazar solicitud"
+        >
+          <FiX className="w-5 h-5" />
+        </button>
+      </div>
 
-      {/* Card principal */}
-      <div className="flex bg-[#f9f6f2] shadow-lg border border-gray-200 overflow-hidden h-32 min-h-36 max-h-38 w-full rounded-xl">
-        {/* Botones de acción - Izquierda */}
-        <div className="w-14 flex flex-col h-full">
-          <button
-            onClick={() => onAceptar(idSolicitud)}
-            className="flex-1 flex items-center justify-center bg-green-100 text-green-700 font-semibold transition-colors rounded-tl-xl hover:bg-green-200 border-b border-green-200"
-            style={{ borderBottomLeftRadius: 0, borderTopLeftRadius: 12 }}
-            title="Aceptar"
-          >
-            <span className="text-xs font-bold">Aceptar</span>
-          </button>
-          <button
-            onClick={() => onRechazar(idSolicitud)}
-            className="flex-1 flex items-center justify-center bg-red-100 text-red-700 font-semibold transition-colors rounded-bl-xl hover:bg-red-200 border-t border-red-200"
-            style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 12 }}
-            title="Rechazar"
-          >
-            <span className="text-xs font-bold">Rechazar</span>
-          </button>
-        </div>
+      {/* Foto grande del libro */}
+      <div className="flex items-center justify-center p-3">
+        <img
+          src={getFotoUrl(fotoLibro)}
+          alt={tituloLibro}
+          className={`${wide ? "w-28 h-36" : "w-24 h-32"} object-cover rounded-lg border-2 border-Swap-beige`}
+        />
+      </div>
 
-        {/* Foto del libro */}
-        <div className="flex items-center w-20 h-full bg-white">
-          <img
-            src={fotoLibro}
-            alt={tituloLibro}
-            className="w-full h-full object-cover border-t border-b border-r border-gray-300"
-            style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderTopRightRadius: 8, borderBottomRightRadius: 8 }}
-          />
-        </div>
-
-        {/* Información central */}
-        <div className="flex-1 flex flex-col justify-center pl-4 pr-2 py-0 min-w-0">
-          <h3 className="font-extrabold text-[#722F37] text-base mb-1 leading-tight truncate">
-            {tituloLibro}
-          </h3>
-          <div className="flex flex-col gap-0.5 text-sm text-gray-800">
-            <span>
-              <span className="font-semibold">Autor:</span> {autorLibro}
-            </span>
-            <span>
-              <span className="font-semibold">Solicitante:</span> {nombreSolicitante}
-            </span>
-            <span>
-              <span className="font-semibold">Fecha:</span> {fechaSolicitud}
-            </span>
-            <span>
-              <span className="font-semibold">Lugar:</span> {lugarEncuentro}
-            </span>
-            <span>
-              <span className="font-semibold">Categoría:</span> {categoriaLibro}
+      {/* Información */}
+      <div className="flex-1 flex flex-col justify-between py-3 pl-3 pr-2 min-w-0">
+        <div>
+          <h3 className="font-semibold text-[#722F37] text-lg truncate">{tituloLibro}</h3>
+          <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+            <FiBook className="flex-shrink-0" />
+            <span className="truncate">{autorLibro}</span>
+            <span className="inline-block ml-2 px-2 py-0.5 bg-[#f9f6f2] text-[#722F37] text-xs rounded-full">
+              {categoriaLibro}
             </span>
           </div>
         </div>
+        <div className="space-y-1.5 text-sm mt-2">
+          <div className="flex items-center gap-2 text-gray-600">
+            <FiUser className="text-[#722F37]" />
+            <span className="truncate">{nombreSolicitante}</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <FiCalendar className="text-[#722F37]" />
+            <span>{fechaSolicitud}</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <FiMapPin className="text-[#722F37]" />
+            <span className="truncate">{lugarEncuentro}</span>
+          </div>
+        </div>
+      </div>
 
-        {/* Botón Ver detalles - Derecha, color suave y armónico */}
+      {/* Botón cerrar y detalles */}
+      <div className="flex flex-col justify-between items-end py-2 pr-2">
+        {onClose && (
+          <button
+            onClick={() => onClose(idSolicitud)}
+            className="p-1 text-gray-400 hover:text-[#722F37] transition"
+            title="Cerrar notificación"
+          >
+            <FiX className="w-4 h-4" />
+          </button>
+        )}
         <button
           onClick={() => onVerDetalles(idSolicitud)}
-          className="w-16 h-full bg-gray-200 text-[#722F37] rounded-r-lg hover:bg-gray-300 transition-colors flex flex-col items-center justify-center p-2 text-sm font-bold"
-          style={{ minWidth: 64 }}
+          className="p-1 text-[#722F37] hover:text-[#a67c52] transition"
           title="Ver detalles"
         >
-          <span className="text-base font-bold">Ver</span>
+          <FiInfo className="w-5 h-5" />
         </button>
       </div>
     </div>

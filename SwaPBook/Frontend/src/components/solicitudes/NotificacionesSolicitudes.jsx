@@ -1,131 +1,167 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import SolicitudNotificacionCard from "./SolicitudNotificacionCard";
 import SolicitudDetalleModal from "./SolicitudDetalleModal";
 import axios from "axios";
 
 const NotificacionesSolicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
-  const [mostrar, setMostrar] = useState(true);
   const [detalleSolicitud, setDetalleSolicitud] = useState(null);
+  const timersRef = useRef({});
+  const dismissedIdsRef = useRef(new Set());
+  const modalOpenRef = useRef(false);
+
+  // Obtener solicitudes pendientes
+  const fetchSolicitudes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const perfil = await axios.get("http://localhost:8000/estudiantes/perfil", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const res = await axios.get(
+        `http://localhost:8000/solicitudes/pendientes/${perfil.data.idEstudiante}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Filtrar solicitudes nuevas no descartadas
+      const nuevasSolicitudes = res.data.filter(
+        solicitud =>
+          !dismissedIdsRef.current.has(solicitud.idSolicitud) &&
+          !solicitudes.some(s => s.idSolicitud === solicitud.idSolicitud)
+      );
+
+      setSolicitudes(prev => [...prev, ...nuevasSolicitudes]);
+    } catch (error) {
+      console.error("Error al obtener solicitudes:", error);
+    }
+  };
+
+  // Manejar auto-cierre de notificaciones
+  const iniciarTimer = (solicitud) => {
+    if (timersRef.current[solicitud.idSolicitud] || modalOpenRef.current) return;
+
+    timersRef.current[solicitud.idSolicitud] = setTimeout(() => {
+      dismissedIdsRef.current.add(solicitud.idSolicitud);
+      setSolicitudes(prev => prev.filter(s => s.idSolicitud !== solicitud.idSolicitud));
+      delete timersRef.current[solicitud.idSolicitud];
+    }, 5000);
+  };
 
   useEffect(() => {
-    const abortController = new AbortController(); // <-- Crear controlador
-  
-    const fetchSolicitudes = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-  
-        const perfil = await axios.get("http://localhost:8000/estudiantes/perfil", {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: abortController.signal // <-- Vincular señal
-        });
-        
-        const idEstudiante = perfil.data.idEstudiante;
-        
-        const res = await axios.get(
-          `http://localhost:8000/solicitudes/pendientes/${idEstudiante}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            signal: abortController.signal // <-- Usar la misma señal
-          }
-        );
-        
-        setSolicitudes(res.data);
-      } catch (error) {
-        if (error.name === 'CanceledError') {
-          console.log('Solicitud cancelada intencionalmente');
-        } else {
-          console.error("Error fetching solicitudes:", error);
-        }
-      }
-    };
-    
-    if (mostrar) fetchSolicitudes();
-    
-    const interval = setInterval(fetchSolicitudes, 30000);
-    
+    solicitudes.forEach(iniciarTimer);
+
     return () => {
-      abortController.abort(); // <-- Cancelar al desmontar
-      clearInterval(interval);
+      Object.values(timersRef.current).forEach(clearTimeout);
     };
-  }, [mostrar]);
+  }, [solicitudes]);
 
-  const handleClose = (idSolicitud) => {
-    setSolicitudes(prev => prev.filter(sol => sol.idSolicitud !== idSolicitud));
-  };
+  // Actualizar solicitudes cada 10 segundos
+  useEffect(() => {
+    fetchSolicitudes();
+    const interval = setInterval(fetchSolicitudes, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleAceptar = async (idSolicitud) => {
+  // Acciones principales
+  const handleAceptarRechazar = async (idSolicitud, accion) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:8000/solicitudes/aceptar/${idSolicitud}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSolicitudes(prev => prev.filter(sol => sol.idSolicitud !== idSolicitud));
+      await axios.put(
+        `http://localhost:8000/solicitudes/${accion}/${idSolicitud}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      dismissedIdsRef.current.add(idSolicitud);
+      setSolicitudes(prev => prev.filter(s => s.idSolicitud !== idSolicitud));
+      setDetalleSolicitud(null);
+      clearTimeout(timersRef.current[idSolicitud]);
+      delete timersRef.current[idSolicitud];
     } catch (error) {
-      console.error("Error al aceptar solicitud:", error);
+      console.error(`Error al ${accion}:`, error);
     }
   };
 
-  const handleRechazar = async (idSolicitud) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:8000/solicitudes/rechazar/${idSolicitud}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSolicitudes(prev => prev.filter(sol => sol.idSolicitud !== idSolicitud));
-    } catch (error) {
-      console.error("Error al rechazar solicitud:", error);
-    }
-  };
-
+  // Manejar visualización de detalles
   const handleVerDetalles = (idSolicitud) => {
-    const solicitud = solicitudes.find(sol => sol.idSolicitud === idSolicitud);
-    setDetalleSolicitud(solicitud);
+    const solicitud = solicitudes.find(s => s.idSolicitud === idSolicitud);
+    if (!solicitud) return;
+
+    // Pausar timer y marcar modal como abierto
+    modalOpenRef.current = true;
+    clearTimeout(timersRef.current[idSolicitud]);
+    setDetalleSolicitud({
+      ...solicitud,
+      libroSolicitado: solicitud.libro_solicitado,
+      solicitante: solicitud.solicitante
+    });
   };
 
-  const handleCerrarDetalles = () => setDetalleSolicitud(null);
+  // Cerrar modal
+  const handleCerrarModal = () => {
+    modalOpenRef.current = false;
+    setDetalleSolicitud(null);
 
-  if (!mostrar || solicitudes.length === 0) return null;
+    // Si la notificación aún existe, reiniciar su timer
+    const solicitudExistente = solicitudes.find(
+      s => s.idSolicitud === detalleSolicitud?.idSolicitud
+    );
+    if (solicitudExistente) {
+      iniciarTimer(solicitudExistente);
+    }
+  };
+
+  // Cerrar notificación manualmente
+  const handleCerrarNotificacion = (idSolicitud) => {
+    dismissedIdsRef.current.add(idSolicitud);
+    setSolicitudes(prev => prev.filter(s => s.idSolicitud !== idSolicitud));
+    clearTimeout(timersRef.current[idSolicitud]);
+    delete timersRef.current[idSolicitud];
+  };
 
   return (
-    <div className="fixed top-4 right-4 z-50 w-full max-w-md">
-      <button
-        className="absolute top-0 right-0 text-xs text-gray-400 hover:text-gray-600 p-2"
-        onClick={() => setMostrar(false)}
-        aria-label="Cerrar todas las notificaciones"
-      >
-        ×
-      </button>
-      <div className="space-y-3">
-        {solicitudes.map((solicitud) => (
-          <SolicitudNotificacionCard
-            key={solicitud.idSolicitud}
-            idSolicitud={solicitud.idSolicitud}
-            fotoLibro={`http://localhost:8000${solicitud.libro_solicitado?.foto}`}
-            tituloLibro={solicitud.libro_solicitado?.titulo}
-            autorLibro={solicitud.libro_solicitado?.autor}
-            categoriaLibro={solicitud.libro_solicitado?.categoria?.nombre || "Sin categoría"}
-            nombreSolicitante={solicitud.solicitante?.nombre}
-            fechaSolicitud={new Date(solicitud.fechaSolicitud).toLocaleDateString()}
-            lugarEncuentro={solicitud.lugarEncuentro}
-            onAceptar={handleAceptar}
-            onRechazar={handleRechazar}
-            onClose={handleClose}
-            onVerDetalles={handleVerDetalles}
-          />
+    <>
+      {/* CONTENEDOR DE NOTIFICACIONES */}
+      <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none">
+        {solicitudes.map(solicitud => (
+          <div key={solicitud.idSolicitud} className="pointer-events-auto">
+            <SolicitudNotificacionCard
+              idSolicitud={solicitud.idSolicitud}
+              fotoLibro={solicitud.libro_solicitado?.foto}
+              tituloLibro={solicitud.libro_solicitado?.titulo}
+              autorLibro={solicitud.libro_solicitado?.autor}
+              categoriaLibro={solicitud.libro_solicitado?.categoria?.nombre || "Sin categoría"}
+              nombreSolicitante={solicitud.solicitante?.nombre}
+              fechaSolicitud={new Date(solicitud.fechaSolicitud).toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+              lugarEncuentro={solicitud.lugarEncuentro}
+              onAceptar={() => handleAceptarRechazar(solicitud.idSolicitud, 'aceptar')}
+              onRechazar={() => handleAceptarRechazar(solicitud.idSolicitud, 'rechazar')}
+              onVerDetalles={() => handleVerDetalles(solicitud.idSolicitud)}
+              onClose={handleCerrarNotificacion}
+              animated={true}
+              wide={false}
+              autoClose={true}
+              autoCloseTime={5000}
+            />
+          </div>
         ))}
       </div>
-      {detalleSolicitud && (
-        <SolicitudDetalleModal
-          solicitud={detalleSolicitud}
-          isOpen={!!detalleSolicitud}
-          onClose={handleCerrarDetalles}
-          onAceptar={handleAceptar}
-          onRechazar={handleRechazar}
-        />
-      )}
-    </div>
+
+      {/* MODAL DE DETALLES - FUERA DEL CONTENEDOR DE NOTIFICACIONES */}
+      <SolicitudDetalleModal
+        solicitud={detalleSolicitud}
+        isOpen={!!detalleSolicitud}
+        onClose={handleCerrarModal}
+        onAceptar={() => handleAceptarRechazar(detalleSolicitud?.idSolicitud, 'aceptar')}
+        onRechazar={() => handleAceptarRechazar(detalleSolicitud?.idSolicitud, 'rechazar')}
+      />
+    </>
   );
 };
 
