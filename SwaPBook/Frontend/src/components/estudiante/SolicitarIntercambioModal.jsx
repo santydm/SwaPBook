@@ -1,7 +1,21 @@
+// src/components/SolicitarIntercambioModal.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import LibroMiniCard from "./LibroMiniCard";
 import { FiMapPin, FiRepeat, FiCheckCircle } from "react-icons/fi";
+
+const getCategoriaNombre = (categoria) => {
+  if (!categoria) return "Sin categoría";
+  if (typeof categoria === "string") return categoria;
+  if (categoria.nombre) return categoria.nombre;
+  return "Sin categoría";
+};
+
+const getFotoUrl = (foto) => {
+  if (!foto || foto.trim() === "") return "/images/book-placeholder.png";
+  if (foto.startsWith("http")) return foto;
+  return `http://localhost:8000${foto}`;
+};
 
 const SolicitarIntercambioModal = ({
   isOpen,
@@ -69,7 +83,7 @@ const SolicitarIntercambioModal = ({
       await axios.post('http://127.0.0.1:8000/solicitudes/', data, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setMostrarExito(true); // Mostrar modal de éxito
+      setMostrarExito(true);
     } catch (error) {
       setError(error.response?.data?.detail || 'Error al enviar la solicitud. Intenta nuevamente.');
     } finally {
@@ -84,14 +98,10 @@ const SolicitarIntercambioModal = ({
 
   if (!isOpen) return null;
 
-  let fotoSolicitada = libroSolicitado?.fotoLibro || libroSolicitado?.foto;
-  if (fotoSolicitada && !fotoSolicitada.startsWith("http")) {
-    fotoSolicitada = `http://localhost:8000${fotoSolicitada}`;
-  }
+  const fotoSolicitada = getFotoUrl(libroSolicitado?.fotoLibro || libroSolicitado?.foto);
 
   return (
     <>
-      {/* Modal principal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 relative">
           <button
@@ -106,39 +116,49 @@ const SolicitarIntercambioModal = ({
           <div className="p-6">
             <h2 className="text-2xl font-bold text-[#722F37] mb-6 text-center">Solicitar Intercambio</h2>
             {/* Previsualización del intercambio */}
-            <div className="flex items-center justify-center gap-6 mb-8">
+            <div className="flex items-center justify-center gap-8 mb-8">
+              {/* Solicitando */}
               <div className="flex flex-col items-center max-w-xs flex-1">
                 <span className="font-semibold text-[#722F37] mb-2">Solicitando</span>
-                <div className="bg-gray-100 p-4 rounded-lg flex flex-row items-center w-32">
+                <div className="border-2 border-green-500 bg-white p-4 rounded-lg flex flex-col items-center w-48">
                   <img
                     src={fotoSolicitada}
                     alt={libroSolicitado.titulo}
-                    className="w-20 h-28 object-cover rounded mb-2 border border-gray-300"
+                    className="w-24 h-32 object-cover rounded mb-2 border border-gray-300"
                   />
-                  <div className="text-center pl-6" >
-                    <p className="font-medium text-xs">{libroSolicitado.titulo}</p>
-                    <p className="text-xs text-gray-600">{libroSolicitado.autor}</p>
-                    <p className="text-xs text-gray-500 mt-1">{libroSolicitado.categoria}</p>
+                  <div className="text-center">
+                    <p className="font-bold text-[#722F37] text-base truncate">{libroSolicitado.titulo}</p>
+                    <p className="text-sm text-gray-700">{libroSolicitado.autor}</p>
+                    <p className="text-xs text-gray-500">{getCategoriaNombre(libroSolicitado.categoria)}</p>
+                    <p className="text-xs text-gray-600 mt-2 line-clamp-3">{libroSolicitado.descripcion}</p>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col items-center">
                 <FiRepeat className="text-3xl text-Swap-beige mb-2" />
               </div>
+              {/* Ofreciendo */}
               <div className="flex flex-col items-center max-w-xs flex-1">
                 <span className="font-semibold text-[#722F37] mb-2">Ofreciendo</span>
-                {libroSeleccionado ? (
-                  <LibroMiniCard
-                    libro={libroSeleccionado}
-                    seleccionado={true}
-                    small
-                    disabled
-                  />
-                ) : (
-                  <div className="bg-gray-100 p-4 rounded-lg text-center w-28 h-40 flex items-center justify-center">
+                <div className="border-2 border-green-500 bg-white p-4 rounded-lg flex flex-col items-center w-48 min-h-[240px] justify-center">
+                  {libroSeleccionado ? (
+                    <>
+                      <img
+                        src={getFotoUrl(libroSeleccionado.foto)}
+                        alt={libroSeleccionado.titulo}
+                        className="w-24 h-32 object-cover rounded mb-2 border border-gray-300"
+                      />
+                      <div className="text-center">
+                        <p className="font-bold text-[#722F37] text-base truncate">{libroSeleccionado.titulo}</p>
+                        <p className="text-sm text-gray-700">{libroSeleccionado.autor}</p>
+                        <p className="text-xs text-gray-500">{getCategoriaNombre(libroSeleccionado.categoria)}</p>
+                        <p className="text-xs text-gray-600 mt-2 line-clamp-3">{libroSeleccionado.descripcion}</p>
+                      </div>
+                    </>
+                  ) : (
                     <span className="text-gray-400 text-xs">Selecciona un libro</span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 

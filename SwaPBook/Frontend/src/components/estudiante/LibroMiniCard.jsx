@@ -1,47 +1,34 @@
-// src/components/estudiante/LibroMiniCard.jsx
-const LibroMiniCard = ({
-    libro,
-    seleccionado,
-    onClick
-  }) => {
-    const estadoDisponible = libro.estado === "Disponible";
-    return (
-      <div
-        className={`border rounded-lg p-3 cursor-pointer transition-all flex flex-col gap-2
-          ${seleccionado ? 'border-green-500 bg-green-50 ring-2 ring-green-500' : 'border-gray-200 hover:border-gray-400'}
-          shadow-sm hover:shadow-md`}
-        onClick={onClick}
-      >
-        <div className="flex items-center gap-3">
-          <img
-            src={`http://localhost:8000${libro.foto}`}
-            alt={libro.titulo}
-            className="w-16 h-20 object-cover rounded"
-          />
-          <div className="flex-1">
-            <h4 className="font-bold text-[#722F37] text-base">{libro.titulo}</h4>
-            <p className="text-xs text-gray-700"><span className="font-semibold">Autor:</span> {libro.autor}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="font-semibold text-[#722F37] text-xs">Estado:</span>
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded font-semibold ${
-                estadoDisponible ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-700"
-              }`}>
-                {estadoDisponible && (
-                  <svg className="w-2 h-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <circle cx="10" cy="10" r="10" />
-                  </svg>
-                )}
-                {libro.estado}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="text-xs text-gray-600 mt-1 line-clamp-2 hover:line-clamp-none">
-          <span className="font-semibold">Descripción:</span> {libro.descripcion}
-        </div>
+const LibroMiniCard = ({ libro, seleccionado, onClick, disabled }) => {
+  const descripcion = libro?.descripcion || "Sin descripción";
+  
+  return (
+    <div 
+      className={`bg-white rounded-lg border-2 border-gray-200 p-3 flex flex-col w-48 min-h-[200px] cursor-pointer transition-all
+        ${seleccionado ? "border-Swap-beige ring-2 ring-Swap-beige" : "hover:border-Swap-beige"}
+        ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+      onClick={onClick}
+    >
+      <img
+        src={libro?.foto ? (libro.foto.startsWith("http") ? libro.foto : `http://localhost:8000${libro.foto}`) : "/images/book-placeholder.png"}
+        alt={libro?.titulo || "Libro"}
+        className="w-full h-32 object-cover rounded mb-2"
+      />
+      <div className="flex-1 flex flex-col">
+        <h3 className="font-bold text-[#722F37] text-sm truncate mb-1">
+          {libro?.titulo || "Sin título"}
+        </h3>
+        <p className="text-xs text-gray-600 truncate mb-1">
+          {libro?.autor || "Autor desconocido"}
+        </p>
+        <p className="text-xs text-gray-500 mb-2">
+          {libro?.categoria?.nombre || "Sin categoría"}
+        </p>
+        <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
+          {descripcion}
+        </p>
       </div>
-    );
-  };
-  
-  export default LibroMiniCard;
-  
+    </div>
+  );
+};
+
+export default LibroMiniCard;
