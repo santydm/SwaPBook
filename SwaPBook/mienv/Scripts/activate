@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\Visaje\desktop\SwaPBook\SwaPBook\mienv"
+VIRTUAL_ENV="C:\Users\Visaje\Desktop\SwaPBook\swapbook\mienv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Text, Enum, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 import enum
+from datetime import datetime
 
 class EstadoLibroEnum(str, enum.Enum):
     disponible = "Disponible"
@@ -12,11 +13,13 @@ class Libro(Base):
 
     idLibro = Column(Integer, primary_key=True, index=True)
     titulo = Column(String(100), nullable=False)
+    autor = Column(String(100), nullable=False)
     descripcion = Column(Text, nullable=True)
+    fechaRegistro = Column(DateTime, default=datetime.utcnow)
     estado = Column(Enum(EstadoLibroEnum), default=EstadoLibroEnum.disponible, nullable=False)
-    
+    foto = Column(String(255), nullable=True)
     idEstudiante = Column(Integer, ForeignKey("estudiantes.idEstudiante", ondelete="CASCADE"), nullable=False)
-    estudiante = relationship("Estudiante", back_populates="libros")
-
     idCategoria = Column(Integer, ForeignKey("categorias.idCategoria"), nullable=False)
+
+    estudiante = relationship("Estudiante", back_populates="libros")
     categoria = relationship("Categoria", back_populates="libros")

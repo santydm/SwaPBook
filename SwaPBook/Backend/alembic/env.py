@@ -13,6 +13,12 @@ from app.models.estudiantes import Estudiante
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from app.db.database import Base
+from app.models.estudiantes import Estudiante
+from app.models.libros import Libro
+from app.models.categorias import Categoria
+from app.models.solicitudes import Solicitud 
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
