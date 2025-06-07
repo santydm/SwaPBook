@@ -13,7 +13,7 @@ import PublicarLibro from './components/catalog/PublicarLibro';
 import Modificar from './pages/estudiante/Perfil';
 import Seguridad from './pages/estudiante/Seguridad';
 import Mislibros from './pages/estudiante/MisLibros';
-import NotificacionesSolicitudes from './components/solicitudes/NotificacionesSolicitudes';
+import NotificacionesSolicitudes from './components/notificaciones/NotificacionesSolicitudes';
 import MisSolicitudes from './pages/estudiante/MisSolicitudes';
 import MisIntercambios from './pages/estudiante/MisIntercambios';
 import Home from './pages/estudiante/Home';

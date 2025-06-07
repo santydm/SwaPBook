@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import PanelPerfil from "../../components/estudiante/PanelPerfil";
 import SolicitudDetalleModal from "../../components/solicitudes/SolicitudDetalleModal";
-import SolicitudNotificacionCard from "../../components/solicitudes/SolicitudNotificacionCard";
+import SolicitudNotificacionCard from "../../components/notificaciones/SolicitudNotificacionCard";
 import Navbar from "../../components/ui/Navbar";
 
 const MisSolicitudes = () => {

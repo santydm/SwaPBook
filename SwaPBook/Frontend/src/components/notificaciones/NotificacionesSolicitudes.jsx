@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import SolicitudNotificacionCard from "./SolicitudNotificacionCard";
-import SolicitudDetalleModal from "./SolicitudDetalleModal";
+import SolicitudNotificacionCard from "/src/components/notificaciones/SolicitudNotificacionCard.jsx";
+import SolicitudDetalleModal from "/src/components/solicitudes/SolicitudDetalleModal.jsx";
 import axios from "axios";
 
 const NotificacionesSolicitudes = () => {
@@ -9,6 +9,7 @@ const NotificacionesSolicitudes = () => {
   const timersRef = useRef({});
   const dismissedIdsRef = useRef(new Set());
   const modalOpenRef = useRef(false);
+  const abortControllerRef = useRef(null);
 
   // Obtener solicitudes pendientes
   const fetchSolicitudes = async () => {
@@ -16,29 +17,42 @@ const NotificacionesSolicitudes = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
+      // Cancelar petición anterior si existe
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
       const perfil = await axios.get("http://localhost:8000/estudiantes/perfil", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        signal: abortControllerRef.current.signal,
       });
 
       const res = await axios.get(
         `http://localhost:8000/solicitudes/pendientes/${perfil.data.idEstudiante}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: abortControllerRef.current.signal,
+        }
       );
 
-      // Filtrar solicitudes nuevas no descartadas
+      // Filtrar notificaciones ya descartadas
       const nuevasSolicitudes = res.data.filter(
-        solicitud =>
-          !dismissedIdsRef.current.has(solicitud.idSolicitud) &&
-          !solicitudes.some(s => s.idSolicitud === solicitud.idSolicitud)
+        solicitud => !dismissedIdsRef.current.has(solicitud.idSolicitud)
       );
 
-      setSolicitudes(prev => [...prev, ...nuevasSolicitudes]);
+      // Sincronizar las que vienen del backend y no están descartadas
+      setSolicitudes(nuevasSolicitudes);
     } catch (error) {
-      console.error("Error al obtener solicitudes:", error);
+      if (axios.isCancel(error)) {
+        // Petición cancelada, no hacer nada
+      } else {
+        console.error("Error al obtener solicitudes:", error);
+      }
     }
   };
 
-  // Manejar auto-cierre de notificaciones
+  // Manejo auto-cierre de notificaciones
   const iniciarTimer = (solicitud) => {
     if (timersRef.current[solicitud.idSolicitud] || modalOpenRef.current) return;
 
@@ -61,7 +75,10 @@ const NotificacionesSolicitudes = () => {
   useEffect(() => {
     fetchSolicitudes();
     const interval = setInterval(fetchSolicitudes, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
   }, []);
 
   // Acciones principales
@@ -99,12 +116,10 @@ const NotificacionesSolicitudes = () => {
     });
   };
 
-  // Cerrar modal
   const handleCerrarModal = () => {
     modalOpenRef.current = false;
     setDetalleSolicitud(null);
 
-    // Si la notificación aún existe, reiniciar su timer
     const solicitudExistente = solicitudes.find(
       s => s.idSolicitud === detalleSolicitud?.idSolicitud
     );
@@ -113,7 +128,6 @@ const NotificacionesSolicitudes = () => {
     }
   };
 
-  // Cerrar notificación manualmente
   const handleCerrarNotificacion = (idSolicitud) => {
     dismissedIdsRef.current.add(idSolicitud);
     setSolicitudes(prev => prev.filter(s => s.idSolicitud !== idSolicitud));
@@ -123,7 +137,6 @@ const NotificacionesSolicitudes = () => {
 
   return (
     <>
-      {/* CONTENEDOR DE NOTIFICACIONES */}
       <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none">
         {solicitudes.map(solicitud => (
           <div key={solicitud.idSolicitud} className="pointer-events-auto">
@@ -153,7 +166,6 @@ const NotificacionesSolicitudes = () => {
         ))}
       </div>
 
-      {/* MODAL DE DETALLES - FUERA DEL CONTENEDOR DE NOTIFICACIONES */}
       <SolicitudDetalleModal
         solicitud={detalleSolicitud}
         isOpen={!!detalleSolicitud}

@@ -14,19 +14,17 @@ const SolicitudNotificacionCard = ({
   onRechazar,
   onVerDetalles,
   onClose,
-  animated = true, // por defecto animada
-  wide = false,    // por defecto compacta
-  autoClose = false, // solo para notificaciones
-  autoCloseTime = 5000 // ms
+  animated = true, 
+  wide = false,    
+  autoClose = false, 
+  autoCloseTime = 5000 
 }) => {
-  // Manejo seguro de la imagen
   const getFotoUrl = (foto) => {
     if (!foto || foto.trim() === "") return "/images/book-placeholder.png";
     if (foto.startsWith("http")) return foto;
     return `http://localhost:8000${foto}`;
   };
 
-  // Descartar automáticamente tras X segundos (solo si autoClose)
   useEffect(() => {
     if (!autoClose || !onClose) return;
     const timer = setTimeout(() => onClose(idSolicitud), autoCloseTime);
@@ -41,7 +39,6 @@ const SolicitudNotificacionCard = ({
         ${animated ? "animate-slide-in" : ""}
       `}
     >
-      {/* Botones de acción */}
       <div className="flex flex-col justify-center items-center px-2 gap-2">
         <button
           onClick={() => onAceptar(idSolicitud)}
@@ -59,7 +56,7 @@ const SolicitudNotificacionCard = ({
         </button>
       </div>
 
-      {/* Foto grande del libro */}
+      {/* Foto Libro */}
       <div className="flex items-center justify-center p-3">
         <img
           src={getFotoUrl(fotoLibro)}

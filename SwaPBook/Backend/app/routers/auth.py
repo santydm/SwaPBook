@@ -36,7 +36,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         )
 
     # Crear un token de acceso para el estudiante autenticado
-    access_token = crear_token({"sub": estudiante.correoInstitucional, "rol": estudiante.rol})
+    access_token = crear_token({"sub": estudiante.correoInstitucional, "rol": estudiante.rol.value})
     
     # Retornar el token y el tipo de token
     return {"access_token": access_token, "token_type": "bearer"}
