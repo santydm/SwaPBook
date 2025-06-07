@@ -51,7 +51,7 @@ function App() {
         <Route path="/mis-intercambios" element={<MisIntercambios/>} />  
         <Route path="/historial" element={<Historial/>} />  
         <Route path="/recuperacion-clave" element={<RecuperarContrasenia />} />
-        <Route path="/restablecer-clave" element={<RestablecerContrasenia />} />
+        <Route path="/restablecer-contrasenia" element={<RestablecerContrasenia />} />
 
       </Routes>
     </Router>
