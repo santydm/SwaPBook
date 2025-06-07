@@ -57,6 +57,35 @@ app.include_router(admin_router)
 # Crear las tablas en la base de datos si no existen
 Base.metadata.create_all(bind=engine)
 
+from fastapi.openapi.utils import get_openapi
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="SwaPBook API",
+        version="1.0.0",
+        description="API para SwaPBook",
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+    for path in openapi_schema["paths"]:
+        for method in openapi_schema["paths"][path]:
+            openapi_schema["paths"][path][method]["security"] = [{"BearerAuth": []}]
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
 # Ruta raíz
 @app.get("/")
 def root():

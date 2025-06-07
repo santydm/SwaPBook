@@ -1,14 +1,19 @@
-from sqlalchemy import Column, Integer, String, DateTime, CHAR, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, CHAR, Boolean, Enum as SQLAlchemyEnum
+import enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.database import Base
+
+class RolEnum(enum.Enum):
+    estudiante = "estudiante"
+    administrador = "administrador"
 
 class Estudiante(Base):
     __tablename__ = "estudiantes"
 
     idEstudiante = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(50), nullable=False)
-    rol = Column(CHAR(10), nullable=False, default="Estudiante")
+    rol = Column(SQLAlchemyEnum(RolEnum), nullable=False, default=RolEnum.estudiante)
     fechaRegistro = Column(DateTime, default=datetime.utcnow)
     fotoPerfil = Column(String(255), nullable=True)
     numeroCelular = Column(String(20), nullable=True)

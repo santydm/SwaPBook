@@ -53,6 +53,7 @@ def registrar_estudiante(estudiante: EstudianteCreate, db: Session = Depends(get
     hashed_password = pwd_context.hash(estudiante.contrasenia)
 
     # Crear nuevo estudiante (inicialmente inactivo)
+
     nuevo_estudiante = Estudiante(
         nombre=estudiante.nombre,
         correoInstitucional=estudiante.correoInstitucional,
@@ -124,8 +125,8 @@ async def login(estudiante_login: EstudianteLogin, db: Session = Depends(get_db)
         raise HTTPException(status_code=400, detail="Cuenta no activada")
     
     # Si las credenciales son correctas, crea el token
-    token = crear_token({"sub": estudiante.correoInstitucional, "rol": "estudiante"})
-    
+    token = crear_token({"sub": estudiante.correoInstitucional, "rol": estudiante.rol.value})
+
     fecha_registro = estudiante.fechaRegistro.strftime("%Y-%m-%d")
 
     # Devolver los datos del estudiante (sin la contraseña) y el token
