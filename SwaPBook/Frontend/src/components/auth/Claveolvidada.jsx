@@ -32,7 +32,7 @@ const OlvideContrasenia = () => {
 
     try {
       // Aquí iría la llamada a tu API para recuperar contraseña
-      await axios.post('http://127.0.0.1:8000/estudiantes/recuperar-contrasenia', {
+      await axios.post('http://127.0.0.1:8000/auth/recuperar-contrasenia', {
         correoInstitucional
       });
       

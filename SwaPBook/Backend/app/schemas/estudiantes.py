@@ -1,5 +1,7 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
+from pydantic import BaseModel
+from typing import Optional
 
 class EstudianteCreate(BaseModel):
     nombre: str
@@ -10,12 +12,24 @@ class EstudianteLogin(BaseModel):
     correo: EmailStr
     contrasenia: str
 
+class EstudianteLoginResponse(BaseModel):
+    idEstudiante: int
+    nombre: str
+    correoInstitucional: str
+    fechaRegistro: str
+    activo: bool
+    access_token: str
+    token_type: str
+
+    class Config:
+        from_attributes = True
+
 class EstudianteResponse(BaseModel):
     idEstudiante: int
     nombre: str
     correoInstitucional: str
     contrasenia: str
-    fechaRegistro: datetime  # Aquí aceptamos que venga ya como string formateado
+    fechaRegistro: datetime  
     activo: bool
 
     class Config:
@@ -30,6 +44,8 @@ class EstudiantePerfilSchema(BaseModel):
     correoInstitucional: str
     fechaRegistro: datetime  # Cambiar datetime -> str para poder formatear
     activo: bool
+    fotoPerfil: Optional[str] = None
+    numeroCelular: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -40,3 +56,12 @@ class EstudiantePerfilSchema(BaseModel):
         if obj.fechaRegistro:
             obj_dict['fechaRegistro'] = obj.fechaRegistro.strftime("%Y-%m-%d")
         return super().from_orm(obj)
+    
+
+
+class EstudianteUpdate(BaseModel):
+    nombre: str 
+    fotoPerfil: str 
+    numeroCelular: str 
+    correoInstitucional: str 
+

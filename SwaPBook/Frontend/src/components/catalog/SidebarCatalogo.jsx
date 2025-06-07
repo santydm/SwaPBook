@@ -1,0 +1,32 @@
+import PanelPerfil from "../estudiante/PanelPerfil";
+
+// Agrega handleLogout a los props que recibe
+const SidebarCatalogo = ({ estudiante, onClose, onCrearLibro, handleLogout }) => (
+  <div
+    className="
+      fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 flex flex-col
+      animate-slide-in-right
+    "
+    style={{ maxWidth: "100vw" }}
+  >
+    <button
+      className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+      onClick={onClose}
+      aria-label="Cerrar sidebar"
+    >
+      &times;
+    </button>
+    <div className="mt-12 p-4">
+      {/* Pasa la función real de handleLogout */}
+      <PanelPerfil estudiante={estudiante} handleLogout={handleLogout} compact={true} />  
+      <button
+        className="mt-8 w-full py-2 px-4 bg-Swap-green text-white rounded-md hover:bg-Swap-green-dark font-semibold transition-all duration-200 animate-bounce-subtle"
+        onClick={onCrearLibro}
+      >
+        + Crear libro
+      </button>
+    </div>
+  </div>
+);
+
+export default SidebarCatalogo;
