@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 from app.models.estudiantes import Estudiante
 from app.models.cambio_correo_pendiente import CambioCorreoPendiente
 from app.utils.auth import crear_token, autenticar_usuario
-from app.schemas.estudiantes import EstudianteCreate, EstudianteResponse, EstudianteLogin, EstudiantePerfilSchema, EstudianteDeleteRequest, EstudianteUpdate
+from app.schemas.estudiantes import EstudianteCreate,EstudianteResponse, EstudianteLogin, EstudianteLoginResponse, EstudiantePerfilSchema, EstudianteDeleteRequest, EstudianteUpdate
 from app.utils.email_utils import enviar_correo_bienvenida, enviar_correo_verificacion_cambio
 from app.core.security import verify_password
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
@@ -30,7 +30,7 @@ load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 #Obtener la clave secreta del archivo .env
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -91,7 +91,7 @@ def verificar_correo(token: str, db: Session = Depends(get_db)):
             db.commit()
             print("Cuenta activada en BD")  # Depuración
         
-        jwt_token = crear_token({"sub": db_estudiante.correoInstitucional})
+        jwt_token = crear_token({"sub": db_estudiante.correoInstitucional, "rol": "estudiante"})
         
         # Cambia el return por esto:
         frontend_url = f"http://localhost:5173/cuenta-activada?token={jwt_token}&status=success"
@@ -106,7 +106,7 @@ def verificar_correo(token: str, db: Session = Depends(get_db)):
         print(f"Error inesperado: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno")
     
-@router.post("/login", response_model=EstudianteResponse)
+@router.post("/login", response_model=EstudianteLoginResponse)
 async def login(estudiante_login: EstudianteLogin, db: Session = Depends(get_db)):
     # Busca al estudiante en la base de datos con el correo proporcionado
     estudiante = db.query(Estudiante).filter(Estudiante.correoInstitucional == estudiante_login.correo).first()
@@ -124,7 +124,7 @@ async def login(estudiante_login: EstudianteLogin, db: Session = Depends(get_db)
         raise HTTPException(status_code=400, detail="Cuenta no activada")
     
     # Si las credenciales son correctas, crea el token
-    token = crear_token({"sub": estudiante.correoInstitucional})
+    token = crear_token({"sub": estudiante.correoInstitucional, "rol": "estudiante"})
     
     fecha_registro = estudiante.fechaRegistro.strftime("%Y-%m-%d")
 
@@ -299,7 +299,7 @@ def verificar_cambio_correo(token: str, db: Session = Depends(get_db)):
         db.delete(cambio)
         db.commit()
 
-        jwt_token = crear_token({"sub": nuevo_correo})
+        jwt_token = crear_token({"sub": nuevo_correo, "rol": "estudiante"})
         frontend_url = f"http://localhost:5173/cambio-correo-exitoso?token={jwt_token}&status=success"
         
         return RedirectResponse(frontend_url)

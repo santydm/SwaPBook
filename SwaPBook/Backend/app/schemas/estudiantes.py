@@ -12,12 +12,24 @@ class EstudianteLogin(BaseModel):
     correo: EmailStr
     contrasenia: str
 
+class EstudianteLoginResponse(BaseModel):
+    idEstudiante: int
+    nombre: str
+    correoInstitucional: str
+    fechaRegistro: str
+    activo: bool
+    access_token: str
+    token_type: str
+
+    class Config:
+        from_attributes = True
+
 class EstudianteResponse(BaseModel):
     idEstudiante: int
     nombre: str
     correoInstitucional: str
     contrasenia: str
-    fechaRegistro: datetime  # Aquí aceptamos que venga ya como string formateado
+    fechaRegistro: datetime  
     activo: bool
 
     class Config:

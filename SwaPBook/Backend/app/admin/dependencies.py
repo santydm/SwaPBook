@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 import os
 from dotenv import load_dotenv
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -13,7 +13,7 @@ ALGORITHM = os.getenv("ALGORITHM")
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("id")
+        user_id = payload.get("sub")
         rol = payload.get("rol")
         if user_id is None or rol is None:
             raise HTTPException(
