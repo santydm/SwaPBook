@@ -34,24 +34,34 @@ def cambiar_rol_estudiante(
     return {"message": "mensaje:" f"Rol actualizado a '{nuevo_rol.value}' para el estudiante con ID {id_estudiante}"}
 
 
+
+@router.get("/estudiantes")
+def get_all_estudiantes(db: Session = Depends(get_db)):
+    return db.query(Estudiante).all()
+
+
 @router.get("/estadisticas/total-libros")
 def total_libros(db: Session = Depends(get_db)):
-    total = db.query(Libro).count()
+    total = db.query(func.count(Libro.idLibro)).scalar()
     return {"total_libros": total}
 
 @router.get("/estadisticas/libros-por-categoria")
 def libros_por_categoria(db: Session = Depends(get_db)):
-    resultados = db.query(Categoria.nombre, Libro).join(Libro.categoria).group_by(Categoria.nombre).all()
-
-    resultados = (
-        db.query(Categoria.nombre, db.func.count(Libro.idLibro))
-        .join(Libro, Categoria.idCategoria == Libro.idCategoria)
-        .group_by(Categoria.nombre)
-        .all()
-    )
-
-    return [
-        {"categoria": nombre, "cantidad": cantidad}
-        for nombre, cantidad in resultados
-    ]
-
+    try:
+        resultados = (
+            db.query(Categoria.nombre, func.count(Libro.idLibro))
+            .join(Libro, Categoria.idCategoria == Libro.idCategoria)
+            .group_by(Categoria.nombre)
+            .all()
+        )
+        
+        return [
+            {"categoria": str(nombre), "cantidad": int(cantidad)}
+            for nombre, cantidad in resultados
+        ]
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error interno: {str(e)}"
+        )

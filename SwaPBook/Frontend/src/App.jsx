@@ -19,6 +19,11 @@ import MisIntercambios from './pages/estudiante/MisIntercambios';
 import Home from './pages/estudiante/Home';
 import RecuperarContrasenia from './components/auth/RecuperarContrasenia';
 import RestablecerContrasenia from './components/auth/RestablecerContrasenia';
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsuarios from './pages/admin/AdminUsuarios';
+
+
 
 function App() {
   const [usuarioLogeado, setUsuarioLogeado] = useState(false);
@@ -52,6 +57,17 @@ function App() {
         <Route path="/historial" element={<Historial/>} />  
         <Route path="/recuperacion-clave" element={<RecuperarContrasenia />} />
         <Route path="/restablecer-contrasenia" element={<RestablecerContrasenia />} />
+|
+
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="usuarios" element={<AdminUsuarios />} />
+          <Route path="libros" element={<div>Libros Admin</div>} />
+          <Route path="intercambios" element={<div>Intercambios Admin</div>} />
+          <Route path="estadisticas" element={<div>Estadísticas Admin</div>} />
+        </Route>
+
+        {/* Rutas protegidas */}
 
       </Routes>
     </Router>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import fondoSwap from '../../img/fondoSwap.webp';
+import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import Footer from '../ui/Footer';
 
@@ -42,14 +43,21 @@ const Login = () => {
       const response = await axios.post('http://127.0.0.1:8000/auth/login', {
         correoInstitucional,
         contrasenia
-      }, { timeout: 10000 }); // 10 segundos de timeout
+      }, { timeout: 10000 });
 
       if (!response.data.access_token) {
         throw new Error('El servidor no devolvió un token válido');
       }
 
       localStorage.setItem('token', response.data.access_token);
-      navigate('/catalogo');
+
+      // CAMBIO CLAVE: Decodificar el token y redirigir según el rol
+      const decoded = jwtDecode(response.data.access_token);
+      if (decoded.rol === 'administrador') {
+        navigate('/admin');
+      } else {
+        navigate('/catalogo');
+      }
     } catch (error) {
       let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
       if (axios.isAxiosError(error)) {
@@ -91,8 +99,6 @@ const Login = () => {
           <div className="hidden md:block absolute left-[35%] top-0 w-[65%] h-full bg-black bg-opacity-80"></div>
         </div>
       </div>
-
-      {/* Contenido principal */}
       <div className="relative z-10 min-h-screen flex flex-col">
         <div className="flex-grow flex items-center p-4">
           <div className="w-full flex flex-col md:flex-row">
@@ -188,7 +194,6 @@ const Login = () => {
                 </form>
               </div>
             </div>
-
             {/* Marca y eslogan */}
             <div className="hidden md:flex w-[65%] items-center justify-center">
               <div className="max-w-xs ml-16">
