@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 from .dependencies import admin_required
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session , joinedload
 from sqlalchemy import func, case, literal_column, cast, String, or_
 from sqlalchemy.exc import NoResultFound
 from typing import Optional, List
@@ -13,6 +13,7 @@ from app.models.solicitudes import Solicitud
 from app.models.libros import Libro
 from app.models.categorias import Categoria
 from app.models.intercambios import Intercambio, EstadoIntercambioEnum
+
 
 router = APIRouter(
     prefix="/admin",
@@ -67,6 +68,89 @@ def filtrar_estudiantes(
 
     return query.all()
 
+
+
+@router.get("/libros")
+def get_all_libros(db: Session = Depends(get_db)):
+    try:
+        libros = (
+            db.query(Libro)
+            .options(
+                joinedload(Libro.categoria),
+                joinedload(Libro.estudiante)
+            )
+            .all()
+        )
+        
+        return [
+            {
+                "idLibro": libro.idLibro,
+                "titulo": libro.titulo,
+                "autor": libro.autor,
+                "descripcion": libro.descripcion,
+                "foto": libro.foto,
+                "estado": libro.estado,
+                "fechaRegistro": libro.fechaRegistro.isoformat() if libro.fechaRegistro else None,
+                "visibleCatalogo": libro.visibleCatalogo,
+                "categoria": libro.categoria.nombre if libro.categoria else "Sin categoría",
+                "estudiante": {
+                    "nombre": libro.estudiante.nombre if libro.estudiante else "Anónimo",
+                    "foto": libro.estudiante.fotoPerfil if libro.estudiante else None
+                }
+            }
+            for libro in libros
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
+@router.get("/libros/filtrar")
+def filtrar_libros_admin(
+    search: Optional[str] = Query(None, description="Buscar por título, autor, categoría o estudiante"),
+    db: Session = Depends(get_db)
+):
+    try:
+        query = (
+            db.query(Libro)
+            .options(
+                joinedload(Libro.categoria),
+                joinedload(Libro.estudiante)
+            )
+        )
+        
+        if search:
+            search_pattern = f"%{search.lower()}%"
+            query = query.filter(
+                or_(
+                    func.lower(Libro.titulo).like(search_pattern),
+                    func.lower(Libro.autor).like(search_pattern),
+                    func.lower(Libro.descripcion).like(search_pattern),
+                    func.lower(Categoria.nombre).like(search_pattern),
+                    func.lower(Estudiante.nombre).like(search_pattern)
+                )
+            ).join(Categoria, isouter=True).join(Estudiante, isouter=True)
+        
+        libros = query.all()
+        
+        return [
+            {
+                "idLibro": libro.idLibro,
+                "titulo": libro.titulo,
+                "autor": libro.autor,
+                "descripcion": libro.descripcion,
+                "foto": libro.foto,
+                "estado": libro.estado,
+                "fechaPublicacion": libro.fechaRegistro.isoformat() if libro.fechaRegistro else None,
+                "visibleCatalogo": libro.visibleCatalogo,
+                "categoria": libro.categoria.nombre if libro.categoria else "Sin categoría",
+                "estudiante": {
+                    "nombre": libro.estudiante.nombre if libro.estudiante else "Anónimo",
+                    "foto": libro.estudiante.fotoPerfil if libro.estudiante else None
+                }
+            }
+            for libro in libros
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 @router.get("/estadisticas/total-libros")
 def total_libros(db: Session = Depends(get_db)):
@@ -176,6 +260,7 @@ def top_libros_mas_intercambiados(db: Session = Depends(get_db)):
         {"titulo": titulo, "cantidad": cantidad}
         for titulo, cantidad in resultados
         ]
+
 
 
 @router.get("/estadisticas/oferta-demanda")

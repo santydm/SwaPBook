@@ -8,34 +8,31 @@ Chart.register(CategoryScale, LinearScale, BarElement);
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalLibros: 0,
+    totalUsuarios: 0,
+    intercambiosCreados: 0,
     librosPorCategoria: []
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
-        
-        const [librosRes, categoriasRes] = await Promise.all([
-          axios.get('http://localhost:8000/admin/estadisticas/total-libros', { headers }),
-          axios.get('http://localhost:8000/admin/estadisticas/libros-por-categoria', { headers })
-        ]);
-        
-        setStats({
-          totalLibros: librosRes.data.total_libros,
-          librosPorCategoria: categoriasRes.data
-        });
-      } catch (err) {
-        setError("No se pudo cargar la información de estadísticas.");
-      } finally {
-        setLoading(false);
-      }
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      const [librosRes, categoriasRes, intercambiosRes, usuariosRes] = await Promise.all([
+        axios.get('http://localhost:8000/admin/estadisticas/total-libros', { headers }),
+        axios.get('http://localhost:8000/admin/estadisticas/libros-por-categoria', { headers }),
+        axios.get('http://localhost:8000/admin/estadisticas/intercambios', { headers }),
+        axios.get('http://localhost:8000/admin/estudiantes', { headers })
+      ]);
+      
+      setStats({
+        totalLibros: librosRes.data.total_libros,
+        totalUsuarios: usuariosRes.data.length,
+        intercambiosCreados: intercambiosRes.data.total_creados,
+        librosPorCategoria: categoriasRes.data
+      });
     };
+    
     fetchData();
   }, []);
 
@@ -52,47 +49,35 @@ const AdminDashboard = () => {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold text-[#722F37]">Estadísticas generales</h1>
       
-      {loading ? (
-        <div className="flex justify-center items-center h-32">
-          <span className="text-[#722F37] text-lg">Cargando estadísticas...</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-xl font-semibold mb-4">Libros registrados</h3>
+          <p className="text-4xl font-bold text-[#722F37]">{stats.totalLibros}</p>
         </div>
-      ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
+        
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-xl font-semibold mb-4">Usuarios registrados</h3>
+          <p className="text-4xl font-bold text-[#722F37]">{stats.totalUsuarios}</p>
         </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-semibold mb-4">Total de libros registrados</h3>
-              <p className="text-4xl font-bold text-[#722F37]">{stats.totalLibros}</p>
-            </div>
-          </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-xl font-semibold mb-4">Intercambios creados</h3>
+          <p className="text-4xl font-bold text-[#722F37]">{stats.intercambiosCreados}</p>
+        </div>
+      </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Libros por categoría</h3>
-            {stats.librosPorCategoria.length === 0 ? (
-              <p className="text-gray-500">No hay datos para mostrar.</p>
-            ) : (
-              <div className="h-96">
-                <Bar 
-                  data={chartData}
-                  options={{ 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { display: false }
-                    },
-                    scales: {
-                      y: { beginAtZero: true }
-                    }
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        </>
-      )}
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-xl font-semibold mb-4">Libros por categoría</h3>
+        <div className="h-96">
+          <Bar 
+            data={chartData}
+            options={{ 
+              responsive: true,
+              maintainAspectRatio: false
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

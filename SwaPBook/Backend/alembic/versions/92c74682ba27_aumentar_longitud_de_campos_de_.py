@@ -24,7 +24,7 @@ def upgrade() -> None:
     op.create_table('estudiantes',
     sa.Column('idEstudiante', sa.Integer(), nullable=False),
     sa.Column('nombre', sa.String(length=100), nullable=False),
-    sa.Column('rol', sa.Enum('estudiante', 'administrador', name='rolenum'), nullable=False),
+   # sa.Column('rol', sa.Enum('estudiante', 'administrador', name='rolenum'), nullable=False),
     sa.Column('fechaRegistro', sa.DateTime(), nullable=True),
     sa.Column('fotoPerfil', sa.String(length=255), nullable=True),
     sa.Column('numeroCelular', sa.String(length=100), nullable=True),
