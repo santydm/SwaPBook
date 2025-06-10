@@ -1,8 +1,8 @@
-"""correciones tabla de cambio de correo
+"""correcion de erorres y creacion de base de datos
 
-Revision ID: fe6f95ebd46a
-Revises: 91aee71e7e13
-Create Date: 2025-05-22 12:52:41.816292
+Revision ID: 128792c86e8b
+Revises: 
+Create Date: 2025-06-10 11:49:58.195182
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'fe6f95ebd46a'
-down_revision: Union[str, None] = '91aee71e7e13'
+revision: str = '128792c86e8b'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -38,6 +38,7 @@ def downgrade() -> None:
     sa.Column('idLibroOfrecido', sa.INTEGER(), autoincrement=False, nullable=True),
     sa.Column('idLibroSolicitado', sa.INTEGER(), autoincrement=False, nullable=True),
     sa.Column('fechaEncuentro', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
+    sa.Column('fechaCambioEstado', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
     sa.Column('horaEncuentro', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
     sa.Column('lugarEncuentro', sa.VARCHAR(length=100), autoincrement=False, nullable=True),
     sa.Column('estado', postgresql.ENUM('en_proceso', 'finalizado', 'cancelado', name='estadointercambioenum'), autoincrement=False, nullable=True),
@@ -50,13 +51,13 @@ def downgrade() -> None:
     )
     op.create_index('ix_intercambios_idIntercambio', 'intercambios', ['idIntercambio'], unique=False)
     op.create_table('cambios_correo_pendiente',
-    sa.Column('id', sa.VARCHAR(), autoincrement=False, nullable=False),
+    sa.Column('idCambio', sa.VARCHAR(), autoincrement=False, nullable=False),
     sa.Column('idEstudiante', sa.INTEGER(), autoincrement=False, nullable=False),
     sa.Column('nuevoCorreo', sa.VARCHAR(length=50), autoincrement=False, nullable=False),
     sa.Column('fechaSolicitud', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
     sa.Column('expiraEn', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
     sa.Column('usado', sa.BOOLEAN(), autoincrement=False, nullable=True),
     sa.ForeignKeyConstraint(['idEstudiante'], ['estudiantes.idEstudiante'], name='cambios_correo_pendiente_idEstudiante_fkey'),
-    sa.PrimaryKeyConstraint('id', name='cambios_correo_pendiente_pkey')
+    sa.PrimaryKeyConstraint('idCambio', name='cambios_correo_pendiente_pkey')
     )
     # ### end Alembic commands ###

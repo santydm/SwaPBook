@@ -6,7 +6,8 @@ from .estudiantes import EstudiantePerfilSchema
 
 class EstadoLibroEnum(str, Enum):
     disponible = "Disponible"
-    intercambio = "Intercambio"
+    enIntercambio = "En Intercambio"
+    intercambiado = "Intercambiado"
 
 # Agrega este esquema para la categoría
 class CategoriaResponse(BaseModel):
@@ -27,6 +28,7 @@ class LibroResponse(BaseModel):
     estado: EstadoLibroEnum
     categoria: Optional[CategoriaResponse] = None
     estudiante: EstudiantePerfilSchema 
+    visibleCatalogo: bool = True
 
     # Relación anidada para mostrar el nombre de la categoría
     categoria: Optional[CategoriaResponse] = None

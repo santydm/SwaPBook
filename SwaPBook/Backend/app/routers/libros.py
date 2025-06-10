@@ -28,7 +28,9 @@ async def crear_libro(
     estudiante: Estudiante = Depends(get_current_user),
     idCategoria: int = Form(...),
     foto: UploadFile = File(...),
+    visibleCatalogo: bool = Form(True),
     db: Session = Depends(get_db)
+    
 ):
 
 
@@ -68,7 +70,8 @@ async def crear_libro(
         idCategoria=categoria.idCategoria,
         idEstudiante=estudiante.idEstudiante,
         foto=f"/static/images/libros/{filename}",
-        fechaRegistro=datetime.utcnow()
+        fechaRegistro=datetime.utcnow(),
+        visibleCatalogo=visibleCatalogo
         
     )
         
@@ -94,6 +97,7 @@ def filtrar_por_categoria(
         .options(joinedload(Libro.categoria))
         .filter(
             Libro.idEstudiante != estudiante.idEstudiante,
+            Libro.visibleCatalogo == True,
             func.lower(Categoria.nombre).ilike(f"{categoria}%")
         )
         .all()
@@ -109,19 +113,21 @@ def obtener_catalogo(
 ):
     query = db.query(Libro).options(joinedload(Libro.categoria),joinedload(Libro.estudiante)).filter(
         
-        Libro.idEstudiante != id_estudiante
+        Libro.idEstudiante != id_estudiante,
+        Libro.visibleCatalogo == True  
+        
         
     )
 
     if search:
         search_pattern = f"%{search.lower()}%"
-        query = query.join(Libro.categoria).filter(
+        query = query.filter(
             or_(
                 Libro.titulo.ilike(search_pattern),
                 Libro.autor.ilike(search_pattern),
-                Libro.descripcion.ilike(search_pattern)
-            )
+                Libro.descripcion.ilike(search_pattern)  # filtro por categoría usando has()
         )
+    )
 
     return query.all()
 
@@ -141,6 +147,7 @@ async def editar_libro(
     autor: Optional[str] = Form(None),
     descripcion: Optional[str] = Form(None),
     idCategoria: Optional[int] = Form(None),
+    visibleCatalogo: Optional[bool] = Form(None),
     nueva_foto: Optional[UploadFile] = File(None),
     estudiante: Estudiante = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -168,6 +175,10 @@ async def editar_libro(
         libro.autor = autor
     if descripcion:
         libro.descripcion = descripcion
+        
+    if visibleCatalogo is not None: 
+        libro.visibleCatalogo = visibleCatalogo
+
 
     if nueva_foto:
         if not nueva_foto.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
