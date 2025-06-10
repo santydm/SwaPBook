@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, HTTPException, Query
 from .dependencies import admin_required
 from sqlalchemy.orm import Session
-from sqlalchemy import func, case
+from sqlalchemy import func, case, cast, Date, or_, String
 from sqlalchemy.exc import NoResultFound
+from typing import Optional, List
+from datetime import date
 from app.models.estudiantes import RolEnum
 from app.db.database import get_db
 from app.models.estudiantes import Estudiante
+from app.schemas.estudiantes import EstudianteResponse
 from app.models.libros import Libro
 from app.models.categorias import Categoria
 from app.models.intercambios import Intercambio, EstadoIntercambioEnum
@@ -35,9 +38,33 @@ def cambiar_rol_estudiante(
 
 
 
+
+
 @router.get("/estudiantes")
 def get_all_estudiantes(db: Session = Depends(get_db)):
     return db.query(Estudiante).all()
+
+#filtrar por estudiante
+
+@router.get("/estudiantes/filtrar", response_model=List[EstudianteResponse])
+def filtrar_estudiantes(
+    search: Optional[str] = Query(None, description="Buscar por nombre, correo, rol o fecha de registro"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Estudiante)
+
+    if search:
+        search_pattern = f"%{search.lower()}%"
+        query = query.filter(
+            or_(
+        func.lower(Estudiante.nombre).like(f"%{search_pattern}%"),
+        func.lower(Estudiante.correoInstitucional).like(f"%{search_pattern}%"),
+        func.lower(cast(Estudiante.rol, String)).like(f"%{search_pattern}%"),  
+        cast(Estudiante.fechaRegistro, String).like(f"%{search_pattern}%")
+            )
+        )
+
+    return query.all()
 
 
 @router.get("/estadisticas/total-libros")
@@ -148,5 +175,4 @@ def top_libros_mas_intercambiados(db: Session = Depends(get_db)):
         {"titulo": titulo, "cantidad": cantidad}
         for titulo, cantidad in resultados
         ]
-
 

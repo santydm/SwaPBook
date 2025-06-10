@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import random
 
 from app.models.intercambios import Intercambio, EstadoIntercambioEnum
 from app.models.libros import Libro, EstadoLibroEnum
 from app.models.estudiantes import Estudiante
+from app.models.solicitudes import Solicitud  # 👈 Asegúrate de importar el modelo correcto
 from app.db.database import SessionLocal  # Usa tu propia función para obtener sesión
 
 # Crear una nueva sesión
@@ -38,11 +39,23 @@ else:
             continue
 
         estado = random.choice([EstadoIntercambioEnum.en_proceso, EstadoIntercambioEnum.finalizado])
-        fecha_encuentro = datetime.utcnow() + timedelta(days=random.randint(1, 7))
-        hora_encuentro = datetime.utcnow().replace(minute=0, second=0, microsecond=0) + timedelta(hours=random.randint(1, 12))
+        fecha_encuentro = datetime.now(timezone.utc) + timedelta(days=random.randint(1, 7))
+        hora_encuentro = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) + timedelta(hours=random.randint(1, 12))
         lugar = f"Aula {random.randint(1, 20)} - Bloque {random.choice(['A', 'B', 'C'])}"
 
+        # 👇 Crear solicitud asociada
+        nueva_solicitud = Solicitud(
+            estudianteSolicitante=estudiante1.idEstudiante,
+            libroSolicitado=libro2.idLibro,
+            estado="Aceptada",
+            fechaSolicitud=datetime.now(timezone.utc)
+        )
+        session.add(nueva_solicitud)
+        session.flush()  # 👈 Importante para obtener el id generado
+        id_solicitud = nueva_solicitud.idSolicitud
+
         intercambio = Intercambio(
+            idSolicitud=id_solicitud,
             idEstudiante=estudiante1.idEstudiante,
             idEstudianteReceptor=estudiante2.idEstudiante,
             idLibroOfrecido=libro1.idLibro,
@@ -51,7 +64,7 @@ else:
             horaEncuentro=hora_encuentro,
             lugarEncuentro=lugar,
             estado=estado,
-            fechaCambioEstado=datetime.utcnow()
+            fechaCambioEstado=datetime.now(timezone.utc)
         )
 
         # Cambiar estados de libros según el estado del intercambio
