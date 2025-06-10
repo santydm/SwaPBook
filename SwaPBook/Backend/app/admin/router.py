@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, Path
 from .dependencies import admin_required
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, case
 from sqlalchemy.exc import NoResultFound
 from app.models.estudiantes import RolEnum
 from app.db.database import get_db
 from app.models.estudiantes import Estudiante
 from app.models.libros import Libro
 from app.models.categorias import Categoria
-
+from app.models.intercambios import Intercambio, EstadoIntercambioEnum
 
 router = APIRouter(
     prefix="/admin",
@@ -65,3 +65,88 @@ def libros_por_categoria(db: Session = Depends(get_db)):
             status_code=500, 
             detail=f"Error interno: {str(e)}"
         )
+
+@router.get("/estadisticas/horarios/heatmap")
+def obtener_horarios_frecuentes(db: Session = Depends(get_db)):
+    dias_semana = {
+        0: "Domingo",
+        1: "Lunes",
+        2: "Martes",
+        3: "Miércoles",
+        4: "Jueves",
+        5: "Viernes",
+        6: "Sábado",
+    }
+
+
+    franja_horaria = case(
+            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('08:00:00', '09:59:59'), '08:00-10:00'),
+            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('10:00:00', '11:59:59'), '10:00-12:00'),
+            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('12:00:00', '13:59:59'), '12:00-14:00'),
+            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('14:00:00', '15:59:59'), '14:00-16:00'),
+            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('16:00:00', '17:59:59'), '16:00-18:00'),
+            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('18:00:00', '19:59:59'), '18:00-20:00'),
+            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('20:00:00', '21:59:59'), '20:00-22:00'),
+        else_='Otro'
+    ).label("franja")
+    
+    resultados = (
+        db.query(
+            func.extract("dow", Intercambio.horaEncuentro).label("dia"),
+            franja_horaria,
+            func.count().label("cantidad")
+        )
+        .group_by("dia", "franja")
+        .order_by("dia", "franja")
+        .all()
+    )
+
+    heatmap = []
+    for r in resultados:
+        heatmap.append({
+            "dia": dias_semana.get(int(r.dia), "Desconocido"),
+            "franja": r.franja,
+            "cantidad": r.cantidad
+        })
+    
+    return heatmap
+
+
+@router.get("/estadisticas/intercambios")
+def resumen_intercambios(db: Session = Depends(get_db)):
+    total_creados = db.query(func.count(Intercambio.idIntercambio)).scalar()
+
+    total_finalizados = db.query(func.count(Intercambio.idIntercambio)).filter(
+        Intercambio.estado == EstadoIntercambioEnum.finalizado
+    ).scalar()
+
+    total_cancelados = db.query(func.count(Intercambio.idIntercambio)).filter(
+        Intercambio.estado == EstadoIntercambioEnum.cancelado
+    ).scalar()
+
+    return {
+        "total_creados": total_creados,
+        "total_finalizados": total_finalizados,
+        "total_cancelados": total_cancelados
+    }
+
+@router.get("/estadisticas/top-libros")
+def top_libros_mas_intercambiados(db: Session = Depends(get_db)):
+    resultados = (
+        db.query(
+            Libro.titulo,
+            func.count(Intercambio.idIntercambio).label("cantidad")
+        )
+        .join(Intercambio, (Intercambio.idLibroSolicitado == Libro.idLibro) | (Intercambio.idLibroOfrecido == Libro.idLibro))
+        .group_by(Libro.idLibro, Libro.titulo)
+        .order_by(func.count(Intercambio.idIntercambio).desc())
+        .limit(10)
+        .all()
+        )
+
+    return [
+        {"titulo": titulo, "cantidad": cantidad}
+        for titulo, cantidad in resultados
+        ]
+
+
