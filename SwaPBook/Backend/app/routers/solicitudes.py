@@ -63,8 +63,12 @@ def aceptar_solicitud(id_solicitud: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Uno o ambos libros no existen")
 
     # Cambiar estado de los libros
-    libro_solicitado.estado = EstadoLibroEnum.intercambio
-    libro_ofrecido.estado = EstadoLibroEnum.intercambio
+    libro_solicitado.estado = EstadoLibroEnum.enIntercambio
+    libro_ofrecido.estado = EstadoLibroEnum.enIntercambio
+    
+    #cambiar visibilidad de los libros en el catálogo
+    libro_solicitado.visibleCatalogo = False
+    libro_ofrecido.visibleCatalogo = False
 
     # Crear el intercambio
     intercambio = Intercambio(

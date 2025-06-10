@@ -45,8 +45,8 @@ def crear_intercambio(id_solicitud: int, db: Session = Depends(get_db)):
     if not libro_solicitado or not libro_ofrecido:
         raise HTTPException(status_code=404, detail="Uno o ambos libros no existen")
 
-    libro_solicitado.estado = EstadoLibroEnum.intercambio
-    libro_ofrecido.estado = EstadoLibroEnum.intercambio
+    libro_solicitado.estado = EstadoLibroEnum.intercambiado
+    libro_ofrecido.estado = EstadoLibroEnum.intercambiado
 
     # Cambiar el estado de la solicitud a 'aceptada'
     solicitud.estado = EstadoSolicitudEnum.aceptada
@@ -81,9 +81,9 @@ def actualizar_estado_intercambio(
     if not libro1 or not libro2:
         raise HTTPException(status_code=404, detail="Uno o ambos libros no existen")
 
-    # if nuevo_estado == EstadoIntercambioEnum.finalizado:
-    #   db.delete(libro1)
-    #    db.delete(libro2)
+    if nuevo_estado == EstadoIntercambioEnum.finalizado:
+        libro1.estado = EstadoLibroEnum.intercambiado
+        libro2.estado = EstadoLibroEnum.intercambiado
 
     elif nuevo_estado == EstadoIntercambioEnum.cancelado:
         libro1.estado = EstadoLibroEnum.disponible

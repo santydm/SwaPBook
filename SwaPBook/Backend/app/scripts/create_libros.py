@@ -1,71 +1,65 @@
-from faker import Faker
 import random
+from datetime import datetime
+from faker import Faker
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.models.libros import Libro, EstadoLibroEnum
 from app.models.estudiantes import Estudiante
 from app.models.categorias import Categoria
-from datetime import datetime
 
 fake = Faker()
 
-# Lista de nombres de las 60 categorías
+# Lista de nombres de categoría
 categorias_nombres = [
-    "Ficción", "No ficción", "Ciencia ficción", "Fantasía", "Terror",
-    "Romance", "Misterio", "Thriller", "Suspenso", "Aventura", "Histórica",
-    "Biografía", "Autobiografía", "Memorias", "Poesía", "Teatro", "Ensayo",
-    "Filosofía", "Psicología", "Autoayuda", "Negocios", "Finanzas", "Economía",
-    "Política", "Sociología", "Arte", "Arquitectura", "Diseño", "Fotografía",
-    "Cine", "Música", "Cocina", "Gastronomía", "Salud", "Nutrición", "Deportes",
+    "Ficción", "No ficción", "Ciencia ficción", "Fantasía", "Terror", "Romance",
+    "Misterio", "Thriller", "Suspenso", "Aventura", "Histórica", "Biografía",
+    "Autobiografía", "Memorias", "Poesía", "Teatro", "Ensayo", "Filosofía",
+    "Psicología", "Autoayuda", "Negocios", "Finanzas", "Economía", "Política",
+    "Sociología", "Arte", "Arquitectura", "Diseño", "Fotografía", "Cine",
+    "Música", "Cocina", "Gastronomía", "Salud", "Nutrición", "Deportes",
     "Viajes", "Geografía", "Historia", "Ciencia", "Matemáticas", "Tecnología",
     "Informática", "Medicina", "Ingeniería", "Literatura infantil", "Juvenil",
     "Educación", "Idiomas", "Religión", "Espiritualidad", "Humor", "Cómics",
     "Manga", "Novela gráfica", "Erótica", "Policíaca", "Western", "Ucronía", "Distopía"
 ]
 
-def generar_libros():
+def crear_libros_falsos():
     db: Session = SessionLocal()
 
     try:
-        # Obtener todos los estudiantes
+        # Obtener todos los estudiantes y categorías desde la BD
         estudiantes = db.query(Estudiante).all()
-
-        # Crear categorías si no existen
-        categorias_existentes = db.query(Categoria).all()
-        if not categorias_existentes:
-            for nombre in categorias_nombres:
-                db.add(Categoria(nombreCategoria=nombre))
-            db.commit()
-
-        # Volver a consultar las categorías (asegurar IDs)
         categorias = db.query(Categoria).all()
+        categorias_dict = {cat.nombre: cat.idCategoria for cat in categorias}
 
-        libros_a_crear = []
+        libros_creados = 0
+
         for estudiante in estudiantes:
-            for _ in range(15):
-                categoria = random.choice(categorias)
+            for _ in range(15):  # 15 libros por estudiante
+                categoria_nombre = random.choice(categorias_nombres)
+                categoria_id = categorias_dict[categoria_nombre]
+
                 libro = Libro(
-                    titulo=fake.sentence(nb_words=4),
+                    titulo=fake.sentence(nb_words=4).rstrip('.'),
                     autor=fake.name(),
                     descripcion=fake.paragraph(nb_sentences=3),
                     fechaRegistro=datetime.utcnow(),
                     estado=EstadoLibroEnum.disponible,
-                    foto=fake.image_url(width=200, height=300),
+                    foto=fake.image_url(),
                     idEstudiante=estudiante.idEstudiante,
-                    idCategoria=categoria.idCategoria,
+                    idCategoria=categoria_id,
                     visibleCatalogo=True
                 )
-                libros_a_crear.append(libro)
+                db.add(libro)
+                libros_creados += 1
 
-        # Guardar en la base de datos
-        db.add_all(libros_a_crear)
         db.commit()
-        print(f"✅ Se crearon {len(libros_a_crear)} libros exitosamente.")
+        print(f"{libros_creados} libros creados con éxito.")
     except Exception as e:
         db.rollback()
-        print(f"❌ Error al generar libros: {e}")
+        print("Error al crear libros:", e)
     finally:
         db.close()
 
 if __name__ == "__main__":
-    generar_libros()
+    crear_libros_falsos()
