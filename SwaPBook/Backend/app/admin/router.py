@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 from .dependencies import admin_required
 from sqlalchemy.orm import Session
-from sqlalchemy import func, case, cast, Date, or_, String
+from sqlalchemy import func, case, literal_column, cast, String, or_
 from sqlalchemy.exc import NoResultFound
 from typing import Optional, List
 from datetime import date
@@ -9,6 +9,7 @@ from app.models.estudiantes import RolEnum
 from app.db.database import get_db
 from app.models.estudiantes import Estudiante
 from app.schemas.estudiantes import EstudianteResponse
+from app.models.solicitudes import Solicitud
 from app.models.libros import Libro
 from app.models.categorias import Categoria
 from app.models.intercambios import Intercambio, EstadoIntercambioEnum
@@ -175,4 +176,50 @@ def top_libros_mas_intercambiados(db: Session = Depends(get_db)):
         {"titulo": titulo, "cantidad": cantidad}
         for titulo, cantidad in resultados
         ]
+
+
+@router.get("/estadisticas/oferta-demanda")
+def libros_mas_solicitados(db: Session = Depends(get_db)):
+    sub_demanda = (
+        db.query(
+            Solicitud.libroSolicitado.label("idLibro"),
+            func.count(Solicitud.idSolicitud).label("demanda")
+        )
+        .group_by(Solicitud.libroSolicitado)
+        .subquery()
+    )
+
+    sub_oferta = (
+        db.query(
+            Libro.idLibro.label("idLibro"),
+            func.count(Libro.idLibro).label("oferta")
+        )
+        .group_by(Libro.idLibro)
+        .subquery()
+    )
+
+    resultados = (
+        db.query(
+            Libro.titulo,
+            func.coalesce(sub_demanda.c.demanda, 0).label("demanda"),
+            func.coalesce(sub_oferta.c.oferta, 0).label("oferta"),
+            (func.coalesce(sub_demanda.c.demanda, 0) - func.coalesce(sub_oferta.c.oferta, 0)).label("diferencia")
+        )
+        .outerjoin(sub_demanda, Libro.idLibro == sub_demanda.c.idLibro)
+        .outerjoin(sub_oferta, Libro.idLibro == sub_oferta.c.idLibro)
+        .group_by(Libro.titulo, sub_demanda.c.demanda, sub_oferta.c.oferta)
+        .order_by(func.coalesce(sub_demanda.c.demanda, 0) - func.coalesce(sub_oferta.c.oferta, 0).desc())
+        .all()
+    )
+
+    return [
+        {
+            "titulo": r.titulo,
+            "demanda": int(r.demanda),
+            "oferta": int(r.oferta),
+            "diferencia": int(r.diferencia)
+        }
+        for r in resultados if r.demanda > r.oferta  # Solo mostrar si hay más demanda que oferta
+    ]
+
 
