@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import PanelPerfil from "../../components/estudiante/PanelPerfil";
-import Navbar from "../../components/ui/Navbar";
-import CardIntercambio from "../../components/historial/CardIntercambio";
+import Navbar from "../../components/ui/Navbar";;
 import { FiBookOpen, FiUser, FiLayers, FiClock } from "react-icons/fi";
 
 // Card compacta para historial de intercambios
