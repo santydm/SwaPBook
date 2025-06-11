@@ -5,57 +5,61 @@ import random
 from app.models.intercambios import Intercambio, EstadoIntercambioEnum
 from app.models.libros import Libro, EstadoLibroEnum
 from app.models.estudiantes import Estudiante
-from app.models.solicitudes import Solicitud  # 👈 Asegúrate de importar el modelo correcto
-from app.db.database import SessionLocal  # Usa tu propia función para obtener sesión
+from app.models.solicitudes import Solicitud, EstadoSolicitudEnum
+from app.db.database import SessionLocal
 
-# Crear una nueva sesión
+# Crear sesión
 session: Session = SessionLocal()
 
-# Obtener todos los estudiantes y libros disponibles
-estudiantes = session.query(Estudiante).all()
-libros_disponibles = session.query(Libro).filter(Libro.estado == EstadoLibroEnum.disponible).all()
+# Obtener solicitudes pendientes
+solicitudes_pendientes = session.query(Solicitud).filter(Solicitud.estado == EstadoSolicitudEnum.pendiente).all()
 
-# Validar que haya suficientes datos
-if len(estudiantes) < 2 or len(libros_disponibles) < 2:
-    print("No hay suficientes estudiantes o libros disponibles.")
+if len(solicitudes_pendientes) < 15:
+    print("❌ No hay suficientes solicitudes pendientes. Se requieren al menos 15.")
+    session.close()
 else:
-    num_intercambios = 50
+    # Definir estados deseados
+    estados_deseados = (
+        [EstadoIntercambioEnum.finalizado] * 5 +
+        [EstadoIntercambioEnum.en_proceso] * 5 +
+        [EstadoIntercambioEnum.cancelado] * 5
+    )
+    random.shuffle(estados_deseados)
+
     intercambios_creados = 0
-    usados = set()
 
-    while intercambios_creados < num_intercambios:
-        libro1 = random.choice(libros_disponibles)
-        libro2 = random.choice(libros_disponibles)
+    for i in range(15):
+        solicitud = solicitudes_pendientes[i]
 
-        if libro1.idLibro == libro2.idLibro:
-            continue
-        if libro1.idLibro in usados or libro2.idLibro in usados:
-            continue
-
-        estudiante1 = libro1.estudiante
-        estudiante2 = libro2.estudiante
-
-        if estudiante1.idEstudiante == estudiante2.idEstudiante:
+        # Verificar que los libros y estudiantes sean válidos
+        if (
+            solicitud.estudianteSolicitante == solicitud.estudiantePropietario or
+            solicitud.libroSolicitado == solicitud.libroOfrecido
+        ):
             continue
 
-        estado = random.choice([EstadoIntercambioEnum.en_proceso, EstadoIntercambioEnum.finalizado])
+        libro1 = session.query(Libro).filter_by(idLibro=solicitud.libroOfrecido).first()
+        libro2 = session.query(Libro).filter_by(idLibro=solicitud.libroSolicitado).first()
+        estudiante1 = session.query(Estudiante).filter_by(idEstudiante=solicitud.estudianteSolicitante).first()
+        estudiante2 = session.query(Estudiante).filter_by(idEstudiante=solicitud.estudiantePropietario).first()
+
+        if not all([libro1, libro2, estudiante1, estudiante2]):
+            continue
+
+        estado = estados_deseados[intercambios_creados]
         fecha_encuentro = datetime.now(timezone.utc) + timedelta(days=random.randint(1, 7))
         hora_encuentro = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) + timedelta(hours=random.randint(1, 12))
-        lugar = f"Aula {random.randint(1, 20)} - Bloque {random.choice(['A', 'B', 'C'])}"
+        lugar = "El Matorral"
 
-        # 👇 Crear solicitud asociada
-        nueva_solicitud = Solicitud(
-            estudianteSolicitante=estudiante1.idEstudiante,
-            libroSolicitado=libro2.idLibro,
-            estado="Aceptada",
-            fechaSolicitud=datetime.now(timezone.utc)
-        )
-        session.add(nueva_solicitud)
-        session.flush()  # 👈 Importante para obtener el id generado
-        id_solicitud = nueva_solicitud.idSolicitud
+        # Actualizar solicitud a aceptada
+        solicitud.estado = EstadoSolicitudEnum.aceptada
+        solicitud.fechaEncuentro = fecha_encuentro
+        solicitud.horaEncuentro = hora_encuentro
+        solicitud.lugarEncuentro = lugar
 
+        # Crear intercambio
         intercambio = Intercambio(
-            idSolicitud=id_solicitud,
+            idSolicitud=solicitud.idSolicitud,
             idEstudiante=estudiante1.idEstudiante,
             idEstudianteReceptor=estudiante2.idEstudiante,
             idLibroOfrecido=libro1.idLibro,
@@ -67,18 +71,20 @@ else:
             fechaCambioEstado=datetime.now(timezone.utc)
         )
 
-        # Cambiar estados de libros según el estado del intercambio
+        # Cambiar estado de los libros
         if estado == EstadoIntercambioEnum.en_proceso:
             libro1.estado = EstadoLibroEnum.enIntercambio
             libro2.estado = EstadoLibroEnum.enIntercambio
         elif estado == EstadoIntercambioEnum.finalizado:
             libro1.estado = EstadoLibroEnum.intercambiado
             libro2.estado = EstadoLibroEnum.intercambiado
+        elif estado == EstadoIntercambioEnum.cancelado:
+            libro1.estado = EstadoLibroEnum.disponible
+            libro2.estado = EstadoLibroEnum.disponible
 
         session.add(intercambio)
-        usados.update([libro1.idLibro, libro2.idLibro])
         intercambios_creados += 1
 
     session.commit()
     session.close()
-    print(f"{intercambios_creados} intercambios creados exitosamente.")
+    print(f"✅ Se crearon {intercambios_creados} intercambios usando solicitudes existentes.")

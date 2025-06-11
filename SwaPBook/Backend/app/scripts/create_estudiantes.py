@@ -22,7 +22,7 @@ def generar_correo_edu(nombre: str) -> str:
     return f"{username}@{dominio}"
 
 # Función principal para crear estudiantes falsos
-def crear_estudiantes_fake(cantidad=100):
+def crear_estudiantes_fake(cantidad=20):
     db = SessionLocal()
     estudiantes = []
 
@@ -53,4 +53,4 @@ def crear_estudiantes_fake(cantidad=100):
 
 # Ejecuta el script si se llama directamente
 if __name__ == "__main__":
-    crear_estudiantes_fake(100)
+    crear_estudiantes_fake(20)
