@@ -73,7 +73,7 @@ const AdminLibros = () => {
   }
 
     return (
-    <div className="bg-white rounded-xl shadow border border-gray-200 max-w-7xl mx-auto p-8 flex flex-col gap-6">
+    <div className="bg-white rounded-xl shadow border border-gray-200 max-w-lvw mx-auto p-8 flex flex-col gap-6">
       {/* Encabezado */}
       <h1 className="text-3xl font-bold text-[#722F37]">Gestión de Libros</h1>
 
@@ -133,7 +133,7 @@ const AdminLibros = () => {
       </div>
 
       {/* Bandeja de libros */}
-      <div className="rounded-lg border border-[#C9B084] max-h-[800px] overflow-y-auto">
+      <div className="rounded-lg border border-[#C9B084] max-h-[500px] overflow-y-auto">
         {error ? (
           <div className="text-center p-8 text-red-600">{error}</div>
         ) : (

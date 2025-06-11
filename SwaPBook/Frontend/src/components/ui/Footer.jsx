@@ -8,7 +8,7 @@ const Footer = () => (
         <div>
           <div className="flex items-center gap-2 mb-4">
             <FiBook className="text-2xl" />
-            <span className="text-xl font-bold">SwapBook</span>
+            <span className="text-xl font-bold">SwaPBook</span>
           </div>
           <p className="text-gray-300">
             La plataforma de intercambio de libros que conecta estudiantes universitarios.
@@ -52,7 +52,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="border-t border-gray-600 mt-4 pt-2 text-center text-gray-300">
-        <p>&copy; 2025 SwapBook. Todos los derechos reservados.</p>
+        <p>&copy; 2025 SwaPBook. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>

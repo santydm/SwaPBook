@@ -81,7 +81,7 @@ const AdminIntercambios = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow border border-gray-200 max-w-7xl mx-auto p-8 flex flex-col gap-6">
+    <div className="bg-white rounded-xl shadow border border-gray-200 max-w-lvw mx-auto p-8 flex flex-col gap-6">
       {/* Encabezado */}
       <h1 className="text-3xl font-bold text-[#722F37]">Gestión de Intercambios</h1>
 

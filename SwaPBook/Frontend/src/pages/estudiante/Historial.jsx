@@ -151,7 +151,7 @@ const Historial = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-Swap-cream">
       <Navbar usuario={estudiante} />
       <div className="container mx-auto p-4 md:p-6">
         <div className="flex flex-col md:flex-row gap-6">

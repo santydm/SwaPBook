@@ -86,7 +86,7 @@ const Catalogo = () => {
   const librosFiltrados = libros.filter(libro => libro.estado !== "Intercambio");
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-Swap-cream flex flex-col">
       <NavbarCatalogo
         estudiante={estudiante}
         onPerfilClick={() => setShowSidebar(true)}
@@ -132,7 +132,7 @@ const Catalogo = () => {
         </div>
       )}
 
-      <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-8 max-w-lvw mx-auto w-full">
         <h2 className="text-3xl font-bold mb-6 text-[#722F37]">Catálogo de Libros</h2>
         
         {loading ? (
@@ -141,7 +141,7 @@ const Catalogo = () => {
             <span className="ml-4 text-[#722F37] font-semibold">Cargando libros...</span>
           </div>
         ) : librosFiltrados.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-items-center">
             {librosFiltrados.map((libro) => (
               <CardLibro
                 key={libro.idLibro}

@@ -1,4 +1,3 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
@@ -24,6 +23,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsuarios from './pages/admin/AdminUsuarios';
 import AdminLibros from './pages/admin/AdminLibros';
 import AdminIntercambios from './pages/admin/AdminIntercambios';
+import AdminEstadisticas from './pages/admin/AdminEstadisticas';
 
 
 
@@ -66,8 +66,7 @@ function App() {
           <Route path="usuarios" element={<AdminUsuarios />} />
           <Route path="libros" element={<AdminLibros />} />
           <Route path="intercambios" element={<AdminIntercambios />} />
-          <Route path="intercambios" element={<div>Intercambios Admin</div>} />
-          <Route path="estadisticas" element={<div>Estadísticas Admin</div>} />
+          <Route path="estadisticas" element={<AdminEstadisticas />} /> 
           
         </Route>
 

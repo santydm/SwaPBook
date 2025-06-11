@@ -35,8 +35,9 @@ export default {
         'Swap-beige': '#C9B084',
         'Swap-green': '#009000',
         'Swap-green-dark': '#06402B',
+        'Swap-cream': '#e7d8ca',
         // Paleta extendida para mejor contraste
-        'Swap-beige-light': '#f9f6f2',
+        'Swap-beige-light': '#f7ecdc',
         'Swap-vinotinto-dark': '#5A252B',
       }
     },

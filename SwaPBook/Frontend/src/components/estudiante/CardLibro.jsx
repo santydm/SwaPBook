@@ -35,7 +35,7 @@ const CardLibro = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-gray-100 flex flex-col overflow-hidden w-full min-w-[280px] max-w-md hover:shadow-lg transition-shadow duration-200">
+    <div className="bg-white rounded-xl shadow-md border border-[#e7d8ca] flex flex-col overflow-hidden w-full min-w-[280px] max-w-md hover:shadow-lg transition-shadow duration-200">
       {/* Header usuario */}
       <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-100 bg-gray-50">
         <img

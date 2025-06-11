@@ -127,7 +127,7 @@ const AdminUsuarios = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow border border-gray-200 max-w-6xl mx-auto p-10 flex flex-col gap-8">
+    <div className="bg-white rounded-xl shadow border border-gray-200 max-w-lvw mx-auto p-10 flex flex-col gap-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-3xl font-bold text-[#722F37]">Gestión de Usuarios</h1>
         <div className="w-full md:w-96 relative">
