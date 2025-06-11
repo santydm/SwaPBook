@@ -13,7 +13,11 @@ from app.admin.router import router as admin_router
 from fastapi.staticfiles import StaticFiles  # Para los static files
 import os  #  os para crear directorios tambien para las fotos
 
+
 app = FastAPI()
+
+
+
 
 # directorio para las fotos de los libros
 os.makedirs("app/static/images/libros", exist_ok=True)

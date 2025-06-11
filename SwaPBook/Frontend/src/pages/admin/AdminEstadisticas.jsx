@@ -8,6 +8,7 @@ import {
   FiBarChart2,
   FiArrowUp
 } from "react-icons/fi";
+import ReactApexChart from "react-apexcharts";
 import {
   BarChart,
   Bar,
@@ -15,13 +16,12 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Cell
+  ResponsiveContainer
 } from "recharts";
 
 const AdminEstadisticas = () => {
-  const [heatmapData, setHeatmapData] = useState([]);
+  const [heatmapSeries, setHeatmapSeries] = useState([]);
+  const [heatmapOptions, setHeatmapOptions] = useState({});
   const [ofertaDemanda, setOfertaDemanda] = useState([]);
   const [topLibros, setTopLibros] = useState([]);
   const [stats, setStats] = useState({
@@ -30,20 +30,16 @@ const AdminEstadisticas = () => {
     usuariosActivos: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Configuración de diseño
   const colorPrimario = "#722F37";
   const colorSecundario = "#C9B084";
-  const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-
-  // Transformar datos del heatmap
-  const transformHeatmapData = (rawData) => {
-    return rawData.map(item => ({
-      day: diasSemana[item.dia],
-      time: item.franja,
-      value: item.cantidad
-    }));
-  };
+  const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+  const franjasHorarias = [
+    '08:00-10:00', '10:00-12:00', '12:00-14:00',
+    '14:00-16:00', '16:00-18:00', '18:00-20:00',
+    '20:00-22:00', 'Otro'
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,18 +61,59 @@ const AdminEstadisticas = () => {
           axios.get("http://localhost:8000/admin/estadisticas/intercambios", { headers })
         ]);
 
-        setHeatmapData(transformHeatmapData(heatmapRes.data));
+        // Procesar datos para el heatmap
+        const maxValue = Math.max(...heatmapRes.data.map(item => item.cantidad));
+        const seriesData = franjasHorarias.map(franja => ({
+          name: franja,
+          data: diasSemana.map(dia => {
+            const registro = heatmapRes.data.find(item => 
+              item.dia === dia && item.franja === franja
+            );
+            return registro ? registro.cantidad : 0;
+          })
+        }));
+
+        setHeatmapOptions({
+          chart: {
+            type: 'heatmap',
+            toolbar: { show: true }
+          },
+          dataLabels: { enabled: false },
+          colors: [colorPrimario],
+          xaxis: {
+            categories: diasSemana,
+            labels: { style: { colors: colorPrimario, fontWeight: 600 } }
+          },
+          plotOptions: {
+            heatmap: {
+              colorScale: {
+                ranges: [
+                  { from: 0, to: maxValue * 0.3, color: '#F3E9E9', name: 'Bajo' },
+                  { from: maxValue * 0.3, to: maxValue * 0.6, color: colorSecundario, name: 'Medio' },
+                  { from: maxValue * 0.6, to: maxValue, color: colorPrimario, name: 'Alto' }
+                ]
+              }
+            }
+          },
+          tooltip: {
+            y: {
+              formatter: (val) => `${val} intercambios`
+            }
+          }
+        });
+
+        setHeatmapSeries(seriesData);
         setOfertaDemanda(ofertaRes.data);
         setTopLibros(topRes.data);
         setStats({
           totalLibros: librosRes.data.total_libros,
           intercambiosTotales: intercambiosRes.data.total_creados,
-          usuariosActivos: 0 // Agregar endpoint correspondiente
+          usuariosActivos: 0 // Si tienes endpoint, actualízalo aquí
         });
-        
-      } catch (error) {
-        console.error("Error cargando estadísticas:", error);
-      } finally {
+        setLoading(false);
+
+      } catch (err) {
+        setError(`Error al cargar datos: ${err.message}`);
         setLoading(false);
       }
     };
@@ -95,98 +132,58 @@ const AdminEstadisticas = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-red-600">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Encabezado */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-[#722F37]">
-            <FiBarChart2 className="inline mr-3" />
-            Panel Estadístico
-          </h1>
-        </div>
+        <h1 className="text-3xl font-bold text-[#722F37]">
+          <FiBarChart2 className="inline mr-3" />
+          Panel Estadístico
+        </h1>
 
         {/* Tarjetas de resumen */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10 hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#722F37]/10 rounded-full">
-                <FiBookOpen className="text-2xl text-[#722F37]" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Libros publicados</p>
-                <p className="text-2xl font-bold text-[#722F37]">
-                  {stats.totalLibros}
-                </p>
-              </div>
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-[#722F37]">Libros Registrados</h3>
+              <FiBookOpen className="text-2xl text-[#C9B084]" />
             </div>
+            <p className="text-3xl font-bold text-[#722F37] mt-4">{stats.totalLibros}</p>
           </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10 hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#C9B084]/10 rounded-full">
-                <FiTrendingUp className="text-2xl text-[#722F37]" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Intercambios totales</p>
-                <p className="text-2xl font-bold text-[#722F37]">
-                  {stats.intercambiosTotales}
-                </p>
-              </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-[#722F37]">Intercambios Totales</h3>
+              <FiTrendingUp className="text-2xl text-[#C9B084]" />
             </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10 hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#722F37]/10 rounded-full">
-                <FiClock className="text-2xl text-[#722F37]" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Actividad reciente</p>
-                <p className="text-2xl font-bold text-[#722F37]">+24%</p>
-              </div>
-            </div>
+            <p className="text-3xl font-bold text-[#722F37] mt-4">{stats.intercambiosTotales}</p>
           </div>
         </div>
 
         {/* Sección de gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Heatmap de horarios */}
+          {/* Heatmap de horarios con ApexCharts */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
             <h3 className="text-xl font-semibold text-[#722F37] mb-6 flex items-center gap-2">
               <FiClock className="text-[#C9B084]" />
               Horarios de Intercambios
             </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={heatmapData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="day" 
-                    tick={{ fill: colorPrimario }}
-                  />
-                  <YAxis 
-                    tick={{ fill: colorPrimario }}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: colorPrimario,
-                      border: 'none',
-                      borderRadius: '8px',
-                      color: 'white'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="value" 
-                    fill={colorSecundario}
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ReactApexChart
+              options={heatmapOptions}
+              series={heatmapSeries}
+              type="heatmap"
+              height={350}
+            />
           </div>
 
-          {/* Oferta vs Demanda */}
+          {/* Gráfico de Oferta vs Demanda */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
             <h3 className="text-xl font-semibold text-[#722F37] mb-6 flex items-center gap-2">
               <FiArrowUp className="text-[#C9B084]" />
