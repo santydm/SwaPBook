@@ -236,10 +236,29 @@ def resumen_intercambios(db: Session = Depends(get_db)):
         Intercambio.estado == EstadoIntercambioEnum.cancelado
     ).scalar()
 
+    intercambios = db.query(Intercambio).all()
+    intercambios_data = [
+        {
+            "idIntercambio": i.idIntercambio,
+            "idSolicitud": i.idSolicitud,
+            "idEstudiante": i.idEstudiante,
+            "idEstudianteReceptor": i.idEstudianteReceptor,
+            "idLibroOfrecido": i.idLibroOfrecido,
+            "idLibroSolicitado": i.idLibroSolicitado,
+            "fechaEncuentro": i.fechaEncuentro.isoformat() if i.fechaEncuentro else None,
+            "fechaCambioEstado": i.fechaCambioEstado.isoformat() if i.fechaCambioEstado else None,
+            "horaEncuentro": i.horaEncuentro.isoformat() if i.horaEncuentro else None,
+            "lugarEncuentro": i.lugarEncuentro,
+            "estado": i.estado
+        }
+        for i in intercambios
+    ]
+
     return {
         "total_creados": total_creados,
         "total_finalizados": total_finalizados,
-        "total_cancelados": total_cancelados
+        "total_cancelados": total_cancelados,
+        "intercambios": intercambios_data
     }
 
 @router.get("/estadisticas/top-libros")

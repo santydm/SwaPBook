@@ -41,7 +41,7 @@ else:
         estado = random.choice([EstadoIntercambioEnum.en_proceso, EstadoIntercambioEnum.finalizado])
         fecha_encuentro = datetime.now(timezone.utc) + timedelta(days=random.randint(1, 7))
         hora_encuentro = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) + timedelta(hours=random.randint(1, 12))
-        lugar = f"Aula {random.randint(1, 20)} - Bloque {random.choice(['A', 'B', 'C'])}"
+        lugar = f"El Matorral"
 
         # 👇 Crear solicitud asociada
         nueva_solicitud = Solicitud(
