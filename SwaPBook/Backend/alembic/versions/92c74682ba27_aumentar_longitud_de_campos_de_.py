@@ -35,12 +35,12 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_estudiantes_correoInstitucional'), 'estudiantes', ['correoInstitucional'], unique=True)
     op.create_index(op.f('ix_estudiantes_idEstudiante'), 'estudiantes', ['idEstudiante'], unique=False)
-    op.drop_index('ix_intercambios_idIntercambio', table_name='intercambios')
+    #op.drop_index('ix_intercambios_idIntercambio', table_name='intercambios')
     op.drop_table('intercambios')
     op.drop_table('cambios_correo_pendiente')
-    op.create_foreign_key(None, 'libros', 'estudiantes', ['idEstudiante'], ['idEstudiante'], ondelete='CASCADE')
-    op.create_foreign_key(None, 'solicitudes', 'estudiantes', ['estudiantePropietario'], ['idEstudiante'])
-    op.create_foreign_key(None, 'solicitudes', 'estudiantes', ['estudianteSolicitante'], ['idEstudiante'])
+    #op.create_foreign_key(None, 'libros', 'estudiantes', ['idEstudiante'], ['idEstudiante'], ondelete='CASCADE')
+    #op.create_foreign_key(None, 'solicitudes', 'estudiantes', ['estudiantePropietario'], ['idEstudiante'])
+    #op.create_foreign_key(None, 'solicitudes', 'estudiantes', ['estudianteSolicitante'], ['idEstudiante'])
     # ### end Alembic commands ###
 
 

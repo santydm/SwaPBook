@@ -49,7 +49,7 @@ else:
         estado = estados_deseados[intercambios_creados]
         fecha_encuentro = datetime.now(timezone.utc) + timedelta(days=random.randint(1, 7))
         hora_encuentro = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) + timedelta(hours=random.randint(1, 12))
-        lugar = "El Matorral"
+        lugar = f"El Matorral"
 
         # Actualizar solicitud a aceptada
         solicitud.estado = EstadoSolicitudEnum.aceptada
