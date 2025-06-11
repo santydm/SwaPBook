@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiBook, FiUsers, FiStar, FiMapPin, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
 import axios from 'axios';
-
+import Footer from '../../components/ui/Footer';
 const Home = () => {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState(null);
@@ -24,36 +24,33 @@ const Home = () => {
     }
   }, []);
 
-  // Redirección automática si intentan ir a /login o /registro estando logeados
-  // (esto se hace mejor en las rutas privadas, pero aquí mostramos la idea)
 
-  // Renderizado condicional basado en estado de autenticación
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-Swap-cream">
       {/* Header/Navbar */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-Swap-vinotinto shadow-sm border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <FiBook className="text-2xl text-[#722F37]" />
-            <span className="text-2xl font-bold text-[#722F37]">SwapBook</span>
+            <FiBook className="text-2xl text-white" />
+            <span className="text-2xl font-bold text-white">SwapBook</span>
           </div>
           <nav className="hidden md:flex space-x-6">
-            <a href="#como-funciona" className="text-gray-600 hover:text-[#722F37]">¿Cómo funciona?</a>
-            <a href="#beneficios" className="text-gray-600 hover:text-[#722F37]">Beneficios</a>
-            <a href="#matorral" className="text-gray-600 hover:text-[#722F37]">El Matorral</a>
+            <a href="#como-funciona" className="text-white hover:text-Swap-cream">¿Cómo funciona?</a>
+            <a href="#beneficios" className="text-white hover:text-Swap-cream">Beneficios</a>
+            <a href="#matorral" className="text-white hover:text-Swap-cream">El Matorral</a>
           </nav>
           <div className="flex gap-3">
             {loading ? null : usuario ? (
               <>
                 <Link
                   to="/catalogo"
-                  className="px-4 py-2 bg-Swap-beige text-white rounded-md hover:bg-[#a67c52] transition-colors"
+                  className="px-4 py-2 border-2 border-[#722F37]  bg-Swap-vinotinto text-white rounded-md hover:bg-Swap-cream text-Swap-beige hover:text-Swap-vinotinto transition-colors"
                 >
                   Ir al catálogo
                 </Link>
                 <Link
                   to="/perfil"
-                  className="px-4 py-2 text-[#722F37] border border-[#722F37] rounded-md hover:bg-[#722F37] hover:text-white transition-colors"
+                  className="px-4 py-2 text-white border border-[#722F37] rounded-md hover:bg-Swap-cream hover:text-Swap-vinotinto transition-colors"
                 >
                   Mi perfil
                 </Link>
@@ -94,7 +91,7 @@ const Home = () => {
               <>
                 <Link
                   to="/catalogo"
-                  className="px-8 py-4 bg-Swap-beige text-white text-lg font-semibold rounded-lg hover:bg-[#a67c52] transition-colors flex items-center justify-center gap-2"
+                  className="px-8 py-4 border-2 border-[#722F37] text-white bg-Swap-vinotinto rounded-md hover:bg-Swap-cream  hover:text-Swap-vinotinto text-lg font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   Ir al catálogo <FiArrowRight />
                 </Link>
@@ -126,7 +123,7 @@ const Home = () => {
       </section>
 
       {/* Estadísticas */}
-      <section className="py-16 bg-white">
+      <section className="py-32 bg-Swap-cream">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
@@ -176,7 +173,7 @@ const Home = () => {
       </section>
 
       {/* Beneficios */}
-      <section id="beneficios" className="py-20 bg-white">
+      <section id="beneficios" className="py-20 bg-Swap-cream">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-[#722F37] mb-16">¿Por qué usar SwapBook?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -265,13 +262,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Newsletter/CTA */}
-      <section className="py-16 bg-Swap-beige">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">¿Listo para comenzar?</h2>
-          <p className="text-white text-lg mb-8">Únete a nuestra comunidad de estudiantes que intercambian conocimiento</p>
+
+      <section className="py-20 bg-Swap-cream">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-Swap-vinotinto mb-4">¿Listo para comenzar?</h2>
+          <p className="text-black text-lg mb-8">Únete a nuestra comunidad de estudiantes que intercambian conocimiento</p>
           {loading ? null : usuario ? (
-            <Link to="/catalogo" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-Swap-beige text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+            <Link to="/catalogo" className="inline-flex items-center gap-2 px-8 py-4 px-4 py-2 border-2 border-[#722F37]  bg-Swap-vinotinto text-white rounded-md hover:bg-Swap-cream transition-colors text-Swap-beige hover:text-Swap-vinotinto text-lg font-semibold rounded-lg transition-colors">
               Ir al catálogo <FiArrowRight />
             </Link>
           ) : (
@@ -283,46 +280,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#722F37] text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <FiBook className="text-2xl" />
-                <span className="text-xl font-bold">SwapBook</span>
-              </div>
-              <p className="text-gray-300">La plataforma de intercambio de libros que conecta estudiantes.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Enlaces</h3>
-              <ul className="space-y-2 text-gray-300">
-                <li><Link to="/about" className="hover:text-white">Acerca de</Link></li>
-                <li><Link to="/catalogo" className="hover:text-white">Catálogo</Link></li>
-                <li><Link to="/contact" className="hover:text-white">Contacto</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Soporte</h3>
-              <ul className="space-y-2 text-gray-300">
-                <li><Link to="/help" className="hover:text-white">Ayuda</Link></li>
-                <li><Link to="/terms" className="hover:text-white">Términos</Link></li>
-                <li><Link to="/privacy" className="hover:text-white">Privacidad</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">El Matorral</h3>
-              <ul className="space-y-2 text-gray-300">
-                <li>Cra. 19 # 36-55</li>
-                <li>Teusaquillo, Bogotá</li>
-                <li>Lun-Sáb: 10AM-8PM</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-600 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2025 SwapBook. Todos los derechos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

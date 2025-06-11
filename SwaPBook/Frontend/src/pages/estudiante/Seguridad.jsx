@@ -124,7 +124,7 @@ const Seguridad = () => {
   return (
     <>
       <Navbar usuario={estudiante} />
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-Swap-cream">
         <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
           <PanelPerfil
             handleLogout={() => {

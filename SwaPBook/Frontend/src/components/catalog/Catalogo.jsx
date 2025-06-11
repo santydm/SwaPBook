@@ -19,6 +19,7 @@ const Catalogo = () => {
   const [searchText, setSearchText] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
 
   // Cargar usuario si hay token
   useEffect(() => {
@@ -64,6 +65,7 @@ const Catalogo = () => {
         }
 
         setLibros(response.data);
+        setPaginaActual(1); // Resetear página al cambiar libros
       } catch (error) {
         console.error("Error al cargar libros:", error);
         setLibros([]);
@@ -85,6 +87,11 @@ const Catalogo = () => {
 
   const librosFiltrados = libros.filter(libro => libro.estado !== "Intercambio");
 
+  // Paginación
+  const librosPorPagina = 4 * 6; // 4 filas x 5 columnas
+  const totalPaginas = Math.ceil(librosFiltrados.length / librosPorPagina);
+  const librosPagina = librosFiltrados.slice((paginaActual - 1) * librosPorPagina, paginaActual * librosPorPagina);
+
   return (
     <div className="min-h-screen bg-Swap-cream flex flex-col">
       <NavbarCatalogo
@@ -103,7 +110,7 @@ const Catalogo = () => {
         }}
       />
 
-      {/* Sidebar y modales (mantener igual) */}
+      {/* Sidebar y modales */}
       {estudiante && showSidebar && (
         <SidebarCatalogo
           estudiante={estudiante}
@@ -133,16 +140,16 @@ const Catalogo = () => {
       )}
 
       <main className="flex-1 p-8 max-w-lvw mx-auto w-full">
-        <h2 className="text-3xl font-bold mb-6 text-[#722F37]">Catálogo de Libros</h2>
+        <h2 className="text-5xl font-bold mb-10 items-center text-center text-[#722F37]">Catálogo de Libros</h2>
         
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
             <span className="ml-4 text-[#722F37] font-semibold">Cargando libros...</span>
           </div>
-        ) : librosFiltrados.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-items-center">
-            {librosFiltrados.map((libro) => (
+        ) : librosPagina.length > 0 ? (
+          <div className="grid grid-cols-4 gap-8 justify-items-center">
+            {librosPagina.map((libro) => (
               <CardLibro
                 key={libro.idLibro}
                 usuarioNombre={libro.estudiante?.nombre || "Usuario"}
@@ -160,6 +167,27 @@ const Catalogo = () => {
           </div>
         ) : (
           <p className="text-center text-gray-500 py-8">No hay libros disponibles en el catálogo.</p>
+        )}
+
+
+        {totalPaginas > 1 && (
+          <div className="flex justify-center mt-10 gap-6">
+            <button
+              className="px-4 py-2 bg-Swap-vinotinto text-white rounded-md hover:bg-Swap-vinotinto-dark"
+              onClick={() => setPaginaActual(p => Math.max(p - 1, 1))}
+              disabled={paginaActual === 1}
+            >
+              Anterior
+            </button>
+            <span className="flex items-center text-[#722F37] text-lg font-semibold">Página {paginaActual} de {totalPaginas}</span>
+            <button
+              className="px-4 py-2 bg-Swap-vinotinto text-white rounded-md hover:bg-Swap-vinotinto-dark"
+              onClick={() => setPaginaActual(p => Math.min(p + 1, totalPaginas))}
+              disabled={paginaActual === totalPaginas}
+            >
+              Siguiente
+            </button>
+          </div>
         )}
       </main>
 

@@ -21,8 +21,8 @@ const NavbarCatalogo = ({
 
   return (
     <nav className="w-full bg-[#722F37] px-6 py-3 flex items-center justify-between shadow">
-      <a href="/catalogo" className="flex items-center gap-2">
-        <span className="text-2xl font-extrabold text-white tracking-tight">SwaPBook</span>
+      <a href="/" className="flex items-center gap-2">
+        <span className="text-3xl shadow-md font-extrabold text-white ">SwaPBook</span>
       </a>
       {/* SearchBar y filtro */}
       <form

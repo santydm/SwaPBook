@@ -5,7 +5,7 @@ const Navbar = ({ usuario }) => {
   const navigate = useNavigate();
 
   return (
-    <header className="bg-[#722F37] text-white shadow-md">
+    <header className="bg-[#722F37] text-white shadow-md absolute top-0 left-0 w-full z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo y nombre */}
         <div
