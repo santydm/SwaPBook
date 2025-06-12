@@ -1,7 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import useWebSocket from "react-use-websocket";
 import SolicitudNotificacionCard from "/src/components/notificaciones/SolicitudNotificacionCard.jsx";
 import SolicitudDetalleModal from "/src/components/solicitudes/SolicitudDetalleModal.jsx";
 import axios from "axios";
+import { FiX } from "react-icons/fi";
 
 const NotificacionesSolicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
@@ -11,13 +13,35 @@ const NotificacionesSolicitudes = () => {
   const modalOpenRef = useRef(false);
   const abortControllerRef = useRef(null);
 
-  // Obtener solicitudes pendientes
-  const fetchSolicitudes = async () => {
+  // Configuración WebSocket
+  const WS_URL = "ws://localhost:8000/ws/notificaciones";
+  const { lastJsonMessage, sendJsonMessage } = useWebSocket(
+    `${WS_URL}?token=${localStorage.getItem("token")}`,
+    {
+      shouldReconnect: () => true,
+      reconnectAttempts: 3,
+      reconnectInterval: 3000,
+      onOpen: () => console.log("Conexión WebSocket establecida"),
+      onError: (err) => console.error("Error WebSocket:", err),
+    }
+  );
+
+  // Procesar mensajes WebSocket
+  useEffect(() => {
+    if (lastJsonMessage?.event === "nueva_solicitud") {
+      const nuevaSolicitud = lastJsonMessage.data;
+      if (!dismissedIdsRef.current.has(nuevaSolicitud.idSolicitud)) {
+        setSolicitudes(prev => [...prev, nuevaSolicitud]);
+      }
+    }
+  }, [lastJsonMessage]);
+
+  // Obtener solicitudes pendientes iniciales
+  const fetchSolicitudes = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      // Cancelar petición anterior si existe
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -36,24 +60,18 @@ const NotificacionesSolicitudes = () => {
         }
       );
 
-      // Filtrar notificaciones ya descartadas
-      const nuevasSolicitudes = res.data.filter(
+      setSolicitudes(res.data.filter(
         solicitud => !dismissedIdsRef.current.has(solicitud.idSolicitud)
-      );
-
-      // Sincronizar las que vienen del backend y no están descartadas
-      setSolicitudes(nuevasSolicitudes);
+      ));
     } catch (error) {
-      if (axios.isCancel(error)) {
-        // Petición cancelada, no hacer nada
-      } else {
+      if (!axios.isCancel(error)) {
         console.error("Error al obtener solicitudes:", error);
       }
     }
-  };
+  }, []);
 
   // Manejo auto-cierre de notificaciones
-  const iniciarTimer = (solicitud) => {
+  const iniciarTimer = useCallback((solicitud) => {
     if (timersRef.current[solicitud.idSolicitud] || modalOpenRef.current) return;
 
     timersRef.current[solicitud.idSolicitud] = setTimeout(() => {
@@ -61,28 +79,21 @@ const NotificacionesSolicitudes = () => {
       setSolicitudes(prev => prev.filter(s => s.idSolicitud !== solicitud.idSolicitud));
       delete timersRef.current[solicitud.idSolicitud];
     }, 5000);
-  };
+  }, []);
 
   useEffect(() => {
     solicitudes.forEach(iniciarTimer);
+    return () => Object.values(timersRef.current).forEach(clearTimeout);
+  }, [solicitudes, iniciarTimer]);
 
-    return () => {
-      Object.values(timersRef.current).forEach(clearTimeout);
-    };
-  }, [solicitudes]);
-
-  // Actualizar solicitudes cada 10 segundos
+  // Cargar datos iniciales
   useEffect(() => {
     fetchSolicitudes();
-    const interval = setInterval(fetchSolicitudes, 10000);
-    return () => {
-      clearInterval(interval);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-    };
-  }, []);
+    return () => abortControllerRef.current?.abort();
+  }, [fetchSolicitudes]);
 
   // Acciones principales
-  const handleAceptarRechazar = async (idSolicitud, accion) => {
+  const handleAceptarRechazar = useCallback(async (idSolicitud, accion) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
@@ -96,17 +107,22 @@ const NotificacionesSolicitudes = () => {
       setDetalleSolicitud(null);
       clearTimeout(timersRef.current[idSolicitud]);
       delete timersRef.current[idSolicitud];
+      
+      // Notificar a través de WebSocket
+      sendJsonMessage({
+        event: "actualizacion_solicitud",
+        data: { idSolicitud, accion }
+      });
     } catch (error) {
       console.error(`Error al ${accion}:`, error);
     }
-  };
+  }, [sendJsonMessage]);
 
   // Manejar visualización de detalles
-  const handleVerDetalles = (idSolicitud) => {
+  const handleVerDetalles = useCallback((idSolicitud) => {
     const solicitud = solicitudes.find(s => s.idSolicitud === idSolicitud);
     if (!solicitud) return;
 
-    // Pausar timer y marcar modal como abierto
     modalOpenRef.current = true;
     clearTimeout(timersRef.current[idSolicitud]);
     setDetalleSolicitud({
@@ -114,9 +130,9 @@ const NotificacionesSolicitudes = () => {
       libroSolicitado: solicitud.libro_solicitado,
       solicitante: solicitud.solicitante
     });
-  };
+  }, [solicitudes]);
 
-  const handleCerrarModal = () => {
+  const handleCerrarModal = useCallback(() => {
     modalOpenRef.current = false;
     setDetalleSolicitud(null);
 
@@ -126,14 +142,14 @@ const NotificacionesSolicitudes = () => {
     if (solicitudExistente) {
       iniciarTimer(solicitudExistente);
     }
-  };
+  }, [solicitudes, detalleSolicitud, iniciarTimer]);
 
-  const handleCerrarNotificacion = (idSolicitud) => {
+  const handleCerrarNotificacion = useCallback((idSolicitud) => {
     dismissedIdsRef.current.add(idSolicitud);
     setSolicitudes(prev => prev.filter(s => s.idSolicitud !== idSolicitud));
     clearTimeout(timersRef.current[idSolicitud]);
     delete timersRef.current[idSolicitud];
-  };
+  }, []);
 
   return (
     <>

@@ -59,7 +59,7 @@ const Home = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-[#722F37] border border-[#722F37] rounded-md hover:bg-[#722F37] hover:text-white transition-colors"
+                  className="px-4 py-2 text-white border border-[#632730] rounded-md hover:bg-Swap-cream hover:text-white transition-colors"
                 >
                   Iniciar Sesión
                 </Link>
