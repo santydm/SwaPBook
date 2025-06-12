@@ -1,7 +1,7 @@
 import os
 import sys
 import random
-from datetime import datetime, timezone, time
+from datetime import datetime, timezone, time, timedelta
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -37,16 +37,22 @@ try:
         print("Se necesitan al menos 2 estudiantes y 2 libros para generar solicitudes.")
         sys.exit()
 
-    for _ in range(15):
+    hoy = datetime.now().date()
+    dias_generados = 0
+
+    while dias_generados < 40:
+        # Asegura 1 solicitud para cada día de la semana en los primeros 7 días
+        if dias_generados < 7:
+            fecha_encuentro = hoy + timedelta(days=(dias_generados % 7))
+        else:
+            # Luego elige fechas aleatorias del resto del mes
+            fecha_encuentro = fake.date_between(start_date="-80d", end_date="+80d")
+
         solicitante, propietario = random.sample(estudiantes, 2)
         libro_solicitado = random.choice(libros)
         libro_ofrecido = random.choice(libros)
 
-        # Fecha del encuentro (sin hora) entre hoy y +30 días
-        fecha_encuentro = fake.date_between(start_date="today", end_date="+30d")
-
-        # Hora entre 06:00 y 23:00, en bloques de 15 minutos
-        hora_random = random.randint(6, 22)  # hasta 22 porque podrías tener 22:45
+        hora_random = random.randint(6, 22)
         minuto_random = random.choice([0, 15, 30, 45])
         hora_encuentro = datetime.combine(
             fecha_encuentro,
@@ -67,9 +73,10 @@ try:
         )
 
         session.add(nueva_solicitud)
+        dias_generados += 1
 
     session.commit()
-    print("✅ Se crearon 15 solicitudes con horas entre 06:00 y 23:00, y lugar fijo 'El Matorral'.")
+    print("✅ Se crearon 15 solicitudes distribuidas en los 7 días de la semana.")
 except Exception as e:
     session.rollback()
     print("❌ Error al crear solicitudes:", e)
