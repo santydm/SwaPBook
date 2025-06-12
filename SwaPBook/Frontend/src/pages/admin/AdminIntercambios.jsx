@@ -9,6 +9,7 @@ const AdminIntercambios = () => {
     total: 0,
     realizados: 0,
     cancelados: 0,
+    en_proceso: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,11 +71,15 @@ const AdminIntercambios = () => {
       const res = await axios.get("http://localhost:8000/admin/estadisticas/intercambios", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+      // Si el backend no devuelve total_en_proceso, se puede calcular:
+      // en_proceso = total - realizados - cancelados
       setStats({
         total: res.data.total_creados,
         realizados: res.data.total_finalizados,
         cancelados: res.data.total_cancelados,
+        en_proceso: res.data.total_en_proceso !== undefined
+          ? res.data.total_en_proceso
+          : res.data.total_creados - res.data.total_finalizados - res.data.total_cancelados
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -109,12 +114,19 @@ const AdminIntercambios = () => {
       <h1 className="text-3xl font-bold text-[#722F37]">Gestión de Intercambios</h1>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-[#722F37]/10 p-4 rounded-lg flex items-center gap-4 border border-[#722F37]/20">
           <FiRepeat className="text-2xl text-[#722F37]" />
           <div>
             <p className="text-sm text-[#5A252B]">Total de intercambios</p>
             <p className="text-2xl font-bold text-[#722F37]">{stats.total}</p>
+          </div>
+        </div>
+        <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg flex items-center gap-4">
+          <FiRepeat className="text-2xl" />
+          <div>
+            <p className="text-sm">En proceso</p>
+            <p className="text-2xl font-bold">{stats.en_proceso}</p>
           </div>
         </div>
         <div className="bg-green-100 text-green-800 p-4 rounded-lg flex items-center gap-4">
@@ -154,7 +166,7 @@ const AdminIntercambios = () => {
             <IntercambioCard 
               key={inter.idIntercambio}
               intercambio={inter}
-              classNameAdmin={estadoColor[inter.estado.toLowerCase()]}
+              classNameAdmin={estadoColor[inter.estado?.toLowerCase()]}
               onVerDetalles={() => {/* Implementar lógica de detalles */}}
             />
           ))}
@@ -171,4 +183,3 @@ const AdminIntercambios = () => {
 };
 
 export default AdminIntercambios;
-  

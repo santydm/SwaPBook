@@ -233,7 +233,9 @@ const LibroDetalleModal = ({
                           Editar libro
                         </button>
                         <button
-                          onClick={() => setConfirmarEliminar(true)}
+                          onClick={() => 
+                            setConfirmarEliminar(true)
+                          }
                           className="w-full py-3 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                         >
                           Eliminar libro

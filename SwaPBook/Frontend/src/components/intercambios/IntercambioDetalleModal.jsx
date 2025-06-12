@@ -178,6 +178,11 @@ const IntercambioDetalleModal = ({
               onClick={() => {
                 if (window.confirm("¿Estás seguro de cancelar este intercambio?")) {
                   onCancelar(intercambio.idIntercambio);
+                  setTimeout(() => {
+                  setMensajeExito('');
+                  onClose();
+                  window.location.reload();
+                }, 2000);
                 }
               }}
               className={`flex-1 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors flex items-center justify-center gap-2 ${
@@ -192,6 +197,11 @@ const IntercambioDetalleModal = ({
               onClick={() => {
                 if (window.confirm("¿Confirmas que el intercambio se realizó exitosamente?")) {
                   onFinalizar(intercambio.idIntercambio);
+                  setTimeout(() => {
+                  setMensajeExito('');
+                  onClose();
+                  window.location.reload();
+                }, 2000);
                 }
               }}
               className={`flex-1 py-3 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-semibold transition-colors flex items-center justify-center gap-2 ${

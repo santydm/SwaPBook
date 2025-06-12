@@ -89,6 +89,13 @@ const PublicarLibro = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
 
+    setTimeout(() => {
+    setMensajeExito('');
+    onClose();
+    window.location.reload();
+  }, 2000);
+
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {

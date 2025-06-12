@@ -84,6 +84,11 @@ const SolicitarIntercambioModal = ({
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setMostrarExito(true);
+      setTimeout(() => {
+      setMensajeExito('');
+      onClose();
+      window.location.reload();
+    }, 2000);
     } catch (error) {
       setError(error.response?.data?.detail || 'Error al enviar la solicitud. Intenta nuevamente.');
     } finally {

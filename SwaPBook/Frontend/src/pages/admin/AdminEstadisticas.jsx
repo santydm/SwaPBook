@@ -52,16 +52,18 @@ const AdminEstadisticas = () => {
           librosRes, 
           ofertaRes, 
           topRes,
-          intercambiosRes
+          intercambiosRes,
+          estudiantesRes
         ] = await Promise.all([
           axios.get("http://localhost:8000/admin/estadisticas/horarios/heatmap", { headers }),
           axios.get("http://localhost:8000/admin/estadisticas/total-libros", { headers }),
           axios.get("http://localhost:8000/admin/estadisticas/oferta-demanda", { headers }),
           axios.get("http://localhost:8000/admin/estadisticas/top-libros", { headers }),
-          axios.get("http://localhost:8000/admin/estadisticas/intercambios", { headers })
+          axios.get("http://localhost:8000/admin/estadisticas/intercambios", { headers }),
+          axios.get("http://localhost:8000/admin/estudiantes", { headers })
+
         ]);
 
-        // Procesar datos para el heatmap
         const maxValue = Math.max(...heatmapRes.data.map(item => item.cantidad));
         const seriesData = franjasHorarias.map(franja => ({
           name: franja,
@@ -108,7 +110,7 @@ const AdminEstadisticas = () => {
         setStats({
           totalLibros: librosRes.data.total_libros,
           intercambiosTotales: intercambiosRes.data.total_creados,
-          usuariosActivos: 0 // Si tienes endpoint, actualízalo aquí
+          usuariosActivos: estudiantesRes.data.length
         });
         setLoading(false);
 
@@ -165,7 +167,16 @@ const AdminEstadisticas = () => {
             </div>
             <p className="text-3xl font-bold text-[#722F37] mt-4">{stats.intercambiosTotales}</p>
           </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-[#722F37]">Total Usuarios</h3>
+              <FiTrendingUp className="text-2xl text-[#C9B084]" />
+            </div>
+            <p className="text-3xl font-bold text-[#722F37] mt-4">{stats.usuariosActivos}</p>
+          </div>
         </div>
+        
 
         {/* Sección de gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -41,7 +41,7 @@ const AdminDashboard = () => {
     datasets: [{
       label: 'Libros por categoría',
       data: stats.librosPorCategoria.map(item => item.cantidad),
-      backgroundColor: '#C9B084'
+      backgroundColor: '#722F37'
     }]
   };
 

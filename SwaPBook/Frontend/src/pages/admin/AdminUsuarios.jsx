@@ -10,7 +10,7 @@ const AdminUsuarios = () => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const debounceTimeout = useRef(null);
 
-  // Estadísticas calculadas
+  
   const totalUsuarios = usuarios.length;
   const usuariosActivos = usuarios.filter(user => user.activo).length;
   const usuariosInactivos = totalUsuarios - usuariosActivos;
