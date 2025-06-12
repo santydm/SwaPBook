@@ -42,7 +42,7 @@ def descargar_foto_perfil() -> str:
 
     return "/static/fotos_perfil/default.jpg"  # fallback si falla
 
-def crear_estudiantes_fake(cantidad=20):
+def crear_estudiantes_fake(cantidad=40):
     from sqlalchemy.orm import Session
     db: Session = SessionLocal()
     estudiantes = []
@@ -74,4 +74,4 @@ def crear_estudiantes_fake(cantidad=20):
     print(f"\n{cantidad} estudiantes creados exitosamente.")
 
 if __name__ == "__main__":
-    crear_estudiantes_fake(20)
+    crear_estudiantes_fake(40)

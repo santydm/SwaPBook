@@ -255,22 +255,29 @@ def resumen_intercambios(db: Session = Depends(get_db)):
     total_cancelados = db.query(func.count(Intercambio.idIntercambio)).filter(
         Intercambio.estado == EstadoIntercambioEnum.cancelado
     ).scalar()
-    total_en_proceso = db.query(func.count(Intercambio.idIntercambio)).filter(
-            Intercambio.estado == EstadoIntercambioEnum.en_proceso
-        ).scalar()
 
-    intercambios = db.query(Intercambio).all()
+    total_en_proceso = db.query(func.count(Intercambio.idIntercambio)).filter(
+        Intercambio.estado == EstadoIntercambioEnum.en_proceso
+    ).scalar()
+
+    intercambios = db.query(Intercambio).options(
+        joinedload(Intercambio.libro_ofrecido),
+        joinedload(Intercambio.libro_solicitado),
+        joinedload(Intercambio.estudiante),
+        joinedload(Intercambio.estudiante_receptor),
+    ).all()
+
     intercambios_data = [
         {
             "idIntercambio": i.idIntercambio,
-            "idSolicitud": i.idSolicitud,
-            "idEstudiante": i.idEstudiante,
-            "idEstudianteReceptor": i.idEstudianteReceptor,
-            "idLibroOfrecido": i.idLibroOfrecido,
-            "idLibroSolicitado": i.idLibroSolicitado,
+            "solicitud": i.idSolicitud,
+            "estudiante_ofrece": i.estudiante.nombre if i.estudiante else None,
+            "estudiante_recibe": i.estudiante_receptor.nombre if i.estudiante_receptor else None,
+            "libro_ofrecido": i.libro_ofrecido.titulo if i.libro_ofrecido else None,
+            "libro_solicitado": i.libro_solicitado.titulo if i.libro_solicitado else None,
             "fechaEncuentro": i.fechaEncuentro.isoformat() if i.fechaEncuentro else None,
-            "fechaCambioEstado": i.fechaCambioEstado.isoformat() if i.fechaCambioEstado else None,
             "horaEncuentro": i.horaEncuentro.isoformat() if i.horaEncuentro else None,
+            "fechaCambioEstado": i.fechaCambioEstado.isoformat() if i.fechaCambioEstado else None,
             "lugarEncuentro": i.lugarEncuentro,
             "estado": i.estado
         }
@@ -284,7 +291,6 @@ def resumen_intercambios(db: Session = Depends(get_db)):
         "total_en_proceso": total_en_proceso,
         "intercambios": intercambios_data
     }
-
 @router.get("/estadisticas/top-libros")
 def top_libros_mas_intercambiados(db: Session = Depends(get_db)):
     resultados = (

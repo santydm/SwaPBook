@@ -184,14 +184,14 @@ const AdminIntercambios = () => {
                   </Td>
                   <Td>
                     <div className="flex flex-col">
-                      <span className="text-[#722F37] font-medium">Ofrecido: #{inter.idLibroOfrecido}</span>
-                      <span className="text-[#5A252B]">Solicitado: #{inter.idLibroSolicitado}</span>
+                      <span className="text-[#722F37] font-medium">Ofrecido: {inter.libro_ofrecido}</span>
+                      <span className="text-[#5A252B]">Solicitado: {inter.libro_solicitado}</span>
                     </div>
                   </Td>
                   <Td>
                     <div className="flex flex-col">
-                      <span className="text-[#722F37] font-medium">Solicitante: #{inter.idEstudiante}</span>
-                      <span className="text-[#5A252B]">Ofertante: #{inter.idEstudianteReceptor}</span>
+                      <span className="text-[#722F37] font-medium">Solicitante: {inter.estudiante_ofrece}</span>
+                      <span className="text-[#5A252B]">Ofertante: {inter.estudiante_recibe}</span>
                     </div>
                   </Td>
                 </tr>

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form, Query
-from sqlalchemy import or_
+from sqlalchemy import or_, not_
 import shutil
 import os
 from uuid import uuid4
@@ -98,25 +98,26 @@ def filtrar_por_categoria(
         .filter(
             Libro.idEstudiante != estudiante.idEstudiante,
             Libro.visibleCatalogo == True,
+            Libro.estado == "Disponible",
             func.lower(Categoria.nombre).ilike(f"{categoria}%")
         )
         .all()
     )
     return libros
 
-#filtrar libros por sus datos
 @router.get("/catalogo/{id_estudiante}", response_model=List[LibroResponse])
 def obtener_catalogo(
     id_estudiante: int,
     search: Optional[str] = Query(None, description="Buscar por título, autor, descripción o categoría"),
     db: Session = Depends(get_db)
 ):
-    query = db.query(Libro).options(joinedload(Libro.categoria),joinedload(Libro.estudiante)).filter(
-        
+    query = db.query(Libro).options(
+        joinedload(Libro.categoria),
+        joinedload(Libro.estudiante)
+    ).filter(
         Libro.idEstudiante != id_estudiante,
-        Libro.visibleCatalogo == True  
-        
-        
+        Libro.visibleCatalogo == True,
+        not_(Libro.estado.in_(["enIntercambio", "Intercambiado"]))
     )
 
     if search:
@@ -125,9 +126,9 @@ def obtener_catalogo(
             or_(
                 Libro.titulo.ilike(search_pattern),
                 Libro.autor.ilike(search_pattern),
-                Libro.descripcion.ilike(search_pattern)  # filtro por categoría usando has()
+                Libro.descripcion.ilike(search_pattern)
+            )
         )
-    )
 
     return query.all()
 
