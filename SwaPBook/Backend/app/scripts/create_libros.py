@@ -52,7 +52,7 @@ def crear_libros_falsos():
         libros_creados = 0
 
         for estudiante in estudiantes:
-            for _ in range(10):
+            for _ in range(20):
                 categoria_nombre = random.choice(categorias_nombres)
                 categoria_id = categorias_dict[categoria_nombre]
 

@@ -192,15 +192,17 @@ def obtener_horarios_frecuentes(db: Session = Depends(get_db)):
 
 
     franja_horaria = case(
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('08:00:00', '09:59:59'), '08:00-10:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('10:00:00', '11:59:59'), '10:00-12:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('12:00:00', '13:59:59'), '12:00-14:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('14:00:00', '15:59:59'), '14:00-16:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('16:00:00', '17:59:59'), '16:00-18:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('18:00:00', '19:59:59'), '18:00-20:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('20:00:00', '21:59:59'), '20:00-22:00'),
-        else_='Otro'
-    ).label("franja")
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('00:00:00', '05:59:59'), '00:00-06:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('06:00:00', '07:59:59'), '06:00-08:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('08:00:00', '09:59:59'), '08:00-10:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('10:00:00', '11:59:59'), '10:00-12:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('12:00:00', '13:59:59'), '12:00-14:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('14:00:00', '15:59:59'), '14:00-16:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('16:00:00', '17:59:59'), '16:00-18:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('18:00:00', '19:59:59'), '18:00-20:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('20:00:00', '21:59:59'), '20:00-22:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('22:00:00', '23:59:59'), '22:00-00:00'),
+).label("franja")
     
     resultados = (
         db.query(
