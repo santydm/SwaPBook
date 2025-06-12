@@ -1,8 +1,9 @@
-// src/componentes/autenticacion/Login.jsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import fondoSwap from '../../img/fondoSwap.webp';
+import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
+import Footer from '../ui/Footer';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,12 +13,16 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const esCorreoInstitucionalValido = (correo) => {
+    const regex = /^[^@]+@[^@]+\.(edu)(\.[a-z]+)?$/i;
+    return regex.test(correo);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
 
-    // Validaciones
     const nuevosErrores = {};
     if (!correoInstitucional) {
       nuevosErrores.correoInstitucional = 'El correo es requerido';
@@ -38,48 +43,44 @@ const Login = () => {
       const response = await axios.post('http://127.0.0.1:8000/auth/login', {
         correoInstitucional,
         contrasenia
-      });
-      
-      
+      }, { timeout: 10000 });
+
       if (!response.data.access_token) {
         throw new Error('El servidor no devolvió un token válido');
       }
-      
-      // Guardar token en localStorage
+
       localStorage.setItem('token', response.data.access_token);
-      
-      // Redirigir al perfil
-      navigate('/Catalogo');
-      
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      
-      let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
-      
-      if (error.response) {
-        // Manejo de errores específicos del backend
-        if (error.response.status === 401) {
-          errorMessage = 'Credenciales incorrectas';
-        } else if (error.response.data?.detail) {
-          errorMessage = error.response.data.detail;
-        } else if (error.response.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-      } else if (error.request) {
-        errorMessage = 'No se recibió respuesta del servidor';
-      } else if (error.message) {
-        errorMessage = error.message;
+
+      // CAMBIO CLAVE: Decodificar el token y redirigir según el rol
+      const decoded = jwtDecode(response.data.access_token);
+      if (decoded.rol === 'administrador') {
+        navigate('/admin');
+      } else {
+        navigate('/catalogo');
       }
-      
+    } catch (error) {
+      let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+      if (axios.isAxiosError(error)) {
+        if (error.code === "ECONNABORTED") {
+          errorMessage = 'Tiempo de espera agotado. El servidor no responde.';
+        } else if (error.response) {
+          if (error.response.status === 401) {
+            errorMessage = 'Credenciales incorrectas';
+          } else if (error.response.data?.detail) {
+            errorMessage = error.response.data.detail;
+          } else if (error.response.data?.message) {
+            errorMessage = error.response.data.message;
+          }
+        } else if (error.request) {
+          errorMessage = 'No se recibió respuesta del servidor';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      }
       setErrors({ submit: errorMessage });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const esCorreoInstitucionalValido = (correo) => {
-    const regex = /^[^@]+@[^@]+\.(edu)(\.[a-z]+)?$/i;
-    return regex.test(correo);
   };
 
   return (
@@ -89,7 +90,7 @@ const Login = () => {
         <div className="hidden md:block w-[35%] bg-white"></div>
         <div 
           className="flex-grow"
-          style={{ 
+          style={{
             backgroundImage: `url(${fondoSwap})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
@@ -98,8 +99,6 @@ const Login = () => {
           <div className="hidden md:block absolute left-[35%] top-0 w-[65%] h-full bg-black bg-opacity-80"></div>
         </div>
       </div>
-
-      {/* Contenido principal */}
       <div className="relative z-10 min-h-screen flex flex-col">
         <div className="flex-grow flex items-center p-4">
           <div className="w-full flex flex-col md:flex-row">
@@ -107,13 +106,11 @@ const Login = () => {
             <div className="w-full md:w-[35%] flex justify-center p-8">
               <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8 border border-gray-200">
                 <h1 className="text-3xl font-bold text-center mb-8">Iniciar Sesión</h1>
-
                 {errors.submit && (
                   <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
                     {errors.submit}
                   </div>
                 )}
-
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Correo institucional</label>
@@ -122,7 +119,7 @@ const Login = () => {
                       className={`w-full px-3 py-2 border ${
                         errors.correoInstitucional ? 'border-red-500' : 'border-gray-300'
                       } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      placeholder="correo@institucion.edu"
+                      placeholder="Correo Electronico Institucional"
                       value={correoInstitucional}
                       onChange={(e) => setCorreoInstitucional(e.target.value)}
                     />
@@ -130,7 +127,6 @@ const Login = () => {
                       <p className="mt-1 text-sm text-red-600">{errors.correoInstitucional}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                     <div className="relative">
@@ -147,6 +143,7 @@ const Login = () => {
                         type="button"
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
                         onClick={() => setMostrarContrasenia(!mostrarContrasenia)}
+                        tabIndex={-1}
                       >
                         {mostrarContrasenia ? (
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -164,19 +161,15 @@ const Login = () => {
                       <p className="mt-1 text-sm text-red-600">{errors.contrasenia}</p>
                     )}
                   </div>
-
                   <div className="column justify-between items-center text-sm">
                     <div>
                       <span className="text-gray-600">¿No tienes cuenta? </span>
-                      <Link to="/registro" className="text-blue-600 hover:text-blue-500 font-medium">
-                        Regístrate aquí
-                      </Link>
+                      <Link to="/registro" className="text-blue-600 hover:text-blue-500 font-medium">Regístrate aquí</Link>
                     </div>
                     <Link to="/recuperacion-clave" className="text-blue-600 hover:text-blue-500 font-medium">
                       ¿Olvidaste tu contraseña?
                     </Link>
                   </div>
-
                   <button
                     type="submit"
                     className={`w-full py-2 px-4 bg-Swap-beige text-white font-medium rounded-md hover:bg-Swap-vinotinto focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -201,7 +194,6 @@ const Login = () => {
                 </form>
               </div>
             </div>
-
             {/* Marca y eslogan */}
             <div className="hidden md:flex w-[65%] items-center justify-center">
               <div className="max-w-xs ml-16">
@@ -209,74 +201,14 @@ const Login = () => {
                 <div className="grid grid-cols-1 gap-1 mt-2 font-bold text-white text-3xl">
                   <div className="text-white text-3xl hover:text-4xl transition-all duration-200 ease-in">Reutiliza</div>
                   <div className="text-white text-3xl hover:text-4xl transition-all duration-200 ease-in">Intercambia</div>
-                  <div className="text-white text-3xl hover:text-4xl transition-all duration-200 ease-in"> Conoce</div>
+                  <div className="text-white text-3xl hover:text-4xl transition-all duration-200 ease-in">Conoce</div>
                   <div className="text-white text-3xl hover:text-4xl transition-all duration-200 ease-in">Libros</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="w-full bg-[#722F37] py-2">
-          <div className="max-w-6xl mx-auto px-2">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
-              {/* Columna Nosotros */}
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold border-b border-white/20 pb-2">Nosotros</h3>
-                <ul className="space-y-1">
-                  <li>
-                    <a href="#" className="hover:text-gray-300 transition-colors">Formulario de contacto</a>
-                  </li>
-                  <li>
-                    <a href="mailto:contacto@swapbook.edu" className="hover:text-gray-300 transition-colors">Correo Swapbook</a>
-                  </li>
-                  <li>
-                    <a href="#" className="hover:text-gray-300 transition-colors">Preguntas frecuentes</a>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Columna Páginas Legales */}
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold border-b border-white/20 pb-2">Páginas legales</h3>
-                <ul className="space-y-1">
-                  <li>
-                    <a href="#" className="hover:text-gray-300 transition-colors">Términos y condiciones</a>
-                  </li>
-                  <li>
-                    <a href="#" className="hover:text-gray-300 transition-colors">Política de privacidad</a>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Columna Información del Matorral */}
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold border-b border-white/20 pb-2">Información del Matorral</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <a 
-                      href="https://www.matorral.com.co" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:text-gray-300 transition-colors"
-                    >
-                      Visita nuestro sitio web
-                    </a>
-                  </li>
-                  <li className="text-sm text-white/80">
-                    Plataforma desarrollada en colaboración con El Matorral
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Derechos de autor */}
-            <div className="mt-8 pt-2 border-t border-white/20 text-center text-white/70 text-sm">
-              © {new Date().getFullYear()} SwaPBook.
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </div>
   );
