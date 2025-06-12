@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Path, HTTPException, Query, Body
 from .dependencies import admin_required
-from sqlalchemy.orm import Session , joinedload
+from sqlalchemy.orm import Session , joinedload, aliased
 from sqlalchemy import func, case, literal_column, cast, String, or_
 from sqlalchemy.exc import NoResultFound
 from typing import Optional, List
@@ -9,6 +9,7 @@ from app.models.estudiantes import RolEnum
 from app.db.database import get_db
 from app.models.estudiantes import Estudiante
 from app.schemas.estudiantes import EstudianteResponse
+from app.schemas.intercambios import IntercambioResponse
 from app.models.solicitudes import Solicitud
 from app.models.libros import Libro
 from app.models.categorias import Categoria
@@ -355,5 +356,54 @@ def libros_mas_solicitados(db: Session = Depends(get_db)):
         }
         for r in resultados if r.demanda > r.oferta  # Solo mostrar si hay más demanda que oferta
     ]
+
+LibroOfrecido = aliased(Libro)
+LibroSolicitado = aliased(Libro)
+EstudianteOfrece = aliased(Estudiante)
+EstudianteRecibe = aliased(Estudiante)
+
+@router.get("/intercambios/filtrar", response_model=List[IntercambioResponse])
+def filtrar_intercambios(
+    search_libro: Optional[str] = Query(None, description="Buscar por título de libro ofrecido o solicitado"),
+    search_estudiante: Optional[str] = Query(None, description="Buscar por nombre de estudiante que ofrece o recibe"),
+    estado: Optional[EstadoIntercambioEnum] = Query(None, description="Filtrar por estado del intercambio"),
+    lugar: Optional[str] = Query(None, description="Buscar por lugar de encuentro"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Intercambio)\
+        .join(LibroOfrecido, Intercambio.idLibroOfrecido == LibroOfrecido.idLibro)\
+        .join(LibroSolicitado, Intercambio.idLibroSolicitado == LibroSolicitado.idLibro)\
+        .join(EstudianteOfrece, Intercambio.idEstudiante == EstudianteOfrece.idEstudiante)\
+        .join(EstudianteRecibe, Intercambio.idEstudianteReceptor == EstudianteRecibe.idEstudiante)
+
+    if search_libro:
+        pattern = f"%{search_libro.lower()}%"
+        query = query.filter(
+            or_(
+                func.lower(LibroOfrecido.titulo).like(pattern),
+                func.lower(LibroSolicitado.titulo).like(pattern)
+            )
+        )
+
+    if search_estudiante:
+        pattern = f"%{search_estudiante.lower()}%"
+        query = query.filter(
+            or_(
+                func.lower(EstudianteOfrece.nombre).like(pattern),
+                func.lower(EstudianteRecibe.nombre).like(pattern)
+            )
+        )
+
+    if estado:
+        query = query.filter(Intercambio.estado == estado)
+
+    if lugar:
+        pattern = f"%{lugar.lower()}%"
+        query = query.filter(func.lower(Intercambio.lugarEncuentro).like(pattern))
+
+    # Evita duplicados
+    query = query.distinct()
+
+    return query.all()
 
 

@@ -74,4 +74,4 @@ def crear_estudiantes_fake(cantidad=40):
     print(f"\n{cantidad} estudiantes creados exitosamente.")
 
 if __name__ == "__main__":
-    crear_estudiantes_fake(40)
+    crear_estudiantes_fake(10)
