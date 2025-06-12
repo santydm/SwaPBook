@@ -10,7 +10,7 @@ const AdminUsuarios = () => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const debounceTimeout = useRef(null);
 
-  
+  // Estadísticas calculadas
   const totalUsuarios = usuarios.length;
   const usuariosActivos = usuarios.filter(user => user.activo).length;
   const usuariosInactivos = totalUsuarios - usuariosActivos;
@@ -37,7 +37,10 @@ const AdminUsuarios = () => {
         : 'http://localhost:8000/admin/estudiantes';
       
       const res = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
       });
 
       // Filtrar usuario admin actual
@@ -48,6 +51,7 @@ const AdminUsuarios = () => {
       setUsuarios(filteredUsers);
       setError("");
     } catch (error) {
+      console.error("Error al cargar usuarios:", error);
       setError("Error al cargar usuarios");
     } finally {
       setLoading(false);
@@ -61,14 +65,19 @@ const AdminUsuarios = () => {
       await axios.put(
         `http://localhost:8000/admin/estudiantes/${idEstudiante}/rol`,
         { nuevo_rol: nuevoRol },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
       );
+      
       setUsuarios(prev => 
         prev.map(user => 
           user.idEstudiante === idEstudiante ? { ...user, rol: nuevoRol } : user
         )
       );
-      await fetchUsuarios(searchTerm);
     } catch (error) {
       console.error("Error actualizando rol:", error);
       alert("No se pudo actualizar el rol. Intente nuevamente.");
@@ -82,14 +91,19 @@ const AdminUsuarios = () => {
       await axios.put(
         `http://localhost:8000/admin/estudiantes/${idEstudiante}/estado`,
         { activo: nuevoEstado },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
       );
+      
       setUsuarios(prev => 
         prev.map(user => 
           user.idEstudiante === idEstudiante ? { ...user, activo: nuevoEstado } : user
         )
       );
-      await fetchUsuarios(searchTerm);
     } catch (error) {
       console.error("Error actualizando estado:", error);
       alert("No se pudo actualizar el estado. Intente nuevamente.");

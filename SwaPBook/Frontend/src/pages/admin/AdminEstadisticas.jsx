@@ -6,7 +6,8 @@ import {
   FiTrendingUp,
   FiClock,
   FiBarChart2,
-  FiArrowUp
+  FiArrowUp,
+  FiUserCheck
 } from "react-icons/fi";
 import ReactApexChart from "react-apexcharts";
 import {
@@ -18,8 +19,10 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 const AdminEstadisticas = () => {
+  const navigate = useNavigate();
   const [heatmapSeries, setHeatmapSeries] = useState([]);
   const [heatmapOptions, setHeatmapOptions] = useState({});
   const [ofertaDemanda, setOfertaDemanda] = useState([]);
@@ -61,7 +64,6 @@ const AdminEstadisticas = () => {
           axios.get("http://localhost:8000/admin/estadisticas/top-libros", { headers }),
           axios.get("http://localhost:8000/admin/estadisticas/intercambios", { headers }),
           axios.get("http://localhost:8000/admin/estudiantes", { headers })
-
         ]);
 
         const maxValue = Math.max(...heatmapRes.data.map(item => item.cantidad));
@@ -150,33 +152,40 @@ const AdminEstadisticas = () => {
           Panel Estadístico
         </h1>
 
-        {/* Tarjetas de resumen */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
+          <div
+            className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10 transition-all hover:shadow-xl cursor-pointer"
+            onClick={() => navigate('/admin/libros')}
+          >
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-[#722F37]">Libros Registrados</h3>
-              <FiBookOpen className="text-2xl text-[#C9B084]" />
+              <FiBookOpen className="text-2xl text-[#C9B084] hover:text-[#722F37] transition-colors" />
             </div>
             <p className="text-3xl font-bold text-[#722F37] mt-4">{stats.totalLibros}</p>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
+          <div
+            className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10 transition-all hover:shadow-xl cursor-pointer"
+            onClick={() => navigate('/admin/intercambios')}
+          >
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-[#722F37]">Intercambios Totales</h3>
-              <FiTrendingUp className="text-2xl text-[#C9B084]" />
+              <FiTrendingUp className="text-2xl text-[#C9B084] hover:text-[#722F37] transition-colors" />
             </div>
             <p className="text-3xl font-bold text-[#722F37] mt-4">{stats.intercambiosTotales}</p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10">
+          <div
+            className="bg-white p-6 rounded-xl shadow-lg border border-[#722F37]/10 transition-all hover:shadow-xl cursor-pointer"
+            onClick={() => navigate('/admin/usuarios')}
+          >
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-[#722F37]">Total Usuarios</h3>
-              <FiTrendingUp className="text-2xl text-[#C9B084]" />
+              <FiUserCheck className="text-2xl text-[#C9B084] hover:text-[#722F37] transition-colors" />
             </div>
             <p className="text-3xl font-bold text-[#722F37] mt-4">{stats.usuariosActivos}</p>
           </div>
         </div>
-        
 
         {/* Sección de gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

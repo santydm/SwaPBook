@@ -20,7 +20,7 @@ if len(solicitudes_pendientes) < 15:
 else:
     # Definir estados deseados
     estados_deseados = (
-        [EstadoIntercambioEnum.finalizado] * 5 +
+        [EstadoIntercambioEnum.finalizado] * 15 +
         [EstadoIntercambioEnum.en_proceso] * 5 +
         [EstadoIntercambioEnum.cancelado] * 5
     )

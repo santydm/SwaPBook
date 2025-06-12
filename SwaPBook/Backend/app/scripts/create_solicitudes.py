@@ -1,7 +1,7 @@
 import os
 import sys
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -42,9 +42,17 @@ try:
         libro_solicitado = random.choice(libros)
         libro_ofrecido = random.choice(libros)
 
-        # Generar fechas y horas aleatorias entre hoy y 30 días en el futuro
-        fecha_encuentro = fake.date_time_between(start_date="now", end_date="+30d", tzinfo=timezone.utc)
-        hora_encuentro = fake.date_time_between(start_date="now", end_date="+30d", tzinfo=timezone.utc)
+        # Fecha del encuentro (sin hora) entre hoy y +30 días
+        fecha_encuentro = fake.date_between(start_date="today", end_date="+30d")
+
+        # Hora entre 06:00 y 23:00, en bloques de 15 minutos
+        hora_random = random.randint(6, 22)  # hasta 22 porque podrías tener 22:45
+        minuto_random = random.choice([0, 15, 30, 45])
+        hora_encuentro = datetime.combine(
+            fecha_encuentro,
+            time(hora_random, minuto_random),
+            tzinfo=timezone.utc
+        )
 
         nueva_solicitud = Solicitud(
             estudianteSolicitante=solicitante.idEstudiante,
@@ -52,7 +60,7 @@ try:
             libroSolicitado=libro_solicitado.idLibro,
             libroOfrecido=libro_ofrecido.idLibro,
             fechaSolicitud=datetime.now(timezone.utc),
-            fechaEncuentro=fecha_encuentro,
+            fechaEncuentro=hora_encuentro.date(),
             horaEncuentro=hora_encuentro,
             lugarEncuentro="El Matorral",
             estado=EstadoSolicitudEnum.pendiente,
@@ -61,7 +69,7 @@ try:
         session.add(nueva_solicitud)
 
     session.commit()
-    print("✅ Se crearon 15 solicitudes con estado 'Pendiente', fechas y horas aleatorias, y lugar fijo 'El Matorral'.")
+    print("✅ Se crearon 15 solicitudes con horas entre 06:00 y 23:00, y lugar fijo 'El Matorral'.")
 except Exception as e:
     session.rollback()
     print("❌ Error al crear solicitudes:", e)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, HTTPException, Query
+from fastapi import APIRouter, Depends, Path, HTTPException, Query, Body
 from .dependencies import admin_required
 from sqlalchemy.orm import Session , joinedload
 from sqlalchemy import func, case, literal_column, cast, String, or_
@@ -13,6 +13,7 @@ from app.models.solicitudes import Solicitud
 from app.models.libros import Libro
 from app.models.categorias import Categoria
 from app.models.intercambios import Intercambio, EstadoIntercambioEnum
+from enum import Enum
 
 
 router = APIRouter(
@@ -21,24 +22,39 @@ router = APIRouter(
     dependencies=[Depends(admin_required)]
 )
 
+class RolEnum(str, Enum):
+    estudiante = "estudiante"
+    administrador = "administrador"
+
 @router.put("/estudiantes/{id_estudiante}/rol")
 def cambiar_rol_estudiante(
     id_estudiante: int = Path(..., title="ID del estudiante"),
-    nuevo_rol: RolEnum = "estudiante",
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(admin_required)
+    nuevo_rol: RolEnum = Body(..., embed=True),
+    db: Session = Depends(get_db)
 ):
     estudiante = db.query(Estudiante).filter(Estudiante.idEstudiante == id_estudiante).first()
+    
     if not estudiante:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
-
+    
     estudiante.rol = nuevo_rol
     db.commit()
-    db.refresh(estudiante)
+    return {"message": f"Rol actualizado a {nuevo_rol.value}"}
 
-    return {"message": "mensaje:" f"Rol actualizado a '{nuevo_rol.value}' para el estudiante con ID {id_estudiante}"}
-
-
+@router.put("/estudiantes/{id_estudiante}/estado")
+def cambiar_estado_estudiante(
+    id_estudiante: int = Path(..., title="ID del estudiante"),
+    activo: bool = Body(..., embed=True),
+    db: Session = Depends(get_db)
+):
+    estudiante = db.query(Estudiante).filter(Estudiante.idEstudiante == id_estudiante).first()
+    
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    estudiante.activo = activo
+    db.commit()
+    return {"message": f"Estado actualizado a {'activo' if activo else 'inactivo'}"}
 
 
 
@@ -192,15 +208,17 @@ def obtener_horarios_frecuentes(db: Session = Depends(get_db)):
 
 
     franja_horaria = case(
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('08:00:00', '09:59:59'), '08:00-10:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('10:00:00', '11:59:59'), '10:00-12:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('12:00:00', '13:59:59'), '12:00-14:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('14:00:00', '15:59:59'), '14:00-16:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('16:00:00', '17:59:59'), '16:00-18:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('18:00:00', '19:59:59'), '18:00-20:00'),
-            (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('20:00:00', '21:59:59'), '20:00-22:00'),
-        else_='Otro'
-    ).label("franja")
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('00:00:00', '05:59:59'), '00:00-06:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('06:00:00', '07:59:59'), '06:00-08:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('08:00:00', '09:59:59'), '08:00-10:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('10:00:00', '11:59:59'), '10:00-12:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('12:00:00', '13:59:59'), '12:00-14:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('14:00:00', '15:59:59'), '14:00-16:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('16:00:00', '17:59:59'), '16:00-18:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('18:00:00', '19:59:59'), '18:00-20:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('20:00:00', '21:59:59'), '20:00-22:00'),
+    (func.to_char(Intercambio.horaEncuentro, 'HH24:MI:SS').between('22:00:00', '23:59:59'), '22:00-00:00'),
+).label("franja")
     
     resultados = (
         db.query(
