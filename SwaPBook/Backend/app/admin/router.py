@@ -242,6 +242,8 @@ def obtener_horarios_frecuentes(db: Session = Depends(get_db)):
     return heatmap
 
 
+
+
 @router.get("/estadisticas/intercambios")
 def resumen_intercambios(db: Session = Depends(get_db)):
     total_creados = db.query(func.count(Intercambio.idIntercambio)).scalar()
@@ -253,6 +255,9 @@ def resumen_intercambios(db: Session = Depends(get_db)):
     total_cancelados = db.query(func.count(Intercambio.idIntercambio)).filter(
         Intercambio.estado == EstadoIntercambioEnum.cancelado
     ).scalar()
+    total_en_proceso = db.query(func.count(Intercambio.idIntercambio)).filter(
+            Intercambio.estado == EstadoIntercambioEnum.en_proceso
+        ).scalar()
 
     intercambios = db.query(Intercambio).all()
     intercambios_data = [
@@ -276,6 +281,7 @@ def resumen_intercambios(db: Session = Depends(get_db)):
         "total_creados": total_creados,
         "total_finalizados": total_finalizados,
         "total_cancelados": total_cancelados,
+        "total_en_proceso": total_en_proceso,
         "intercambios": intercambios_data
     }
 

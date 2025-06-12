@@ -32,6 +32,9 @@ class Intercambio(Base):
     estudiante_receptor = relationship("Estudiante", foreign_keys=[idEstudianteReceptor])
     libro_solicitado = relationship("Libro", foreign_keys=[idLibroSolicitado])
     libro_ofrecido = relationship("Libro", foreign_keys=[idLibroOfrecido])
+    estudiante = relationship("Estudiante", foreign_keys=[idEstudiante])
+    estudiante_receptor = relationship("Estudiante", foreign_keys=[idEstudianteReceptor])
+    
 
     
 
