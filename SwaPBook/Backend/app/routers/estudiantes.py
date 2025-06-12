@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from passlib.context import CryptContext
 from app.models.estudiantes import Estudiante
+from app.models.solicitudes import Solicitud
+from app.models.libros import Libro
 from app.models.cambio_correo_pendiente import CambioCorreoPendiente
+from app.models.intercambios import Intercambio
 from app.utils.auth import crear_token, autenticar_usuario
 from app.schemas.estudiantes import EstudianteCreate,EstudianteResponse, EstudianteLogin, EstudianteLoginResponse, EstudiantePerfilSchema, EstudianteDeleteRequest, EstudianteUpdate
 from app.utils.email_utils import enviar_correo_bienvenida, enviar_correo_verificacion_cambio
@@ -162,6 +165,7 @@ def obtener_estudiantes(db: Session = Depends(get_db)):
     estudiantes = db.query(Estudiante).all()
     return estudiantes
 
+
 #eliminar estudiante
 @router.delete("/eliminar", status_code=status.HTTP_204_NO_CONTENT)
 async def eliminar_cuenta(
@@ -179,8 +183,6 @@ async def eliminar_cuenta(
     # Eliminar cuenta
     db.delete(estudiante_actual)
     db.commit()
-
-
 
 
 @router.get("/perfil", response_model=EstudiantePerfilSchema)
