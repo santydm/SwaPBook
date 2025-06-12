@@ -31,8 +31,10 @@ const MisIntercambios = () => {
         setEstudiante(perfil.data);
         const response = await axios.get(
           `http://localhost:8000/intercambios/mis-intercambios/${perfil.data.idEstudiante}?estado=En%20proceso`,
-          { params: { estado: "En proceso" }, 
-            headers: { Authorization: `Bearer ${token}` } }
+          { 
+            params: { estado: "En proceso" }, 
+            headers: { Authorization: `Bearer ${token}` } 
+          }
         );
 
         setIntercambios(response.data);
@@ -82,11 +84,17 @@ const MisIntercambios = () => {
       <Navbar usuario={estudiante} />
       <div className="min-h-screen flex items-center justify-center bg-Swap-cream">
         <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
+          {/* Panel lateral */}
           <PanelPerfil handleLogout={handleLogout} />
 
+          {/* Sección de intercambios scrollable */}
           <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-[#722F37] mb-6">Intercambios Activos</h1>
-            
+            <div className="flex flex-col sm:flex-row items-center justify-between w-full mb-6 gap-3">
+              <h1 className="text-2xl font-bold text-[#722F37] text-center flex-1">
+                Intercambios Activos
+              </h1>
+            </div>
+
             {loading ? (
               <div className="flex justify-center items-center h-64">
                 <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
@@ -95,14 +103,19 @@ const MisIntercambios = () => {
             ) : error ? (
               <div className="text-center p-4 text-red-600">{error}</div>
             ) : intercambios.length > 0 ? (
-              <div className="w-full space-y-4">
-                {intercambios.map((intercambio) => (
-                  <IntercambioCard
-                    key={intercambio.idIntercambio}
-                    intercambio={intercambio}
-                    onVerDetalles={() => setIntercambioSeleccionado(intercambio)}
-                  />
-                ))}
+              <div className="w-full">
+                <div
+                  className="grid grid-cols-1 gap-4 w-full max-h-[70vh] overflow-y-auto pr-2"
+                  style={{ minHeight: "200px" }}
+                >
+                  {intercambios.map((intercambio) => (
+                    <IntercambioCard
+                      key={intercambio.idIntercambio}
+                      intercambio={intercambio}
+                      onVerDetalles={() => setIntercambioSeleccionado(intercambio)}
+                    />
+                  ))}
+                </div>
               </div>
             ) : (
               <p className="text-center text-gray-500">
@@ -112,6 +125,7 @@ const MisIntercambios = () => {
           </div>
         </div>
 
+        {/* Modal de detalles */}
         {intercambioSeleccionado && (
           <IntercambioDetalleModal
             intercambio={intercambioSeleccionado}

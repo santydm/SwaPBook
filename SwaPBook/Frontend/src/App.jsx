@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 import Registro from './components/auth/Registro';
@@ -25,23 +25,21 @@ import AdminLibros from './pages/admin/AdminLibros';
 import AdminIntercambios from './pages/admin/AdminIntercambios';
 import AdminEstadisticas from './pages/admin/AdminEstadisticas';
 
-
-
-function App() {
+function AppRoutes() {
   const [usuarioLogeado, setUsuarioLogeado] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
-    // Verifica si hay un token al montar la app
     setUsuarioLogeado(!!localStorage.getItem('token'));
-    // Escucha cambios en el almacenamiento local (por si hay logout/login en otra pestaña)
     const handler = () => setUsuarioLogeado(!!localStorage.getItem('token'));
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
   }, []);
 
   return (
-    <Router>
-      {usuarioLogeado && <NotificacionesSolicitudes />}
+    <>
+      {/* Notificaciones solo si está logeado y NO en la ruta "/" */}
+      {usuarioLogeado && location.pathname !== "/" && <NotificacionesSolicitudes />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/registro" element={<Registro />} />
@@ -59,20 +57,22 @@ function App() {
         <Route path="/historial" element={<Historial/>} />  
         <Route path="/recuperacion-clave" element={<RecuperarContrasenia />} />
         <Route path="/restablecer-contrasenia" element={<RestablecerContrasenia />} />
-|
-
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="usuarios" element={<AdminUsuarios />} />
           <Route path="libros" element={<AdminLibros />} />
           <Route path="intercambios" element={<AdminIntercambios />} />
           <Route path="estadisticas" element={<AdminEstadisticas />} /> 
-          
         </Route>
-
-
-
       </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 }

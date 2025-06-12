@@ -23,15 +23,13 @@ const MisSolicitudes = () => {
           return;
         }
         
-        // Obtener perfil del estudiante
         const perfilResponse = await axios.get('http://127.0.0.1:8000/estudiantes/perfil', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        setEstudiante(perfilResponse.data); // <-- Aquí se establece el usuario
+        setEstudiante(perfilResponse.data);
         const idEstudiante = perfilResponse.data.idEstudiante;
         
-        // Obtener solicitudes pendientes
         const solicitudesResponse = await axios.get(
           `http://127.0.0.1:8000/solicitudes/pendientes/${idEstudiante}`, 
           { headers: { 'Authorization': `Bearer ${token}` } }
@@ -95,10 +93,14 @@ const MisSolicitudes = () => {
           {/* Panel lateral */}
           <PanelPerfil handleLogout={handleLogout} />
 
-          {/* Sección de solicitudes centrada */}
+          {/* Sección de solicitudes scrollable */}
           <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-[#722F37] mb-6 text-center">Solicitudes Recibidas</h1>
-            
+            <div className="flex flex-col sm:flex-row items-center justify-between w-full mb-6 gap-3">
+              <h1 className="text-2xl font-bold text-[#722F37] text-center flex-1">
+                Solicitudes Recibidas
+              </h1>
+            </div>
+
             {loading ? (
               <div className="flex justify-center items-center h-64">
                 <div className="animate-spin h-8 w-8 border-4 border-Swap-beige border-t-transparent rounded-full"></div>
@@ -107,8 +109,11 @@ const MisSolicitudes = () => {
             ) : error ? (
               <div className="text-center p-4 text-red-600">{error}</div>
             ) : solicitudes.length > 0 ? (
-              <div className="w-full flex justify-center">
-                <div className="grid grid-cols-1 gap-4 w-full max-w-4xl">
+              <div className="w-full">
+                <div
+                  className="grid grid-cols-1 gap-4 w-full max-h-[70vh] items-center overflow-y-auto pr-2"
+                  style={{ minHeight: "200px" }}
+                >
                   {solicitudes.map((solicitud) => (
                     <SolicitudNotificacionCard
                       key={solicitud.idSolicitud}
